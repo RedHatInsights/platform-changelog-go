@@ -15,7 +15,7 @@ services:
            - /platform-changelog-api
        depends_on:
            - platform-changelog-db
-   payload-tracker-db:
+   platform-changelog-db:
       image: postgres
       restart: always
       environment:
