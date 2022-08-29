@@ -26,6 +26,7 @@ type Config struct {
 	GitlabWebhookSecretKey string
 	Services               map[string]Service
 	Debug                  bool
+	OpenAPISpec			   OpenAPISpec
 }
 
 type DatabaseCfg struct {
@@ -51,6 +52,21 @@ type Service struct {
 	Branch      string `yaml:"branch"`
 	Namespace   string `yaml:"namespace,omitempty"`
 	DeployFile  string `yaml:"deploy_file,omitempty"`
+}
+
+func readOpenAPISpec() OpenAPISpec {
+	var openAPISpec OpenAPISpec
+	openAPISpecFile, err := os.Open("schema/openapi.yaml")
+	if err != nil {
+		panic(err)
+	}
+	defer openAPISpecFile.Close()
+	decoder := yaml.NewDecoder(openAPISpecFile)
+	err = decoder.Decode(&openAPISpec)
+	if err != nil {
+		panic(err)
+	}
+	return openAPISpec
 }
 
 func Get() *Config {
@@ -121,6 +137,7 @@ func Get() *Config {
 		MetricsPort:            options.GetString("metricsPort"),
 		MetricsPath:            options.GetString("metricsPath"),
 		Debug:                  options.GetBool("Debug"),
+		OpenAPISpec:            readOpenAPISpec(),
 		DatabaseConfig: DatabaseCfg{
 			DBUser:     options.GetString("db.user"),
 			DBPassword: options.GetString("db.password"),
