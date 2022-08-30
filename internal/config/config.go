@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strings"
+	"encoding/json"
 
 	_ "embed"
 
@@ -26,7 +27,7 @@ type Config struct {
 	GitlabWebhookSecretKey string
 	Services               map[string]Service
 	Debug                  bool
-	OpenAPISpec			   OpenAPISpec
+	OpenAPISpec			   []byte
 }
 
 type DatabaseCfg struct {
@@ -54,7 +55,7 @@ type Service struct {
 	DeployFile  string `yaml:"deploy_file,omitempty"`
 }
 
-func readOpenAPISpec() OpenAPISpec {
+func readOpenAPISpec() []byte {
 	var openAPISpec OpenAPISpec
 	openAPISpecFile, err := os.Open("schema/openapi.yaml")
 	if err != nil {
@@ -66,7 +67,11 @@ func readOpenAPISpec() OpenAPISpec {
 	if err != nil {
 		panic(err)
 	}
-	return openAPISpec
+	openAPISpecJSON, err := json.Marshal(openAPISpec)
+	if err != nil {
+		panic(err)
+	}
+	return openAPISpecJSON
 }
 
 func Get() *Config {

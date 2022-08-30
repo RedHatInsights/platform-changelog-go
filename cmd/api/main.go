@@ -2,7 +2,6 @@ package main
 
 import (
 	"net/http"
-	"encoding/json"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -20,16 +19,13 @@ func lubdub(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("lubdub"))
 }
 
-func openApi(w http.ResponseWriter, r *http.Request) {
-	data, err := json.Marshal(config.Get().OpenAPISpec)
-	if err != nil {
-		logging.Log.Errorf("Failed to marshal OpenAPI spec: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(data))
+
+func openAPIHandler(cfg *config.Config) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		w.Write(cfg.OpenAPISpec)
+	})
 }
 
 func main() {
@@ -69,7 +65,7 @@ func main() {
 	sub.Get("/commits/{ref}", endpoints.GetCommitByRef)
 	sub.Get("/deploys/{ref}", endpoints.GetDeployByRef)
 
-	sub.Get("/openapi.json", openApi)
+	sub.Get("/openapi.json", openAPIHandler(cfg))
 
 	srv := http.Server{
 		Addr:    ":" + cfg.PublicPort,
