@@ -7,7 +7,7 @@ import (
 )
 
 type ServiceRepository interface {
-	GetServicesAll(ctx context.Context) ([]structs.ServicesData, error)
+	GetServicesAll(ctx context.Context, offset int, limit int) ([]structs.ServicesData, error)
 	GetServiceByName(ctx context.Context, name string) (structs.ServicesData, error)
 	GetLatest(ctx context.Context, service structs.ServicesData) (structs.ExpandedServicesData, error)
 	GetServiceByGHRepo(ctx context.Context, repo string) (structs.ServicesData, error)
@@ -18,7 +18,7 @@ type MockServiceRepository struct {
 	services *[]structs.ServicesData
 }
 
-func (m *MockServiceRepository) GetServicesAll(ctx context.Context) ([]structs.ServicesData, error) {
+func (m *MockServiceRepository) GetServicesAll(ctx context.Context, offset int, limit int) ([]structs.ServicesData, error) {
 	return *m.services, nil
 }
 

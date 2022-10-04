@@ -7,8 +7,8 @@ import (
 )
 
 type TimelineRepository interface {
-	GetTimelinesAll(ctx context.Context) ([]structs.TimelinesData, error)
-	GetTimelinesByService(ctx context.Context, service structs.ServicesData) ([]structs.TimelinesData, error)
+	GetTimelinesAll(ctx context.Context, offset int, limit int) ([]structs.TimelinesData, error)
+	GetTimelinesByService(ctx context.Context, service structs.ServicesData, offset int, limit int) ([]structs.TimelinesData, error)
 	GetTimelineByRef(ctx context.Context, ref string) (structs.TimelinesData, error)
 }
 
@@ -16,11 +16,11 @@ type MockTimelineRepository struct {
 	timelines *[]structs.TimelinesData
 }
 
-func (m *MockTimelineRepository) GetTimelinesAll(ctx context.Context) ([]structs.TimelinesData, error) {
+func (m *MockTimelineRepository) GetTimelinesAll(ctx context.Context, offset int, limit int) ([]structs.TimelinesData, error) {
 	return *m.timelines, nil
 }
 
-func (m *MockTimelineRepository) GetTimelinesByService(ctx context.Context, service structs.ServicesData) ([]structs.TimelinesData, error) {
+func (m *MockTimelineRepository) GetTimelinesByService(ctx context.Context, service structs.ServicesData, offset int, limit int) ([]structs.TimelinesData, error) {
 	timelines := []structs.TimelinesData{}
 	for _, timeline := range *m.timelines {
 		if timeline.ServiceID == service.ID {

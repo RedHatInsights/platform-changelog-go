@@ -7,8 +7,8 @@ import (
 )
 
 type CommitRepository interface {
-	GetCommitsAll(ctx context.Context) ([]structs.TimelinesData, error)
-	GetCommitsByService(ctx context.Context, service structs.ServicesData) ([]structs.TimelinesData, error)
+	GetCommitsAll(ctx context.Context, offset int, limit int) ([]structs.TimelinesData, error)
+	GetCommitsByService(ctx context.Context, service structs.ServicesData, offset int, limit int) ([]structs.TimelinesData, error)
 	GetCommitByRef(ctx context.Context, ref string) (structs.TimelinesData, error)
 	CreateCommitEntry(ctx context.Context, commitData []structs.TimelinesData) error
 }
@@ -17,7 +17,7 @@ type MockCommitRepository struct {
 	timelines *[]structs.TimelinesData
 }
 
-func (m *MockCommitRepository) GetCommitsAll(ctx context.Context) ([]structs.TimelinesData, error) {
+func (m *MockCommitRepository) GetCommitsAll(ctx context.Context, offset int, limit int) ([]structs.TimelinesData, error) {
 	commits := []structs.TimelinesData{}
 	for _, timeline := range *m.timelines {
 		if timeline.Type == "commit" {
@@ -27,7 +27,7 @@ func (m *MockCommitRepository) GetCommitsAll(ctx context.Context) ([]structs.Tim
 	return commits, nil
 }
 
-func (m *MockCommitRepository) GetCommitsByService(ctx context.Context, service structs.ServicesData) ([]structs.TimelinesData, error) {
+func (m *MockCommitRepository) GetCommitsByService(ctx context.Context, service structs.ServicesData, offset int, limit int) ([]structs.TimelinesData, error) {
 	commits := []structs.TimelinesData{}
 	for _, timeline := range *m.timelines {
 		if timeline.Type == "commit" && timeline.ServiceID == service.ID {
