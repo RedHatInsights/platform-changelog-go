@@ -20,8 +20,8 @@ func GetDeploysAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, deploys, count := db.GetDeploysAll(db.DB, q.Offset, q.Limit)
-	if result.Error != nil {
+	deploys, count, err := db.GetDeploysAll(db.DB, q.Offset, q.Limit)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
@@ -45,15 +45,15 @@ func GetDeploysByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, service := db.GetServiceByName(db.DB, serviceName)
-	if result.Error != nil {
+	service, _, err := db.GetServiceByName(db.DB, serviceName)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Couldn't find the service"))
 		return
 	}
 
-	result, deploys, count := db.GetDeploysByService(db.DB, service, q.Offset, q.Limit)
-	if result.Error != nil {
+	deploys, count, err := db.GetDeploysByService(db.DB, service, q.Offset, q.Limit)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
@@ -70,14 +70,14 @@ func GetDeployByRef(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 	ref := chi.URLParam(r, "ref")
 
-	result, deploy := db.GetDeployByRef(db.DB, ref)
-	if result.Error != nil {
+	deploy, rowsAffected, err := db.GetDeployByRef(db.DB, ref)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
 	}
 
-	if result.RowsAffected == 0 {
+	if rowsAffected == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("Deploy not found"))
 		return

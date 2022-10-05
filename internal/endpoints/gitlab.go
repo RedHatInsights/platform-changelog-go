@@ -131,7 +131,7 @@ func GitlabWebhook(w http.ResponseWriter, r *http.Request) {
 	case *gitlab.PushEvent:
 		for key, service := range services {
 			if service.GLRepo == getURL(e) {
-				_, s := db.GetServiceByName(db.DB, key)
+				s, _, _ := db.GetServiceByName(db.DB, key)
 				if s.Branch != strings.Split((e.Ref), "/")[2] {
 					l.Log.Info("Branch mismatch: ", s.Branch, " != ", strings.Split((e.Ref), "/")[2])
 					writeResponse(w, http.StatusOK, `{"msg": "Not a monitored branch"}`)

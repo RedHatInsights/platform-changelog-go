@@ -21,8 +21,8 @@ func GetServicesAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, servicesWithTimelines, count := db.GetServicesAll(db.DB, q.Offset, q.Limit)
-	if result.Error != nil {
+	servicesWithTimelines, count, err := db.GetServicesAll(db.DB, q.Offset, q.Limit)
+	if err != nil {
 
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
@@ -41,9 +41,9 @@ func GetServiceByName(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
 	serviceName := chi.URLParam(r, "service")
-	result, service := db.GetServiceByName(db.DB, serviceName)
+	service, _, err := db.GetServiceByName(db.DB, serviceName)
 
-	if result.Error != nil {
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return

@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func CreateCommitEntry(db *gorm.DB, t []models.Timelines) *gorm.DB {
+func CreateCommitEntry(db *gorm.DB, t []models.Timelines) error {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlCreateCommitEntry)
 	defer callDurationTimer.ObserveDuration()
 
@@ -16,10 +16,10 @@ func CreateCommitEntry(db *gorm.DB, t []models.Timelines) *gorm.DB {
 		db.Create(&timeline)
 	}
 
-	return db
+	return db.Error
 }
 
-func GetCommitsAll(db *gorm.DB, offset int, limit int) (*gorm.DB, []models.Timelines, int64) {
+func GetCommitsAll(db *gorm.DB, offset int, limit int) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsAll)
 	defer callDurationTimer.ObserveDuration()
 
@@ -31,10 +31,10 @@ func GetCommitsAll(db *gorm.DB, offset int, limit int) (*gorm.DB, []models.Timel
 	db.Find(&commits).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&commits)
 
-	return result, commits, count
+	return commits, count, result.Error
 }
 
-func GetCommitsByService(db *gorm.DB, service structs.ServicesData, offset int, limit int) (*gorm.DB, []models.Timelines, int64) {
+func GetCommitsByService(db *gorm.DB, service structs.ServicesData, offset int, limit int) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsByService)
 	defer callDurationTimer.ObserveDuration()
 
@@ -46,13 +46,14 @@ func GetCommitsByService(db *gorm.DB, service structs.ServicesData, offset int, 
 	db.Find(&commits).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&commits)
 
-	return result, commits, count
+	return commits, count, result.Error
 }
 
-func GetCommitByRef(db *gorm.DB, ref string) (*gorm.DB, models.Timelines) {
+func GetCommitByRef(db *gorm.DB, ref string) (models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitByRef)
 	defer callDurationTimer.ObserveDuration()
 	var commit models.Timelines
 	result := db.Model(models.Timelines{}).Where("timelines.ref = ?", ref).Where("timelines.type = ?", "commit").Scan(&commit)
-	return result, commit
+
+	return commit, result.RowsAffected, result.Error
 }

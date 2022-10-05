@@ -51,7 +51,7 @@ func GithubWebhook(w http.ResponseWriter, r *http.Request) {
 	case *github.PushEvent:
 		for key, service := range services {
 			if service.GHRepo == e.Repo.GetURL() {
-				_, s := db.GetServiceByName(db.DB, key)
+				s, _, _ := db.GetServiceByName(db.DB, key)
 				if s.Branch != strings.Split(utils.DerefString(e.Ref), "/")[2] {
 					l.Log.Info("Branch mismatch: ", s.Branch, " != ", strings.Split(utils.DerefString(e.Ref), "/")[2])
 					writeResponse(w, http.StatusOK, `{"msg": "Not a monitored branch"}`)

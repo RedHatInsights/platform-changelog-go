@@ -48,9 +48,9 @@ func GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, service := db.GetServiceByName(db.DB, serviceName)
+	service, _, err := db.GetServiceByName(db.DB, serviceName)
 
-	if result.Error != nil {
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Couldn't find the service"))
 		return

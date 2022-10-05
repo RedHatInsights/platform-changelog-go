@@ -21,8 +21,8 @@ func GetCommitsAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, commits, count := db.GetCommitsAll(db.DB, q.Offset, q.Limit)
-	if result.Error != nil {
+	commits, count, err := db.GetCommitsAll(db.DB, q.Offset, q.Limit)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
@@ -46,15 +46,15 @@ func GetCommitsByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, service := db.GetServiceByName(db.DB, serviceName)
-	if result.Error != nil {
+	service, _, err := db.GetServiceByName(db.DB, serviceName)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Couldn't find the service"))
 		return
 	}
 
-	result, commits, count := db.GetCommitsByService(db.DB, service, q.Offset, q.Limit)
-	if result.Error != nil {
+	commits, count, err := db.GetCommitsByService(db.DB, service, q.Offset, q.Limit)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
@@ -71,14 +71,14 @@ func GetCommitByRef(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 	ref := chi.URLParam(r, "ref")
 
-	result, commit := db.GetCommitByRef(db.DB, ref)
-	if result.Error != nil {
+	commit, rowsAffected, err := db.GetCommitByRef(db.DB, ref)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
 	}
 
-	if result.RowsAffected == 0 {
+	if rowsAffected == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("Commit not found"))
 		return

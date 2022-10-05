@@ -31,8 +31,8 @@ func main() {
 
 func reconcileServices(g *gorm.DB, cfg *config.Config) {
 	for key, service := range cfg.Services {
-		res, _ := db.GetServiceByName(g, key)
-		if res.RowsAffected == 0 {
+		_, rowsAffected, _ := db.GetServiceByName(g, key)
+		if rowsAffected == 0 {
 			_, service := db.CreateServiceTableEntry(g, key, service)
 			logging.Log.Info("Created service: ", service)
 		} else {
