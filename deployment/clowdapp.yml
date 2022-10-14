@@ -57,6 +57,21 @@ objects:
         env:
           - name: LOGLEVEL
             value: ${LOGLEVEL}
+    jobs:
+    - name: vacuum
+      schedule: '@daily'
+      suspend: ${{CLEANER_SUSPEND}}
+      podSpec:
+        image: ${IMAGE}:${IMAGE_TAG}
+        command:
+          - ./tools/cron-job.sh
+        resources:
+          limits:
+            cpu: ${API_CPU_LIMIT}
+            memory: ${API_MEMORY_LIMIT}
+          requests:
+            cpu: 200m
+            memory: 256Mi
 
 parameters:
 - description: Initial amount of memory the platform-changlog container will request.
@@ -100,3 +115,5 @@ parameters:
 - name: ENV_NAME
   value: platform-changelog-api
   required: true
+- name: CLEANER_SUSPEND
+  value: 'true'
