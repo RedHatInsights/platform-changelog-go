@@ -1,5 +1,11 @@
 DEBUG=0
 
+POSTGRES_PASSWORD=crc
+POSTGRES_USER=crc
+POSTGRES_DB=gumbaroo
+POSTGRES_PORT=5432:5432
+POSTGRES_HOST=localhost
+
 build:
 
 	go build -o platform-changelog-api cmd/api/main.go
@@ -24,7 +30,11 @@ run-api:
 
 run-db:
 
-	podman run --rm -it -p 5432:5432 -e POSTGRES_PASSWORD=crc -e POSTGRES_USER=crc -e POSTGRES_DB=gumbaroo --name postgres postgres:12.4
+	podman run --rm -it -p {POSTGRES_PORT} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_DB=${POSTGRES_DB} --name postgres postgres:12.4
+
+check-db:
+
+	psql -h {POSTGRES_HOST} --user ${POSTGRES_USER} --db ${POSTGRES_DB}
 
 test-github-webhook:
 
