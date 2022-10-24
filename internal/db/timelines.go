@@ -14,7 +14,7 @@ import (
 /**
  * GetTimeline returns a timeline of commits and deploys for a service
  */
-func GetTimelinesAll(db *gorm.DB, offset int, limit int) (*gorm.DB, []models.Timelines, int64) {
+func GetTimelinesAll(db *gorm.DB, offset int, limit int) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimelinesAll)
 	defer callDurationTimer.ObserveDuration()
 
@@ -29,10 +29,10 @@ func GetTimelinesAll(db *gorm.DB, offset int, limit int) (*gorm.DB, []models.Tim
 	db.Find(&timelines).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&timelines)
 
-	return result, timelines, count
+	return timelines, count, result.Error
 }
 
-func GetTimelinesByService(db *gorm.DB, service structs.ServicesData, offset int, limit int) (*gorm.DB, []models.Timelines, int64) {
+func GetTimelinesByService(db *gorm.DB, service structs.ServicesData, offset int, limit int) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimelinesByService)
 	defer callDurationTimer.ObserveDuration()
 
@@ -47,10 +47,10 @@ func GetTimelinesByService(db *gorm.DB, service structs.ServicesData, offset int
 	db.Find(&timelines).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&timelines)
 
-	return result, timelines, count
+	return timelines, count, result.Error
 }
 
-func GetTimelineByRef(db *gorm.DB, ref string) (*gorm.DB, models.Timelines) {
+func GetTimelineByRef(db *gorm.DB, ref string) (models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimelineByRef)
 	defer callDurationTimer.ObserveDuration()
 
@@ -58,5 +58,5 @@ func GetTimelineByRef(db *gorm.DB, ref string) (*gorm.DB, models.Timelines) {
 
 	result := db.Model(models.Timelines{}).Select("*").Where("timelines.ref = ?", ref).Find(&timeline)
 
-	return result, timeline
+	return timeline, result.RowsAffected, result.Error
 }

@@ -39,7 +39,7 @@ func GithubWebhook(w http.ResponseWriter, r *http.Request) {
 
 	event, err := github.ParseWebHook(github.WebHookType(r), payload)
 	if err != nil {
-		l.Log.Error("could not parse webhook: err=%s\n", err)
+		l.Log.Errorf("could not parse webhook: err=%s\n", err)
 		metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
 		return
 	}
@@ -58,9 +58,9 @@ func GithubWebhook(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				commitData := getCommitData(e, s)
-				result := db.CreateCommitEntry(db.DB, commitData)
-				if result.Error != nil {
-					l.Log.Errorf("Failed to insert webhook data: %v", result.Error)
+				err := db.CreateCommitEntry(db.DB, commitData)
+				if err != nil {
+					l.Log.Errorf("Failed to insert webhook data: %v", err)
 					metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
 					writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert webhook data"}`)
 					return
