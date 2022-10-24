@@ -29,7 +29,7 @@ func GetServicesAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	servicesList := structs.ExpandedServicesList{count, servicesWithTimelines}
+	servicesList := structs.ExpandedServicesList{Count: count, Data: servicesWithTimelines}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)

@@ -29,7 +29,7 @@ func GetTimelinesAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	timelinesList := structs.TimelinesList{count, timeline}
+	timelinesList := structs.TimelinesList{Count: count, Data: timeline}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)

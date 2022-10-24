@@ -27,7 +27,7 @@ func GetDeploysAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	deploysList := structs.TimelinesList{count, deploys}
+	deploysList := structs.TimelinesList{Count: count, Data: deploys}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
@@ -59,7 +59,7 @@ func GetDeploysByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	deploysList := structs.TimelinesList{count, deploys}
+	deploysList := structs.TimelinesList{Count: count, Data: deploys}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)

@@ -28,7 +28,7 @@ func GetCommitsAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	commitsList := structs.TimelinesList{count, commits}
+	commitsList := structs.TimelinesList{Count: count, Data: commits}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
@@ -60,7 +60,7 @@ func GetCommitsByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	commitsList := structs.TimelinesList{count, commits}
+	commitsList := structs.TimelinesList{Count: count, Data: commits}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
