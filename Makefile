@@ -30,11 +30,11 @@ run-api:
 
 run-db:
 
-	podman run --rm -it -p {POSTGRES_PORT} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_DB=${POSTGRES_DB} --name postgres postgres:12.4
+	podman run --rm -it -p ${POSTGRES_PORT} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_DB=${POSTGRES_DB} --name postgres postgres:12.4
 
 check-db:
 
-	psql -h {POSTGRES_HOST} --user ${POSTGRES_USER} --db ${POSTGRES_DB}
+	psql -h ${POSTGRES_HOST} --user ${POSTGRES_USER} --db ${POSTGRES_DB}
 
 test-github-webhook:
 
