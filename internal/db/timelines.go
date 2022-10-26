@@ -7,7 +7,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
-	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 	"gorm.io/gorm"
 )
 
@@ -32,7 +31,7 @@ func GetTimelinesAll(db *gorm.DB, offset int, limit int) ([]models.Timelines, in
 	return timelines, count, result.Error
 }
 
-func GetTimelinesByService(db *gorm.DB, service structs.ServicesData, offset int, limit int) ([]models.Timelines, int64, error) {
+func GetTimelinesByService(db *gorm.DB, service models.Services, offset int, limit int) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimelinesByService)
 	defer callDurationTimer.ObserveDuration()
 

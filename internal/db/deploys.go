@@ -4,7 +4,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
-	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 	"gorm.io/gorm"
 )
 
@@ -23,7 +22,7 @@ func GetDeploysAll(db *gorm.DB, offset int, limit int) ([]models.Timelines, int6
 	return deploys, count, result.Error
 }
 
-func GetDeploysByService(db *gorm.DB, service structs.ServicesData, offset int, limit int) ([]models.Timelines, int64, error) {
+func GetDeploysByService(db *gorm.DB, service models.Services, offset int, limit int) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysByService)
 	defer callDurationTimer.ObserveDuration()
 
