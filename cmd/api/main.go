@@ -19,7 +19,6 @@ func lubdub(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("lubdub"))
 }
 
-
 func openAPIHandler(cfg *config.Config) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -34,7 +33,13 @@ func main() {
 
 	cfg := config.Get()
 
-	db.DbConnect(cfg)
+	// db.DbConnect(cfg)
+	// TODO: Switch between mock and impl based on config
+	var dbConnector db.DBConnector
+	dbConnector = db.NewDBConnector(cfg)
+
+	// TODO: Remove this once everything is connected
+	dbConnector.GetCommitsAll(0, 0)
 
 	r := chi.NewRouter()
 	mr := chi.NewRouter()
