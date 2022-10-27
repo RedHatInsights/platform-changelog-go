@@ -45,3 +45,166 @@ func (conn *DBConnectorImpl) Migrate() {
 
 	logging.Log.Info("DB Migration Complete")
 }
+
+type MockDBConnector struct {
+	Timelines []models.Timelines
+	Services  []models.Services
+}
+
+func NewMockDBConnector() DBConnector {
+	return &MockDBConnector{
+		Timelines: []models.Timelines{},
+		Services:  []models.Services{},
+	}
+}
+
+func (conn *MockDBConnector) Migrate() {
+}
+
+func (conn *MockDBConnector) CreateCommitEntry(timeline []models.Timelines) error {
+	conn.Timelines = append(conn.Timelines, timeline...)
+	return nil
+}
+
+func (conn *MockDBConnector) GetCommitsAll(offset int, limit int) ([]models.Timelines, int64, error) {
+	var commits []models.Timelines
+	for _, timeline := range conn.Timelines {
+		if timeline.Type == "commit" {
+			commits = append(commits, timeline)
+		}
+	}
+	return commits, int64(len(commits)), nil
+}
+
+func (conn *MockDBConnector) GetCommitsByService(service models.Services, offset int, limit int) ([]models.Timelines, int64, error) {
+	var commits []models.Timelines
+	for _, timeline := range conn.Timelines {
+		if timeline.Type == "commit" && timeline.ServiceID == service.ID {
+			commits = append(commits, timeline)
+		}
+	}
+	return commits, int64(len(commits)), nil
+}
+
+func (conn *MockDBConnector) GetCommitByRef(ref string) (models.Timelines, int64, error) {
+	for _, timeline := range conn.Timelines {
+		if timeline.Ref == ref {
+			return timeline, 1, nil
+		}
+	}
+	return models.Timelines{}, 0, nil
+}
+
+func (conn *MockDBConnector) CreateServiceTableEntry(name string, s config.Service) (models.Services, error) {
+	newService := models.Services{
+		Name:        name,
+		DisplayName: s.DisplayName,
+		GHRepo:      s.GHRepo,
+		GLRepo:      s.GLRepo, Branch: s.Branch,
+		Namespace:  s.Namespace,
+		DeployFile: s.DeployFile,
+	}
+
+	conn.Services = append(conn.Services, newService)
+	return newService, nil
+}
+
+func (conn *MockDBConnector) GetServicesAll(offset int, limit int) ([]models.ExpandedServices, int64, error) {
+	servicesWithTimelines := []models.ExpandedServices{}
+
+	for _, service := range conn.Services {
+		serviceWithTimeline, _, _ := conn.GetLatest(models.ExpandedServices{
+			Services: service,
+		})
+		servicesWithTimelines = append(servicesWithTimelines, serviceWithTimeline)
+	}
+
+	return servicesWithTimelines, int64(len(servicesWithTimelines)), nil // TODO: Implement once GetServicesAll is implemented
+}
+
+func (conn *MockDBConnector) GetLatest(service models.ExpandedServices) (models.ExpandedServices, error, error) {
+	expandedService := models.ExpandedServices{
+		Services: service.Services,
+	}
+
+	for _, timeline := range conn.Timelines {
+		if timeline.ServiceID == service.ID && timeline.Type == "commit" {
+			expandedService.Commit = timeline
+		}
+		if timeline.ServiceID == service.ID && timeline.Type == "deploy" {
+			expandedService.Deploy = timeline
+		}
+	}
+
+	return expandedService, nil, nil
+}
+
+func (conn *MockDBConnector) GetServiceByName(name string) (models.Services, int64, error) {
+	for _, service := range conn.Services {
+		if service.Name == name {
+			return service, 1, nil
+		}
+	}
+	return models.Services{}, 0, nil
+}
+
+func (conn *MockDBConnector) GetServiceByGHRepo(repo string) (models.Services, error) {
+	for _, service := range conn.Services {
+		if service.GHRepo == repo {
+			return service, nil
+		}
+	}
+	return models.Services{}, nil
+}
+
+func (conn *MockDBConnector) GetTimelinesAll(offset int, limit int) ([]models.Timelines, int64, error) {
+	return conn.Timelines, int64(len(conn.Timelines)), nil
+}
+
+func (conn *MockDBConnector) GetTimelinesByService(service models.Services, offset int, limit int) ([]models.Timelines, int64, error) {
+	var timelines []models.Timelines
+	for _, timeline := range conn.Timelines {
+		if timeline.ServiceID == service.ID {
+			timelines = append(timelines, timeline)
+		}
+	}
+	return timelines, int64(len(timelines)), nil
+}
+
+func (conn *MockDBConnector) GetTimelineByRef(ref string) (models.Timelines, int64, error) {
+	for _, timeline := range conn.Timelines {
+		if timeline.Ref == ref {
+			return timeline, 1, nil
+		}
+	}
+	return models.Timelines{}, 0, nil
+}
+
+func (conn *MockDBConnector) GetDeploysAll(offset int, limit int) ([]models.Timelines, int64, error) {
+	deploys := []models.Timelines{}
+	for _, timeline := range conn.Timelines {
+		if timeline.Type == "deploy" {
+			deploys = append(deploys, timeline)
+		}
+	}
+	return deploys, int64(len(deploys)), nil
+}
+
+func (conn *MockDBConnector) GetDeploysByService(service models.Services, offset int, limit int) ([]models.Timelines, int64, error) {
+	deploys := []models.Timelines{}
+	for _, timeline := range conn.Timelines {
+		if timeline.Type == "deploy" && timeline.ServiceID == service.ID {
+			deploys = append(deploys, timeline)
+		}
+	}
+	return deploys, int64(len(deploys)), nil
+}
+
+func (conn *MockDBConnector) GetDeployByRef(ref string) (models.Timelines, int64, error) {
+	for _, timeline := range conn.Timelines {
+		if timeline.Ref == ref {
+			return timeline, 1, nil
+		}
+	}
+	return models.Timelines{}, 0, nil
+}

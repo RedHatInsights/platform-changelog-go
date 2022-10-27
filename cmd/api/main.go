@@ -33,8 +33,14 @@ func main() {
 
 	cfg := config.Get()
 
-	// // TODO: Switch between mock and impl based on config
-	dbConnector := db.NewDBConnector(cfg)
+	var dbConnector db.DBConnector
+	switch cfg.DatabaseConfig.DBImpl {
+	case "mock":
+		dbConnector = db.NewMockDBConnector()
+	default:
+		dbConnector = db.NewDBConnector(cfg)
+	}
+
 	handler := endpoints.NewHandler(dbConnector)
 
 	r := chi.NewRouter()
