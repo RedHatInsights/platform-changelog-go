@@ -7,11 +7,10 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 )
 
-func GetCommitsAll(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetCommitsAll(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
 	q, err := initQuery(r)
@@ -21,7 +20,7 @@ func GetCommitsAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	commits, count, err := db.GetCommitsAll(db.DB, q.Offset, q.Limit)
+	commits, count, err := eh.conn.GetCommitsAll(q.Offset, q.Limit)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
@@ -35,7 +34,7 @@ func GetCommitsAll(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(commitsList)
 }
 
-func GetCommitsByService(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetCommitsByService(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 	serviceName := chi.URLParam(r, "service")
 
@@ -46,14 +45,14 @@ func GetCommitsByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	service, _, err := db.GetServiceByName(db.DB, serviceName)
+	service, _, err := eh.conn.GetServiceByName(serviceName)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Couldn't find the service"))
 		return
 	}
 
-	commits, count, err := db.GetCommitsByService(db.DB, service, q.Offset, q.Limit)
+	commits, count, err := eh.conn.GetCommitsByService(service, q.Offset, q.Limit)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
@@ -67,11 +66,11 @@ func GetCommitsByService(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(commitsList)
 }
 
-func GetCommitByRef(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetCommitByRef(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 	ref := chi.URLParam(r, "ref")
 
-	commit, rowsAffected, err := db.GetCommitByRef(db.DB, ref)
+	commit, rowsAffected, err := eh.conn.GetCommitByRef(ref)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))

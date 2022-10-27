@@ -9,7 +9,6 @@ import (
 	"fmt"
 
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
-	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	m "github.com/redhatinsights/platform-changelog-go/internal/models"
@@ -91,7 +90,7 @@ func getMessage(p RepInfo) string {
 }
 
 // GitlabWebhook gets data from the webhook and enters it into the DB
-func GitlabWebhook(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var payload []byte
@@ -130,14 +129,14 @@ func GitlabWebhook(w http.ResponseWriter, r *http.Request) {
 	case *gitlab.PushEvent:
 		for key, service := range services {
 			if service.GLRepo == getURL(e) {
-				s, _, _ := db.GetServiceByName(db.DB, key)
+				s, _, _ := eh.conn.GetServiceByName(key)
 				if s.Branch != strings.Split((e.Ref), "/")[2] {
 					l.Log.Info("Branch mismatch: ", s.Branch, " != ", strings.Split((e.Ref), "/")[2])
 					writeResponse(w, http.StatusOK, `{"msg": "Not a monitored branch"}`)
 					return
 				}
 				commitData := getCommitData2(e, s)
-				err := db.CreateCommitEntry(db.DB, commitData)
+				err := eh.conn.CreateCommitEntry(commitData)
 				if err != nil {
 					l.Log.Errorf("Failed to insert webhook data: %v", err)
 					metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), true)

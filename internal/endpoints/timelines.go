@@ -5,12 +5,11 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
-func GetTimelinesAll(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetTimelinesAll(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
 	q, err := initQuery(r)
@@ -20,7 +19,7 @@ func GetTimelinesAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	timeline, count, err := db.GetTimelinesAll(db.DB, q.Offset, q.Limit)
+	timeline, count, err := eh.conn.GetTimelinesAll(q.Offset, q.Limit)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -36,7 +35,7 @@ func GetTimelinesAll(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(timelinesList)
 }
 
-func GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
 	serviceName := chi.URLParam(r, "service")
@@ -48,7 +47,7 @@ func GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	service, _, err := db.GetServiceByName(db.DB, serviceName)
+	service, _, err := eh.conn.GetServiceByName(serviceName)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -56,7 +55,7 @@ func GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	timeline, count, err := db.GetTimelinesByService(db.DB, service, q.Offset, q.Limit)
+	timeline, count, err := eh.conn.GetTimelinesByService(service, q.Offset, q.Limit)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -71,11 +70,11 @@ func GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(timelinesList)
 }
 
-func GetTimelineByRef(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetTimelineByRef(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 	ref := chi.URLParam(r, "ref")
 
-	timeline, rowsAffected, err := db.GetTimelineByRef(db.DB, ref)
+	timeline, rowsAffected, err := eh.conn.GetTimelineByRef(ref)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

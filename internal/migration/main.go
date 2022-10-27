@@ -6,23 +6,21 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/logging"
 )
 
-var conn db.DBConnector
-
 func main() {
 	logging.InitLogger()
 
 	cfg := config.Get()
 
-	conn = db.NewDBConnector(cfg)
+	conn := db.NewDBConnector(cfg)
 
 	conn.Migrate()
 
 	logging.Log.Info("DB Migration Complete")
 
-	reconcileServices(cfg)
+	reconcileServices(cfg, conn)
 }
 
-func reconcileServices(cfg *config.Config) {
+func reconcileServices(cfg *config.Config, conn db.DBConnector) {
 	for key, service := range cfg.Services {
 		_, rowsAffected, _ := conn.GetServiceByName(key)
 		if rowsAffected == 0 {

@@ -33,13 +33,9 @@ func main() {
 
 	cfg := config.Get()
 
-	// db.DbConnect(cfg)
-	// TODO: Switch between mock and impl based on config
-	var dbConnector db.DBConnector
-	dbConnector = db.NewDBConnector(cfg)
-
-	// TODO: Remove this once everything is connected
-	dbConnector.GetCommitsAll(0, 0)
+	// // TODO: Switch between mock and impl based on config
+	dbConnector := db.NewDBConnector(cfg)
+	handler := endpoints.NewHandler(dbConnector)
 
 	r := chi.NewRouter()
 	mr := chi.NewRouter()
@@ -53,22 +49,22 @@ func main() {
 	mr.Get("/healthz", lubdub)
 	mr.Handle("/metrics", promhttp.Handler())
 
-	sub.Post("/github-webhook", endpoints.GithubWebhook)
-	sub.Post("/gitlab-webhook", endpoints.GitlabWebhook)
+	sub.Post("/github-webhook", handler.GithubWebhook)
+	sub.Post("/gitlab-webhook", handler.GitlabWebhook)
 
-	sub.Get("/services", endpoints.GetServicesAll)
-	sub.Get("/timelines", endpoints.GetTimelinesAll)
-	sub.Get("/commits", endpoints.GetCommitsAll)
-	sub.Get("/deploys", endpoints.GetDeploysAll)
+	sub.Get("/services", handler.GetServicesAll)
+	sub.Get("/timelines", handler.GetTimelinesAll)
+	sub.Get("/commits", handler.GetCommitsAll)
+	sub.Get("/deploys", handler.GetDeploysAll)
 
-	sub.Get("/services/{service}", endpoints.GetServiceByName)
-	sub.Get("/services/{service}/timelines", endpoints.GetTimelinesByService)
-	sub.Get("/services/{service}/commits", endpoints.GetCommitsByService)
-	sub.Get("/services/{service}/deploys", endpoints.GetDeploysByService)
+	sub.Get("/services/{service}", handler.GetServiceByName)
+	sub.Get("/services/{service}/timelines", handler.GetTimelinesByService)
+	sub.Get("/services/{service}/commits", handler.GetCommitsByService)
+	sub.Get("/services/{service}/deploys", handler.GetDeploysByService)
 
-	sub.Get("/timelines/{ref}", endpoints.GetTimelineByRef)
-	sub.Get("/commits/{ref}", endpoints.GetCommitByRef)
-	sub.Get("/deploys/{ref}", endpoints.GetDeployByRef)
+	sub.Get("/timelines/{ref}", handler.GetTimelineByRef)
+	sub.Get("/commits/{ref}", handler.GetCommitByRef)
+	sub.Get("/deploys/{ref}", handler.GetDeployByRef)
 
 	sub.Get("/openapi.json", openAPIHandler(cfg))
 

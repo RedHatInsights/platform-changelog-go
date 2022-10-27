@@ -5,12 +5,11 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
-func GetDeploysAll(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetDeploysAll(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
 	q, err := initQuery(r)
@@ -20,7 +19,7 @@ func GetDeploysAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	deploys, count, err := db.GetDeploysAll(db.DB, q.Offset, q.Limit)
+	deploys, count, err := eh.conn.GetDeploysAll(q.Offset, q.Limit)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
@@ -34,7 +33,7 @@ func GetDeploysAll(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(deploysList)
 }
 
-func GetDeploysByService(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetDeploysByService(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 	serviceName := chi.URLParam(r, "service")
 
@@ -45,14 +44,14 @@ func GetDeploysByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	service, _, err := db.GetServiceByName(db.DB, serviceName)
+	service, _, err := eh.conn.GetServiceByName(serviceName)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Couldn't find the service"))
 		return
 	}
 
-	deploys, count, err := db.GetDeploysByService(db.DB, service, q.Offset, q.Limit)
+	deploys, count, err := eh.conn.GetDeploysByService(service, q.Offset, q.Limit)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
@@ -66,11 +65,11 @@ func GetDeploysByService(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(deploysList)
 }
 
-func GetDeployByRef(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetDeployByRef(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 	ref := chi.URLParam(r, "ref")
 
-	deploy, rowsAffected, err := db.GetDeployByRef(db.DB, ref)
+	deploy, rowsAffected, err := eh.conn.GetDeployByRef(ref)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
