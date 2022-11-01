@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -28,7 +29,6 @@ func openAPIHandler(cfg *config.Config) http.HandlerFunc {
 }
 
 func main() {
-
 	logging.InitLogger()
 
 	cfg := config.Get()
@@ -36,6 +36,7 @@ func main() {
 	var dbConnector db.DBConnector
 	switch cfg.DatabaseConfig.DBImpl {
 	case "mock":
+		fmt.Println("Using mock database")
 		dbConnector = db.NewMockDBConnector()
 	default:
 		dbConnector = db.NewDBConnector(cfg)

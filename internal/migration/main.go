@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/logging"
@@ -11,13 +13,20 @@ func main() {
 
 	cfg := config.Get()
 
-	conn := db.NewDBConnector(cfg)
+	var dbConnector db.DBConnector
+	switch cfg.DatabaseConfig.DBImpl {
+	case "mock":
+		fmt.Println("Using mock database")
+		dbConnector = db.NewMockDBConnector()
+	default:
+		dbConnector = db.NewDBConnector(cfg)
+	}
 
-	conn.Migrate()
+	dbConnector.Migrate()
 
 	logging.Log.Info("DB Migration Complete")
 
-	reconcileServices(cfg, conn)
+	reconcileServices(cfg, dbConnector)
 }
 
 func reconcileServices(cfg *config.Config, conn db.DBConnector) {
