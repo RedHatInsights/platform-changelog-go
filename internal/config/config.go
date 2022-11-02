@@ -27,6 +27,7 @@ type Config struct {
 	GitlabWebhookSecretKey string
 	Services               map[string]Service
 	Debug                  bool
+	DBImpl                 string
 	OpenAPISpec            []byte
 }
 
@@ -37,7 +38,6 @@ type DatabaseCfg struct {
 	DBHost     string
 	DBPort     string
 	RDSCa      string
-	DBImpl     string
 }
 
 type CloudwatchCfg struct {
@@ -94,6 +94,7 @@ func Get() *Config {
 	options.SetDefault("GithubSecretKey", os.Getenv("GITHUB_SECRET_KEY"))
 	options.SetDefault("GitlabSecretKey", os.Getenv("GITLAB_SECRET_KEY"))
 	options.SetDefault("Debug", os.Getenv("DEBUG") == "true" || os.Getenv("DEBUG") == "1")
+	options.SetDefault("DBImpl", os.Getenv("DB_IMPL"))
 
 	if clowder.IsClowderEnabled() {
 		cfg := clowder.LoadedConfig
@@ -145,6 +146,7 @@ func Get() *Config {
 		MetricsPort:            options.GetString("metricsPort"),
 		MetricsPath:            options.GetString("metricsPath"),
 		Debug:                  options.GetBool("Debug"),
+		DBImpl:                 options.GetString("DBImpl"),
 		OpenAPISpec:            readOpenAPISpec(),
 		DatabaseConfig: DatabaseCfg{
 			DBUser:     options.GetString("db.user"),
@@ -152,7 +154,6 @@ func Get() *Config {
 			DBName:     options.GetString("db.name"),
 			DBHost:     options.GetString("db.host"),
 			DBPort:     options.GetString("db.port"),
-			DBImpl:     options.GetString("db.impl"),
 		},
 		CloudwatchConfig: CloudwatchCfg{
 			CWLogGroup:  options.GetString("logGroup"),

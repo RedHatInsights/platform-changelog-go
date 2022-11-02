@@ -135,7 +135,7 @@ func (conn *MockDBConnector) GetServicesAll(offset int, limit int) ([]models.Exp
 		servicesWithTimelines = append(servicesWithTimelines, serviceWithTimeline)
 	}
 
-	return servicesWithTimelines, int64(len(servicesWithTimelines)), nil // TODO: Implement once GetServicesAll is implemented
+	return servicesWithTimelines, int64(len(servicesWithTimelines)), nil
 }
 
 func (conn *MockDBConnector) GetLatest(service models.ExpandedServices) (models.ExpandedServices, error, error) {
@@ -156,7 +156,6 @@ func (conn *MockDBConnector) GetLatest(service models.ExpandedServices) (models.
 }
 
 func (conn *MockDBConnector) GetServiceByName(name string) (models.Services, int64, error) {
-	fmt.Printf("Num of services: %d", len(conn.Services)) // TODO: Remove, for debugging
 	for _, service := range conn.Services {
 		if service.Name == name {
 			return service, 1, nil
