@@ -6,7 +6,8 @@ import (
 )
 
 type DBConnector interface {
-	Migrate()
+	Exec(string) error
+	AutoMigrate(...interface{}) error
 
 	CreateCommitEntry(timeline []models.Timelines) error
 	GetCommitsAll(offset int, limit int) ([]models.Timelines, int64, error)

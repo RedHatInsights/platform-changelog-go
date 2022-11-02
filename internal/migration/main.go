@@ -1,11 +1,10 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/logging"
+	"github.com/redhatinsights/platform-changelog-go/internal/models"
 )
 
 func main() {
@@ -13,20 +12,24 @@ func main() {
 
 	cfg := config.Get()
 
-	var dbConnector db.DBConnector
-	switch cfg.DatabaseConfig.DBImpl {
-	case "mock":
-		fmt.Println("Using mock database")
-		dbConnector = db.NewMockDBConnector()
-	default:
-		dbConnector = db.NewDBConnector(cfg)
-	}
+	dbConnector := db.NewDBConnector(cfg)
 
-	dbConnector.Migrate()
+	migrate(dbConnector)
 
 	logging.Log.Info("DB Migration Complete")
 
 	reconcileServices(cfg, dbConnector)
+}
+
+func migrate(conn db.DBConnector) {
+	conn.Exec("CREATE TYPE timeline_type AS ENUM ('unknown', 'commit', 'deploy')")
+
+	conn.AutoMigrate(
+		&models.Services{},
+		&models.Timelines{},
+	)
+
+	logging.Log.Info("DB Migration Complete")
 }
 
 func reconcileServices(cfg *config.Config, conn db.DBConnector) {

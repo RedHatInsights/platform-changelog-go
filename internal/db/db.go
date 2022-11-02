@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
-	"github.com/redhatinsights/platform-changelog-go/internal/logging"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
 	"gorm.io/driver/postgres"
@@ -35,15 +34,12 @@ func NewDBConnector(cfg *config.Config) DBConnector {
 	return &DBConnectorImpl{db: db}
 }
 
-func (conn *DBConnectorImpl) Migrate() {
-	conn.db.Exec("CREATE TYPE timeline_type AS ENUM ('unknown', 'commit', 'deploy')")
+func (conn *DBConnectorImpl) AutoMigrate(models ...interface{}) error {
+	return conn.db.AutoMigrate(models)
+}
 
-	conn.db.AutoMigrate(
-		&models.Services{},
-		&models.Timelines{},
-	)
-
-	logging.Log.Info("DB Migration Complete")
+func (conn *DBConnectorImpl) Exec(sql string) error {
+	return conn.db.Exec(sql).Error
 }
 
 type MockDBConnector struct {
@@ -51,16 +47,34 @@ type MockDBConnector struct {
 	Services  []models.Services
 }
 
-func NewMockDBConnector() DBConnector {
+func NewMockDBConnector(cfg *config.Config) DBConnector {
 	fmt.Println("Using MockDBConnector")
 
-	return &MockDBConnector{
+	conn := &MockDBConnector{
 		Timelines: []models.Timelines{},
 		Services:  []models.Services{},
 	}
+
+	// Add the data from the config file to the mock DB
+	for key, service := range cfg.Services {
+		_, rowsAffected, _ := conn.GetServiceByName(key)
+		if rowsAffected == 0 {
+			_, service := conn.CreateServiceTableEntry(key, service)
+			l.Log.Info("Created service: ", service)
+		} else {
+			l.Log.Info("Service already exists: ", service.DisplayName)
+		}
+	}
+
+	return conn
 }
 
-func (conn *MockDBConnector) Migrate() {
+func (conn *MockDBConnector) AutoMigrate(models ...interface{}) error {
+	return nil
+}
+
+func (conn *MockDBConnector) Exec(sql string) error {
+	return nil
 }
 
 func (conn *MockDBConnector) CreateCommitEntry(timeline []models.Timelines) error {

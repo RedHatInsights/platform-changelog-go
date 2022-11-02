@@ -37,7 +37,7 @@ func main() {
 	switch cfg.DatabaseConfig.DBImpl {
 	case "mock":
 		fmt.Println("Using mock database")
-		dbConnector = db.NewMockDBConnector()
+		dbConnector = db.NewMockDBConnector(cfg)
 	default:
 		dbConnector = db.NewDBConnector(cfg)
 	}
