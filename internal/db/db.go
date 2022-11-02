@@ -34,8 +34,8 @@ func NewDBConnector(cfg *config.Config) DBConnector {
 	return &DBConnectorImpl{db: db}
 }
 
-func (conn *DBConnectorImpl) AutoMigrate(models ...interface{}) error {
-	return conn.db.AutoMigrate(models)
+func (conn *DBConnectorImpl) AutoMigrate(serviceModel *models.Services, timelineModel *models.Timelines) error {
+	return conn.db.AutoMigrate(serviceModel, timelineModel)
 }
 
 func (conn *DBConnectorImpl) Exec(sql string) error {
@@ -69,7 +69,7 @@ func NewMockDBConnector(cfg *config.Config) DBConnector {
 	return conn
 }
 
-func (conn *MockDBConnector) AutoMigrate(models ...interface{}) error {
+func (conn *MockDBConnector) AutoMigrate(serviceModel *models.Services, timelineModel *models.Timelines) error {
 	return nil
 }
 
