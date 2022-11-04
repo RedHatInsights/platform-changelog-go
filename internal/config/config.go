@@ -94,7 +94,7 @@ func Get() *Config {
 	options.SetDefault("GithubSecretKey", os.Getenv("GITHUB_SECRET_KEY"))
 	options.SetDefault("GitlabSecretKey", os.Getenv("GITLAB_SECRET_KEY"))
 	options.SetDefault("Debug", os.Getenv("DEBUG") == "true" || os.Getenv("DEBUG") == "1")
-	options.SetDefault("DBImpl", os.Getenv("DB_IMPL"))
+	options.SetDefault("db.impl", os.Getenv("DB_IMPL"))
 
 	if clowder.IsClowderEnabled() {
 		cfg := clowder.LoadedConfig
@@ -146,7 +146,7 @@ func Get() *Config {
 		MetricsPort:            options.GetString("metricsPort"),
 		MetricsPath:            options.GetString("metricsPath"),
 		Debug:                  options.GetBool("Debug"),
-		DBImpl:                 options.GetString("DBImpl"),
+		DBImpl:                 options.GetString("db.impl"),
 		OpenAPISpec:            readOpenAPISpec(),
 		DatabaseConfig: DatabaseCfg{
 			DBUser:     options.GetString("db.user"),
