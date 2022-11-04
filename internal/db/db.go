@@ -6,6 +6,7 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
+	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -92,7 +93,7 @@ func (conn *MockDBConnector) GetCommitsAll(offset int, limit int) ([]models.Time
 	return commits, int64(len(commits)), nil
 }
 
-func (conn *MockDBConnector) GetCommitsByService(service models.Services, offset int, limit int) ([]models.Timelines, int64, error) {
+func (conn *MockDBConnector) GetCommitsByService(service structs.ServicesData, offset int, limit int) ([]models.Timelines, int64, error) {
 	var commits []models.Timelines
 	for _, timeline := range conn.Timelines {
 		if timeline.Type == "commit" && timeline.ServiceID == service.ID {
@@ -125,12 +126,21 @@ func (conn *MockDBConnector) CreateServiceTableEntry(name string, s config.Servi
 	return newService, nil
 }
 
-func (conn *MockDBConnector) GetServicesAll(offset int, limit int) ([]models.ExpandedServices, int64, error) {
-	servicesWithTimelines := []models.ExpandedServices{}
+func (conn *MockDBConnector) GetServicesAll(offset int, limit int) ([]structs.ExpandedServicesData, int64, error) {
+	servicesWithTimelines := []structs.ExpandedServicesData{}
 
 	for _, service := range conn.Services {
-		serviceWithTimeline, _, _ := conn.GetLatest(models.ExpandedServices{
-			Services: service,
+		serviceWithTimeline, _, _ := conn.GetLatest(structs.ExpandedServicesData{
+			ServicesData: structs.ServicesData{
+				ID:          service.ID,
+				Name:        service.Name,
+				DisplayName: service.DisplayName,
+				GHRepo:      service.GHRepo,
+				GLRepo:      service.GLRepo,
+				DeployFile:  service.DeployFile,
+				Namespace:   service.Namespace,
+				Branch:      service.Branch,
+			},
 		})
 		servicesWithTimelines = append(servicesWithTimelines, serviceWithTimeline)
 	}
@@ -138,9 +148,9 @@ func (conn *MockDBConnector) GetServicesAll(offset int, limit int) ([]models.Exp
 	return servicesWithTimelines, int64(len(servicesWithTimelines)), nil
 }
 
-func (conn *MockDBConnector) GetLatest(service models.ExpandedServices) (models.ExpandedServices, error, error) {
-	expandedService := models.ExpandedServices{
-		Services: service.Services,
+func (conn *MockDBConnector) GetLatest(service structs.ExpandedServicesData) (structs.ExpandedServicesData, error, error) {
+	expandedService := structs.ExpandedServicesData{
+		ServicesData: service.ServicesData,
 	}
 
 	for _, timeline := range conn.Timelines {
@@ -155,29 +165,47 @@ func (conn *MockDBConnector) GetLatest(service models.ExpandedServices) (models.
 	return expandedService, nil, nil
 }
 
-func (conn *MockDBConnector) GetServiceByName(name string) (models.Services, int64, error) {
+func (conn *MockDBConnector) GetServiceByName(name string) (structs.ServicesData, int64, error) {
 	for _, service := range conn.Services {
 		if service.Name == name {
-			return service, 1, nil
+			return structs.ServicesData{
+				ID:          service.ID,
+				Name:        service.Name,
+				DisplayName: service.DisplayName,
+				GHRepo:      service.GHRepo,
+				GLRepo:      service.GLRepo,
+				DeployFile:  service.DeployFile,
+				Namespace:   service.Namespace,
+				Branch:      service.Branch,
+			}, 1, nil
 		}
 	}
-	return models.Services{}, 0, nil
+	return structs.ServicesData{}, 0, nil
 }
 
-func (conn *MockDBConnector) GetServiceByGHRepo(repo string) (models.Services, error) {
+func (conn *MockDBConnector) GetServiceByGHRepo(repo string) (structs.ServicesData, error) {
 	for _, service := range conn.Services {
 		if service.GHRepo == repo {
-			return service, nil
+			return structs.ServicesData{
+				ID:          service.ID,
+				Name:        service.Name,
+				DisplayName: service.DisplayName,
+				GHRepo:      service.GHRepo,
+				GLRepo:      service.GLRepo,
+				DeployFile:  service.DeployFile,
+				Namespace:   service.Namespace,
+				Branch:      service.Branch,
+			}, nil
 		}
 	}
-	return models.Services{}, nil
+	return structs.ServicesData{}, nil
 }
 
 func (conn *MockDBConnector) GetTimelinesAll(offset int, limit int) ([]models.Timelines, int64, error) {
 	return conn.Timelines, int64(len(conn.Timelines)), nil
 }
 
-func (conn *MockDBConnector) GetTimelinesByService(service models.Services, offset int, limit int) ([]models.Timelines, int64, error) {
+func (conn *MockDBConnector) GetTimelinesByService(service structs.ServicesData, offset int, limit int) ([]models.Timelines, int64, error) {
 	var timelines []models.Timelines
 	for _, timeline := range conn.Timelines {
 		if timeline.ServiceID == service.ID {
@@ -206,7 +234,7 @@ func (conn *MockDBConnector) GetDeploysAll(offset int, limit int) ([]models.Time
 	return deploys, int64(len(deploys)), nil
 }
 
-func (conn *MockDBConnector) GetDeploysByService(service models.Services, offset int, limit int) ([]models.Timelines, int64, error) {
+func (conn *MockDBConnector) GetDeploysByService(service structs.ServicesData, offset int, limit int) ([]models.Timelines, int64, error) {
 	deploys := []models.Timelines{}
 	for _, timeline := range conn.Timelines {
 		if timeline.Type == "deploy" && timeline.ServiceID == service.ID {

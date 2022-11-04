@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
-	"github.com/redhatinsights/platform-changelog-go/internal/models"
+	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
 func (eh *EndpointHandler) GetServicesAll(w http.ResponseWriter, r *http.Request) {
@@ -28,7 +28,7 @@ func (eh *EndpointHandler) GetServicesAll(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	servicesList := models.ExpandedServicesList{Count: count, Data: servicesWithTimelines}
+	servicesList := structs.ExpandedServicesList{Count: count, Data: servicesWithTimelines}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)

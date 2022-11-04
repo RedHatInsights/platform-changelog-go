@@ -12,6 +12,7 @@ import (
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	m "github.com/redhatinsights/platform-changelog-go/internal/models"
+	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -161,7 +162,7 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func getCommitData2(g *gitlab.PushEvent, s m.Services) []m.Timelines {
+func getCommitData2(g *gitlab.PushEvent, s structs.ServicesData) []m.Timelines {
 	var commits []m.Timelines
 	for _, commit := range g.Commits {
 		record := m.Timelines{

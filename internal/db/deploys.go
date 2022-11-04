@@ -4,6 +4,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
+	"github.com/redhatinsights/platform-changelog-go/internal/structs"
+	"gorm.io/gorm"
 )
 
 func (conn *DBConnectorImpl) GetDeploysAll(offset int, limit int) ([]models.Timelines, int64, error) {
@@ -13,7 +15,7 @@ func (conn *DBConnectorImpl) GetDeploysAll(offset int, limit int) ([]models.Time
 	var count int64
 	var deploys []models.Timelines
 
-	conn.db = conn.db.Model(models.Timelines{}).Where("timelines.type = ?", "deploy")
+	conn.db = conn.db.Model(models.Timelines{}).Where("timelines.type = ?", "deploy").Session(&gorm.Session{})
 
 	conn.db.Find(&deploys).Count(&count)
 	result := conn.db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&deploys)
@@ -21,14 +23,14 @@ func (conn *DBConnectorImpl) GetDeploysAll(offset int, limit int) ([]models.Time
 	return deploys, count, result.Error
 }
 
-func (conn *DBConnectorImpl) GetDeploysByService(service models.Services, offset int, limit int) ([]models.Timelines, int64, error) {
+func (conn *DBConnectorImpl) GetDeploysByService(service structs.ServicesData, offset int, limit int) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysByService)
 	defer callDurationTimer.ObserveDuration()
 
 	var count int64
 	var deploys []models.Timelines
 
-	conn.db = conn.db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "deploy")
+	conn.db = conn.db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "deploy").Session(&gorm.Session{})
 
 	conn.db.Find(&deploys).Count(&count)
 	result := conn.db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&deploys)
@@ -40,7 +42,7 @@ func (conn *DBConnectorImpl) GetDeployByRef(ref string) (models.Timelines, int64
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeployByRef)
 	defer callDurationTimer.ObserveDuration()
 	var deploy models.Timelines
-	result := conn.db.Model(models.Timelines{}).Where("timelines.ref = ?", ref).Where("timelines.type = ?", "deploy").Scan(&deploy)
+	result := conn.db.Model(models.Timelines{}).Where("timelines.ref = ?", ref).Where("timelines.type = ?", "deploy").Scan(&deploy).Session(&gorm.Session{})
 	rowsAffected := result.RowsAffected
 
 	return deploy, rowsAffected, result.Error

@@ -23,17 +23,6 @@ const (
 	deploy timelineType = "deploy"
 )
 
-type ExpandedServices struct {
-	Services
-	Commit Timelines `gorm:"foreignkey:ID"`
-	Deploy Timelines `gorm:"foreignkey:ID"`
-}
-
-type ExpandedServicesList struct {
-	Count int64              `json:"count"`
-	Data  []ExpandedServices `json:"data"`
-}
-
 type Timelines struct {
 	ID              int          `gorm:"primary_key;autoincrement" json:"id"`
 	ServiceID       int          `gorm:"not null;foreign_key:services.id" json:"service_id"`

@@ -4,6 +4,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
+	"github.com/redhatinsights/platform-changelog-go/internal/structs"
+	"gorm.io/gorm"
 )
 
 func (conn *DBConnectorImpl) CreateCommitEntry(t []models.Timelines) error {
@@ -24,7 +26,7 @@ func (conn *DBConnectorImpl) GetCommitsAll(offset int, limit int) ([]models.Time
 	var count int64
 	var commits []models.Timelines
 
-	conn.db = conn.db.Model(models.Timelines{}).Where("timelines.type = ?", "commit")
+	conn.db = conn.db.Model(models.Timelines{}).Where("timelines.type = ?", "commit").Session(&gorm.Session{})
 
 	conn.db.Find(&commits).Count(&count)
 	result := conn.db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&commits)
@@ -32,14 +34,14 @@ func (conn *DBConnectorImpl) GetCommitsAll(offset int, limit int) ([]models.Time
 	return commits, count, result.Error
 }
 
-func (conn *DBConnectorImpl) GetCommitsByService(service models.Services, offset int, limit int) ([]models.Timelines, int64, error) {
+func (conn *DBConnectorImpl) GetCommitsByService(service structs.ServicesData, offset int, limit int) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsByService)
 	defer callDurationTimer.ObserveDuration()
 
 	var count int64
 	var commits []models.Timelines
 
-	conn.db = conn.db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "commit")
+	conn.db = conn.db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "commit").Session(&gorm.Session{})
 
 	conn.db.Find(&commits).Count(&count)
 	result := conn.db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&commits)
@@ -51,7 +53,7 @@ func (conn *DBConnectorImpl) GetCommitByRef(ref string) (models.Timelines, int64
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitByRef)
 	defer callDurationTimer.ObserveDuration()
 	var commit models.Timelines
-	result := conn.db.Model(models.Timelines{}).Where("timelines.ref = ?", ref).Where("timelines.type = ?", "commit").Scan(&commit)
+	result := conn.db.Model(models.Timelines{}).Where("timelines.ref = ?", ref).Where("timelines.type = ?", "commit").Scan(&commit).Session(&gorm.Session{})
 
 	return commit, result.RowsAffected, result.Error
 }
