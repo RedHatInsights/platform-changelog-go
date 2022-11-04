@@ -60,7 +60,7 @@ func NewMockDBConnector(cfg *config.Config) DBConnector {
 	for key, service := range cfg.Services {
 		_, rowsAffected, _ := conn.GetServiceByName(key)
 		if rowsAffected == 0 {
-			_, service := conn.CreateServiceTableEntry(key, service)
+			service, _ := conn.CreateServiceTableEntry(key, service)
 			l.Log.Info("Created service: ", service)
 		} else {
 			l.Log.Info("Service already exists: ", service.DisplayName)
@@ -84,7 +84,7 @@ func (conn *MockDBConnector) CreateCommitEntry(timeline []models.Timelines) erro
 }
 
 func (conn *MockDBConnector) GetCommitsAll(offset int, limit int) ([]models.Timelines, int64, error) {
-	var commits []models.Timelines
+	commits := []models.Timelines{}
 	for _, timeline := range conn.Timelines {
 		if timeline.Type == "commit" {
 			commits = append(commits, timeline)
@@ -94,7 +94,7 @@ func (conn *MockDBConnector) GetCommitsAll(offset int, limit int) ([]models.Time
 }
 
 func (conn *MockDBConnector) GetCommitsByService(service structs.ServicesData, offset int, limit int) ([]models.Timelines, int64, error) {
-	var commits []models.Timelines
+	commits := []models.Timelines{}
 	for _, timeline := range conn.Timelines {
 		if timeline.Type == "commit" && timeline.ServiceID == service.ID {
 			commits = append(commits, timeline)
@@ -114,6 +114,7 @@ func (conn *MockDBConnector) GetCommitByRef(ref string) (models.Timelines, int64
 
 func (conn *MockDBConnector) CreateServiceTableEntry(name string, s config.Service) (models.Services, error) {
 	newService := models.Services{
+		ID:          len(conn.Services) + 1,
 		Name:        name,
 		DisplayName: s.DisplayName,
 		GHRepo:      s.GHRepo,
