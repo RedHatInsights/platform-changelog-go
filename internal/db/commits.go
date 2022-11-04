@@ -19,7 +19,7 @@ func CreateCommitEntry(db *gorm.DB, t []models.Timelines) *gorm.DB {
 	return db
 }
 
-func GetCommitsAll(db *gorm.DB, offset int, limit int) (*gorm.DB, []models.Timelines, int64) {
+func GetCommitsAll(db *gorm.DB, offset int, limit int, q structs.Query) (*gorm.DB, []models.Timelines, int64) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsAll)
 	defer callDurationTimer.ObserveDuration()
 
@@ -27,6 +27,26 @@ func GetCommitsAll(db *gorm.DB, offset int, limit int) (*gorm.DB, []models.Timel
 	var commits []models.Timelines
 
 	db = db.Model(models.Timelines{}).Where("timelines.type = ?", "commit")
+
+	if len(q.Repo) > 0 {
+		db = db.Where("timelines.repo IN ?", q.Repo)
+	}
+	if len(q.Author) > 0 {
+		db = db.Where("timelines.author IN ?", q.Author)
+	}
+	if len(q.Merged_By) > 0 {
+		db = db.Where("timelines.merged_by IN ?", q.Merged_By)
+	}
+	if len(q.Ref) > 0 {
+		db = db.Where("timelines.ref IN ?", q.Ref)
+	}
+
+	if q.Start_Date != "" {
+		db = db.Where("timelines.timestamp >= ?", q.Start_Date)
+	}
+	if q.End_Date != "" {
+		db = db.Where("timelines.timestamp <= ?", q.End_Date)
+	}
 
 	db.Find(&commits).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&commits)

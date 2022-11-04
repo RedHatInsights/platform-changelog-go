@@ -40,6 +40,15 @@ paths:
           $ref: '#/components/responses/BadRequest'
 
   /commits:
+    parameters:
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/ref_filter'
+      - $ref: '#/components/parameters/repo_filter'
+      - $ref: '#/components/parameters/author_filter'
+      - $ref: '#/components/parameters/merged_by_filter'
+      - $ref: '#/components/parameters/start_date'
+      - $ref: '#/components/parameters/end_date'
     get:
       summary: Returns an array of commits
       description: Returns a list of all commits
@@ -47,6 +56,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/ref_filter'
+        - $ref: '#/components/parameters/repo_filter'
+        - $ref: '#/components/parameters/author_filter'
+        - $ref: '#/components/parameters/merged_by_filter'
+        - $ref: '#/components/parameters/start_date'
+        - $ref: '#/components/parameters/end_date'
       responses:
         '200':
           description: OK
@@ -65,6 +80,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/ref_filter'
+        - $ref: '#/components/parameters/repo_filter'
+        - $ref: '#/components/parameters/cluster_filter'
+        - $ref: '#/components/parameters/image_filter'
+        - $ref: '#/components/parameters/start_date'
+        - $ref: '#/components/parameters/end_date'
       responses:
         '200':
           description: OK
@@ -967,6 +988,72 @@ components:
         maximum: 50
         default: 10
       description: The number of items to return.
+
+    ref_filter:
+      in: query
+      name: ref
+      required: false
+      schema:
+        type: string
+      description: Filter by references
+
+    repo_filter:
+      in: query
+      name: repo
+      required: false
+      schema:
+        type: string
+      description: Filter by repositories
+
+    author_filter:
+      in: query
+      name: author
+      required: false
+      schema:
+        type: string
+      description: Filter by authors
+
+    merged_by_filter:
+      in: query
+      name: merged_by
+      required: false
+      schema:
+        type: string
+      description: Filter by users who merged a PR
+
+    cluster_filter:
+      in: query
+      name: cluster
+      required: false
+      schema:
+        type: string
+      description: Filter by cluster names
+
+    image_filter:
+      in: query
+      name: image
+      required: false
+      schema:
+        type: string
+      description: Filter by images
+
+    start_date:
+      in: query
+      name: start_date
+      required: false
+      schema:
+        type: string
+        format: date-time
+      description: The start date
+
+    end_date:
+      in: query
+      name: end_date
+      required: false
+      schema:
+        type: string
+        format: date-time
+      description: The end date
 
   responses:
     BadRequest:

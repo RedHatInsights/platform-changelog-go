@@ -21,7 +21,7 @@ func GetCommitsAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, commits, count := db.GetCommitsAll(db.DB, q.Offset, q.Limit)
+	result, commits, count := db.GetCommitsAll(db.DB, q.Offset, q.Limit, q)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))

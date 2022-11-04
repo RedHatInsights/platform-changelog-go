@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetDeploysAll(db *gorm.DB, offset int, limit int) (*gorm.DB, []models.Timelines, int64) {
+func GetDeploysAll(db *gorm.DB, offset int, limit int, q structs.Query) (*gorm.DB, []models.Timelines, int64) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysAll)
 	defer callDurationTimer.ObserveDuration()
 
@@ -16,6 +16,26 @@ func GetDeploysAll(db *gorm.DB, offset int, limit int) (*gorm.DB, []models.Timel
 	var deploys []models.Timelines
 
 	db = db.Model(models.Timelines{}).Where("timelines.type = ?", "deploy")
+
+	if len(q.Repo) > 0 {
+		db = db.Where("timelines.repo IN ?", q.Repo)
+	}
+	if len(q.Ref) > 0 {
+		db = db.Where("timelines.ref IN ?", q.Ref)
+	}
+	if len(q.Cluster) > 0 {
+		db = db.Where("timelines.cluster IN ?", q.Cluster)
+	}
+	if len(q.Image) > 0 {
+		db = db.Where("timelines.image IN ?", q.Image)
+	}
+
+	if q.Start_Date != "" {
+		db = db.Where("timelines.timestamp >= ?", q.Start_Date)
+	}
+	if q.End_Date != "" {
+		db = db.Where("timelines.timestamp <= ?", q.End_Date)
+	}
 
 	db.Find(&deploys).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&deploys)

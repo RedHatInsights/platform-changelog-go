@@ -20,7 +20,7 @@ func GetDeploysAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, deploys, count := db.GetDeploysAll(db.DB, q.Offset, q.Limit)
+	result, deploys, count := db.GetDeploysAll(db.DB, q.Offset, q.Limit, q)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
