@@ -7,9 +7,6 @@ import (
 )
 
 type DBConnector interface {
-	Exec(string) error
-	AutoMigrate(*models.Services, *models.Timelines) error
-
 	CreateCommitEntry(timeline []models.Timelines) error
 	GetCommitsAll(offset int, limit int) ([]models.Timelines, int64, error)
 	GetCommitsByService(service structs.ServicesData, offset int, limit int) ([]models.Timelines, int64, error)

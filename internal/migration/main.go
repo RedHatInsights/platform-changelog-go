@@ -12,16 +12,16 @@ func main() {
 
 	cfg := config.Get()
 
-	dbConnector := db.NewDBConnector(cfg)
+	dbConnector := *db.NewDBConnector(cfg)
 
-	migrate(dbConnector)
+	Migrate(dbConnector)
 
 	logging.Log.Info("DB Migration Complete")
 
-	reconcileServices(cfg, dbConnector)
+	ReconcileServices(cfg, dbConnector)
 }
 
-func migrate(conn db.DBConnector) {
+func Migrate(conn db.DBConnectorImpl) {
 	conn.Exec("CREATE TYPE timeline_type AS ENUM ('unknown', 'commit', 'deploy')")
 
 	conn.AutoMigrate(
@@ -32,7 +32,7 @@ func migrate(conn db.DBConnector) {
 	logging.Log.Info("DB Migration Complete")
 }
 
-func reconcileServices(cfg *config.Config, conn db.DBConnector) {
+func ReconcileServices(cfg *config.Config, conn db.DBConnectorImpl) {
 	for key, service := range cfg.Services {
 		_, rowsAffected, _ := conn.GetServiceByName(key)
 		if rowsAffected == 0 {

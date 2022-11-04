@@ -15,7 +15,7 @@ type DBConnectorImpl struct {
 	db *gorm.DB
 }
 
-func NewDBConnector(cfg *config.Config) DBConnector {
+func NewDBConnector(cfg *config.Config) *DBConnectorImpl {
 	var (
 		user     = cfg.DatabaseConfig.DBUser
 		password = cfg.DatabaseConfig.DBPassword
