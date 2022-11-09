@@ -30,12 +30,7 @@ func GetDeploysAll(db *gorm.DB, offset int, limit int, q structs.Query) (*gorm.D
 		db = db.Where("timelines.image IN ?", q.Image)
 	}
 
-	if q.Start_Date != "" {
-		db = db.Where("timelines.timestamp >= ?", q.Start_Date)
-	}
-	if q.End_Date != "" {
-		db = db.Where("timelines.timestamp <= ?", q.End_Date)
-	}
+	db = FilterTimelineByDate(db, q.Start_Date, q.End_Date)
 
 	db.Find(&deploys).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&deploys)
@@ -43,7 +38,7 @@ func GetDeploysAll(db *gorm.DB, offset int, limit int, q structs.Query) (*gorm.D
 	return result, deploys, count
 }
 
-func GetDeploysByService(db *gorm.DB, service structs.ServicesData, offset int, limit int) (*gorm.DB, []models.Timelines, int64) {
+func GetDeploysByService(db *gorm.DB, service structs.ServicesData, offset int, limit int, q structs.Query) (*gorm.DB, []models.Timelines, int64) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysByService)
 	defer callDurationTimer.ObserveDuration()
 
@@ -51,6 +46,8 @@ func GetDeploysByService(db *gorm.DB, service structs.ServicesData, offset int, 
 	var deploys []models.Timelines
 
 	db = db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "deploy")
+
+	db = FilterTimelineByDate(db, q.Start_Date, q.End_Date)
 
 	db.Find(&deploys).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&deploys)

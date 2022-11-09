@@ -1,5 +1,5 @@
 ---
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: Platform Changelog API
   description: Platform Changelog API Provides Change Data for Monitored Services
@@ -11,6 +11,9 @@ paths:
       summary: Returns list of registered services
       description: Returns a list of services that have been registered with the changelog
       operationId: get.services
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           description: OK
@@ -29,6 +32,10 @@ paths:
       parameters:
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/ref_filter'
+        - $ref: '#/components/parameters/repo_filter'
+        - $ref: '#/components/parameters/start_date'
+        - $ref: '#/components/parameters/end_date'
       responses:
         '200':
           description: OK
@@ -40,15 +47,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
 
   /commits:
-    parameters:
-      - $ref: '#/components/parameters/offsetParam'
-      - $ref: '#/components/parameters/limitParam'
-      - $ref: '#/components/parameters/ref_filter'
-      - $ref: '#/components/parameters/repo_filter'
-      - $ref: '#/components/parameters/author_filter'
-      - $ref: '#/components/parameters/merged_by_filter'
-      - $ref: '#/components/parameters/start_date'
-      - $ref: '#/components/parameters/end_date'
     get:
       summary: Returns an array of commits
       description: Returns a list of all commits
@@ -122,6 +120,8 @@ paths:
         - $ref: '#/components/parameters/service'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/start_date'
+        - $ref: '#/components/parameters/end_date'
       responses:
         '200':
           description: OK
@@ -141,6 +141,8 @@ paths:
         - $ref: '#/components/parameters/service'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/start_date'
+        - $ref: '#/components/parameters/end_date'
       responses:
         '200':
           description: OK
@@ -161,6 +163,8 @@ paths:
         - $ref: '#/components/parameters/service'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/start_date'
+        - $ref: '#/components/parameters/end_date'
       responses:
         '200':
           description: OK

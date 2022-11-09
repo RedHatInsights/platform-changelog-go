@@ -53,7 +53,7 @@ func GetCommitsByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, commits, count := db.GetCommitsByService(db.DB, service, q.Offset, q.Limit)
+	result, commits, count := db.GetCommitsByService(db.DB, service, q.Offset, q.Limit, q)
 	if result.Error != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
