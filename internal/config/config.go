@@ -88,13 +88,18 @@ func Get() *Config {
 		loglevel = "ERROR"
 	}
 
+	dbImpl := os.Getenv("DB_IMPL")
+	if dbImpl == "" {
+		dbImpl = "impl"
+	}
+
 	// global logging
 	options.SetDefault("logLevel", loglevel)
 	options.SetDefault("Hostname", hostname)
 	options.SetDefault("GithubSecretKey", os.Getenv("GITHUB_SECRET_KEY"))
 	options.SetDefault("GitlabSecretKey", os.Getenv("GITLAB_SECRET_KEY"))
 	options.SetDefault("Debug", os.Getenv("DEBUG") == "true" || os.Getenv("DEBUG") == "1")
-	options.SetDefault("db.impl", os.Getenv("DB_IMPL"))
+	options.SetDefault("db.impl", dbImpl)
 
 	if clowder.IsClowderEnabled() {
 		cfg := clowder.LoadedConfig
@@ -110,7 +115,6 @@ func Get() *Config {
 		options.SetDefault("db.host", cfg.Database.Hostname)
 		options.SetDefault("db.port", cfg.Database.Port)
 		options.SetDefault("rdsCa", cfg.Database.RdsCa)
-		options.SetDefault("db.impl", "impl")
 		// cloudwatch
 		options.SetDefault("logGroup", cfg.Logging.Cloudwatch.LogGroup)
 		options.SetDefault("cwRegion", cfg.Logging.Cloudwatch.Region)
@@ -127,7 +131,6 @@ func Get() *Config {
 		options.SetDefault("db.name", "gumbaroo")
 		options.SetDefault("db.host", "0.0.0.0")
 		options.SetDefault("db.port", "5432")
-		options.SetDefault("db.impl", "mock")
 		// cloudwatch
 		options.SetDefault("logGroup", "platform-dev")
 		options.SetDefault("cwRegion", "us-east-1")
