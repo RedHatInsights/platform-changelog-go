@@ -66,7 +66,7 @@ Note: The `DEBUG` argument allows us to send webhooks without needing the secret
 ### Launching with a Mock Database
 
     $> make -B build
-    $> make run-api DEBUG=1 DB_IMPL=mock
+    $> make run-api-mock DEBUG=1
 
 Note: This is useful to avoid having to run the database locally, but this will not persist data between runs.
 
