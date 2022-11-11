@@ -102,10 +102,12 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 
 	if config.Get().Debug {
 		payload, err = ioutil.ReadAll(r.Body)
-	} else if (r.Header["X-gitlab-token"][0]) == config.Get().GitlabWebhookSecretKey {
+	} else if (r.Header["X-gitlab-token"] != nil) && (r.Header["X-gitlab-token"][0] == config.Get().GitlabWebhookSecretKey) {
 
 		payload, err = ioutil.ReadAll(r.Body)
 
+	} else {
+		err = fmt.Errorf("invalid or missing X-Gitlab-Token")
 	}
 	if err != nil {
 		l.Log.Error(err)
