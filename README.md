@@ -29,17 +29,24 @@ TODO: API Spec
 
 To add a service to be supported by platform-changelog, follow these steps:
 
-1. Add the service to `internal/config/services.yaml`
+1. Add your tenant to `internal/config/tenant.yaml` if it is not included.
+  ```yaml
+  tenant-name:
+    name: Tenant Name
+```
+
+2. Add the service to `internal/config/services.yaml`.
   
   ```yaml
   service-name:
     display_name: "Service Name"
+    tenant: <tenant>
     gh_repo: <https://github.com/org/repo>
     branch: master # branch to be monitored
     namespace: <namespace of the project>
 ```
 
-2. Submit an MR to this repo. It will be approved by an owner
+3. Submit an MR to this repo. It will be approved by an owner.
 
 ## Development
 

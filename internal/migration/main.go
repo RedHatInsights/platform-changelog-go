@@ -31,6 +31,12 @@ func main() {
 
 func reconcileServices(g *gorm.DB, cfg *config.Config) {
 	for key, service := range cfg.Services {
+		// Validate the tenant field exists in the config
+		if !validateTenant(service.Tenant, cfg) {
+			logging.Log.Error("Tenant not validated: ", service.Tenant)
+			continue
+		}
+
 		res, _ := db.GetServiceByName(g, key)
 		if res.RowsAffected == 0 {
 			_, service := db.CreateServiceTableEntry(g, key, service)
@@ -39,4 +45,13 @@ func reconcileServices(g *gorm.DB, cfg *config.Config) {
 			logging.Log.Info("Service already exists: ", service.DisplayName)
 		}
 	}
+}
+
+func validateTenant(tenant string, cfg *config.Config) bool {
+	for _, t := range cfg.Tenants {
+		if t.Name == tenant {
+			return true
+		}
+	}
+	return false
 }

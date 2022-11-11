@@ -1,9 +1,9 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
 	"strings"
-	"encoding/json"
 
 	_ "embed"
 
@@ -14,6 +14,9 @@ import (
 
 //go:embed services.yaml
 var services []byte
+
+//go:embed tenant.yaml
+var tenants []byte
 
 type Config struct {
 	PublicPort             string
@@ -26,8 +29,9 @@ type Config struct {
 	GithubWebhookSecretKey string
 	GitlabWebhookSecretKey string
 	Services               map[string]Service
+	Tenants                map[string]Tenant
 	Debug                  bool
-	OpenAPISpec			   []byte
+	OpenAPISpec            []byte
 }
 
 type DatabaseCfg struct {
@@ -48,11 +52,16 @@ type CloudwatchCfg struct {
 
 type Service struct {
 	DisplayName string `yaml:"display_name"`
+	Tenant      string `yaml:"tenant"`
 	GHRepo      string `yaml:"gh_repo,omitempty"`
 	GLRepo      string `yaml:"gl_repo,omitempty"`
 	Branch      string `yaml:"branch"`
 	Namespace   string `yaml:"namespace,omitempty"`
 	DeployFile  string `yaml:"deploy_file,omitempty"`
+}
+
+type Tenant struct {
+	Name string `yaml:"name"`
 }
 
 func readOpenAPISpec() []byte {
@@ -176,6 +185,12 @@ func Get() *Config {
 	err = yaml.Unmarshal(services, config)
 	if err != nil {
 		panic("Unable to read services.yaml")
+	}
+
+	// read in tenant.yaml to the config
+	err = yaml.Unmarshal(tenants, config)
+	if err != nil {
+		panic("Unable to read tenants.yaml")
 	}
 
 	return config

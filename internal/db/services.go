@@ -11,7 +11,7 @@ import (
 )
 
 func CreateServiceTableEntry(db *gorm.DB, name string, s config.Service) (result *gorm.DB, service models.Services) {
-	newService := models.Services{Name: name, DisplayName: s.DisplayName, GHRepo: s.GHRepo, GLRepo: s.GLRepo, Branch: s.Branch, Namespace: s.Namespace, DeployFile: s.DeployFile}
+	newService := models.Services{Name: name, DisplayName: s.DisplayName, Tenant: s.Tenant, GHRepo: s.GHRepo, GLRepo: s.GLRepo, Branch: s.Branch, Namespace: s.Namespace, DeployFile: s.DeployFile}
 	results := db.Create(&newService)
 	return results, newService
 }
