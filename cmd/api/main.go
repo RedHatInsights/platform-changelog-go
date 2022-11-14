@@ -19,7 +19,6 @@ func lubdub(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("lubdub"))
 }
 
-
 func openAPIHandler(cfg *config.Config) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -50,6 +49,7 @@ func main() {
 
 	sub.Post("/github-webhook", endpoints.GithubWebhook)
 	sub.Post("/gitlab-webhook", endpoints.GitlabWebhook)
+	sub.Post("/tekton", endpoints.TektonTaskRun)
 
 	sub.Get("/services", endpoints.GetServicesAll)
 	sub.Get("/timelines", endpoints.GetTimelinesAll)
