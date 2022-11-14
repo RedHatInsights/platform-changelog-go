@@ -5,7 +5,6 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
-	"gorm.io/gorm"
 )
 
 func (conn *DBConnectorImpl) CreateCommitEntry(t []models.Timelines) error {
@@ -26,10 +25,10 @@ func (conn *DBConnectorImpl) GetCommitsAll(offset int, limit int) ([]models.Time
 	var count int64
 	var commits []models.Timelines
 
-	conn.db = conn.db.Model(models.Timelines{}).Where("timelines.type = ?", "commit").Session(&gorm.Session{})
+	db := conn.db.Model(models.Timelines{}).Where("timelines.type = ?", "commit")
 
-	conn.db.Find(&commits).Count(&count)
-	result := conn.db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&commits)
+	db.Find(&commits).Count(&count)
+	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&commits)
 
 	return commits, count, result.Error
 }
@@ -41,10 +40,10 @@ func (conn *DBConnectorImpl) GetCommitsByService(service structs.ServicesData, o
 	var count int64
 	var commits []models.Timelines
 
-	conn.db = conn.db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "commit").Session(&gorm.Session{})
+	db := conn.db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "commit")
 
-	conn.db.Find(&commits).Count(&count)
-	result := conn.db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&commits)
+	db.Find(&commits).Count(&count)
+	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&commits)
 
 	return commits, count, result.Error
 }
@@ -53,7 +52,7 @@ func (conn *DBConnectorImpl) GetCommitByRef(ref string) (models.Timelines, int64
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitByRef)
 	defer callDurationTimer.ObserveDuration()
 	var commit models.Timelines
-	result := conn.db.Model(models.Timelines{}).Where("timelines.ref = ?", ref).Where("timelines.type = ?", "commit").Scan(&commit).Session(&gorm.Session{})
+	result := conn.db.Model(models.Timelines{}).Where("timelines.ref = ?", ref).Where("timelines.type = ?", "commit").Scan(&commit)
 
 	return commit, result.RowsAffected, result.Error
 }

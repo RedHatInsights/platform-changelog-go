@@ -8,7 +8,6 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
-	"gorm.io/gorm"
 )
 
 /**
@@ -24,9 +23,9 @@ func (conn *DBConnectorImpl) GetTimelinesAll(offset int, limit int) ([]models.Ti
 	// Concatanate the timeline fields
 	fields := fmt.Sprintf("%s,%s,%s", strings.Join(timelinesFields, ","), strings.Join(commitsFields, ","), strings.Join(deploysFields, ","))
 
-	conn.db = conn.db.Model(models.Timelines{}).Select(fields).Session(&gorm.Session{})
+	db := conn.db.Model(models.Timelines{}).Select(fields)
 
-	conn.db.Find(&timelines).Count(&count)
+	db.Find(&timelines).Count(&count)
 	result := conn.db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&timelines)
 
 	return timelines, count, result.Error
@@ -42,9 +41,9 @@ func (conn *DBConnectorImpl) GetTimelinesByService(service structs.ServicesData,
 	// Concatanate the timeline fields
 	fields := fmt.Sprintf("%s,%s,%s", strings.Join(timelinesFields, ","), strings.Join(commitsFields, ","), strings.Join(deploysFields, ","))
 
-	conn.db = conn.db.Model(models.Timelines{}).Select(fields).Where("service_id = ?", service.ID).Session(&gorm.Session{})
+	db := conn.db.Model(models.Timelines{}).Select(fields).Where("service_id = ?", service.ID)
 
-	conn.db.Find(&timelines).Count(&count)
+	db.Find(&timelines).Count(&count)
 	result := conn.db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&timelines)
 
 	return timelines, count, result.Error
@@ -56,7 +55,7 @@ func (conn *DBConnectorImpl) GetTimelineByRef(ref string) (models.Timelines, int
 
 	var timeline models.Timelines
 
-	result := conn.db.Model(models.Timelines{}).Select("*").Where("timelines.ref = ?", ref).Find(&timeline).Session(&gorm.Session{})
+	result := conn.db.Model(models.Timelines{}).Select("*").Where("timelines.ref = ?", ref).Find(&timeline)
 
 	return timeline, result.RowsAffected, result.Error
 }

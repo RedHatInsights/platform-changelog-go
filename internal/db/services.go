@@ -7,7 +7,6 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
-	"gorm.io/gorm"
 )
 
 func (conn *DBConnectorImpl) CreateServiceTableEntry(name string, s config.Service) (service models.Services, err error) {
@@ -24,7 +23,7 @@ func (conn *DBConnectorImpl) GetServicesAll(offset int, limit int) ([]structs.Ex
 	var count int64
 	var services []structs.ExpandedServicesData
 
-	dbQuery := conn.db.Model(models.Services{}).Session(&gorm.Session{})
+	dbQuery := conn.db.Model(models.Services{})
 	dbQuery.Find(&services).Count(&count)
 
 	result := dbQuery.Limit(limit).Offset(offset).Find(&services)
@@ -43,9 +42,9 @@ func (conn *DBConnectorImpl) GetLatest(service structs.ExpandedServicesData) (st
 	l.Log.Debugf("Query name: %s", service.Name)
 
 	// TODO: Make one query to get the latest commit and deploy for each service
-	comResult := conn.db.Model(models.Timelines{}).Select("*").Joins("JOIN services ON timelines.service_id = services.id").Where("services.name = ?", service.Name).Where("timelines.type = ?", "commit").Order("Timestamp desc").Limit(1).Find(&service.Commit).Session(&gorm.Session{})
+	comResult := conn.db.Model(models.Timelines{}).Select("*").Joins("JOIN services ON timelines.service_id = services.id").Where("services.name = ?", service.Name).Where("timelines.type = ?", "commit").Order("Timestamp desc").Limit(1).Find(&service.Commit)
 
-	depResult := conn.db.Model(models.Timelines{}).Select("*").Joins("JOIN services ON timelines.service_id = services.id").Where("services.name = ?", service.Name).Where("timelines.type = ?", "deploy").Order("Timestamp desc").Limit(1).Find(&service.Deploy).Session(&gorm.Session{})
+	depResult := conn.db.Model(models.Timelines{}).Select("*").Joins("JOIN services ON timelines.service_id = services.id").Where("services.name = ?", service.Name).Where("timelines.type = ?", "deploy").Order("Timestamp desc").Limit(1).Find(&service.Deploy)
 
 	return service, comResult.Error, depResult.Error
 }
@@ -54,13 +53,13 @@ func (conn *DBConnectorImpl) GetServiceByName(name string) (structs.ServicesData
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServiceByName)
 	defer callDurationTimer.ObserveDuration()
 	var service structs.ServicesData
-	result := conn.db.Model(models.Services{}).Where("name = ?", name).First(&service).Session(&gorm.Session{})
+	result := conn.db.Model(models.Services{}).Where("name = ?", name).First(&service)
 	return service, result.RowsAffected, result.Error
 }
 
 func (conn *DBConnectorImpl) GetServiceByGHRepo(service_url string) (structs.ServicesData, error) {
 	var service structs.ServicesData
-	result := conn.db.Model(models.Services{}).Where("gh_repo = ?", service_url).First(&service).Session(&gorm.Session{})
+	result := conn.db.Model(models.Services{}).Where("gh_repo = ?", service_url).First(&service)
 
 	return service, result.Error
 }
