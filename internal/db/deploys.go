@@ -8,6 +8,15 @@ import (
 	"gorm.io/gorm"
 )
 
+func CreateDeployEntry(db *gorm.DB, deploy models.Timelines) *gorm.DB {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlCreateCommitEntry)
+	defer callDurationTimer.ObserveDuration()
+
+	db.Create(&deploy)
+
+	return db
+}
+
 func GetDeploysAll(db *gorm.DB, offset int, limit int) (*gorm.DB, []models.Timelines, int64) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysAll)
 	defer callDurationTimer.ObserveDuration()

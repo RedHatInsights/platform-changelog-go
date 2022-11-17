@@ -44,6 +44,10 @@ test-gitlab-webhook:
 
 	curl -X POST -H "X-Gitlab-Event: Push Hook" -H "Content-Type: application/json" --data "@tests/gitlab_webhook.json" http://localhost:8000/api/v1/gitlab-webhook
 
+test-tekton-task:
+
+	curl -X POST http://localhost:8000/api/v1/tekton --data "@tests/tekton_run.json" -H "Content-Type: application/json"
+
 compose:
 
 	podman-compose -f development/compose.yml up
