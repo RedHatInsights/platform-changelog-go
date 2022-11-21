@@ -5,13 +5,12 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
-func GetServicesAll(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetServicesAll(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
 	q, err := initQuery(r)
@@ -21,15 +20,14 @@ func GetServicesAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, servicesWithTimelines, count := db.GetServicesAll(db.DB, q.Offset, q.Limit)
-	if result.Error != nil {
-
+	servicesWithTimelines, count, err := eh.conn.GetServicesAll(q.Offset, q.Limit)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
 	}
 
-	servicesList := structs.ExpandedServicesList{count, servicesWithTimelines}
+	servicesList := structs.ExpandedServicesList{Count: count, Data: servicesWithTimelines}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
@@ -37,13 +35,13 @@ func GetServicesAll(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(servicesList)
 }
 
-func GetServiceByName(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetServiceByName(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
 	serviceName := chi.URLParam(r, "service")
-	result, service := db.GetServiceByName(db.DB, serviceName)
+	service, _, err := eh.conn.GetServiceByName(serviceName)
 
-	if result.Error != nil {
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return

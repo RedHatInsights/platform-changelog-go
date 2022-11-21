@@ -1,9 +1,9 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
 	"strings"
-	"encoding/json"
 
 	_ "embed"
 
@@ -27,7 +27,8 @@ type Config struct {
 	GitlabWebhookSecretKey string
 	Services               map[string]Service
 	Debug                  bool
-	OpenAPISpec			   []byte
+	DBImpl                 string
+	OpenAPISpec            []byte
 }
 
 type DatabaseCfg struct {
@@ -87,12 +88,18 @@ func Get() *Config {
 		loglevel = "ERROR"
 	}
 
+	dbImpl := os.Getenv("DB_IMPL")
+	if dbImpl == "" {
+		dbImpl = "impl"
+	}
+
 	// global logging
 	options.SetDefault("logLevel", loglevel)
 	options.SetDefault("Hostname", hostname)
 	options.SetDefault("GithubSecretKey", os.Getenv("GITHUB_SECRET_KEY"))
 	options.SetDefault("GitlabSecretKey", os.Getenv("GITLAB_SECRET_KEY"))
 	options.SetDefault("Debug", os.Getenv("DEBUG") == "true" || os.Getenv("DEBUG") == "1")
+	options.SetDefault("db.impl", dbImpl)
 
 	if clowder.IsClowderEnabled() {
 		cfg := clowder.LoadedConfig
@@ -142,6 +149,7 @@ func Get() *Config {
 		MetricsPort:            options.GetString("metricsPort"),
 		MetricsPath:            options.GetString("metricsPath"),
 		Debug:                  options.GetBool("Debug"),
+		DBImpl:                 options.GetString("db.impl"),
 		OpenAPISpec:            readOpenAPISpec(),
 		DatabaseConfig: DatabaseCfg{
 			DBUser:     options.GetString("db.user"),
