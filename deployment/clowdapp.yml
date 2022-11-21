@@ -57,6 +57,8 @@ objects:
         env:
           - name: LOGLEVEL
             value: ${LOGLEVEL}
+          - name: DB_IMPL
+            value: ${DB_IMPL}
     jobs:
     - name: vacuum
       schedule: '@daily'
@@ -117,3 +119,5 @@ parameters:
   required: true
 - name: CLEANER_SUSPEND
   value: 'true'
+- name: DB_IMPL
+  value: 'impl'
