@@ -1,5 +1,5 @@
 ---
-openapi: 3.1.0
+openapi: 3.0.3
 info:
   title: Platform Changelog API
   description: Platform Changelog API Provides Change Data for Monitored Services
@@ -32,10 +32,10 @@ paths:
       parameters:
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/ref_filter'
-        - $ref: '#/components/parameters/repo_filter'
-        - $ref: '#/components/parameters/start_date'
-        - $ref: '#/components/parameters/end_date'
+        - $ref: '#/components/parameters/refFilter'
+        - $ref: '#/components/parameters/repoFilter'
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -54,12 +54,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/ref_filter'
-        - $ref: '#/components/parameters/repo_filter'
-        - $ref: '#/components/parameters/author_filter'
-        - $ref: '#/components/parameters/merged_by_filter'
-        - $ref: '#/components/parameters/start_date'
-        - $ref: '#/components/parameters/end_date'
+        - $ref: '#/components/parameters/refFilter'
+        - $ref: '#/components/parameters/repoFilter'
+        - $ref: '#/components/parameters/authorFilter'
+        - $ref: '#/components/parameters/merged_byFilter'
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -78,12 +78,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/ref_filter'
-        - $ref: '#/components/parameters/repo_filter'
-        - $ref: '#/components/parameters/cluster_filter'
-        - $ref: '#/components/parameters/image_filter'
-        - $ref: '#/components/parameters/start_date'
-        - $ref: '#/components/parameters/end_date'
+        - $ref: '#/components/parameters/refFilter'
+        - $ref: '#/components/parameters/repoFilter'
+        - $ref: '#/components/parameters/clusterFilter'
+        - $ref: '#/components/parameters/imageFilter'
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -120,8 +120,8 @@ paths:
         - $ref: '#/components/parameters/service'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/start_date'
-        - $ref: '#/components/parameters/end_date'
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -141,8 +141,8 @@ paths:
         - $ref: '#/components/parameters/service'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/start_date'
-        - $ref: '#/components/parameters/end_date'
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -163,8 +163,8 @@ paths:
         - $ref: '#/components/parameters/service'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/start_date'
-        - $ref: '#/components/parameters/end_date'
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -993,7 +993,7 @@ components:
         default: 10
       description: The number of items to return.
 
-    ref_filter:
+    refFilter:
       in: query
       name: ref
       required: false
@@ -1001,7 +1001,7 @@ components:
         type: string
       description: Filter by references
 
-    repo_filter:
+    repoFilter:
       in: query
       name: repo
       required: false
@@ -1009,7 +1009,7 @@ components:
         type: string
       description: Filter by repositories
 
-    author_filter:
+    authorFilter:
       in: query
       name: author
       required: false
@@ -1017,7 +1017,7 @@ components:
         type: string
       description: Filter by authors
 
-    merged_by_filter:
+    mergedByFilter:
       in: query
       name: merged_by
       required: false
@@ -1025,7 +1025,7 @@ components:
         type: string
       description: Filter by users who merged a PR
 
-    cluster_filter:
+    clusterFilter:
       in: query
       name: cluster
       required: false
@@ -1033,7 +1033,7 @@ components:
         type: string
       description: Filter by cluster names
 
-    image_filter:
+    imageFilter:
       in: query
       name: image
       required: false
@@ -1041,7 +1041,7 @@ components:
         type: string
       description: Filter by images
 
-    start_date:
+    startDate:
       in: query
       name: start_date
       required: false
@@ -1050,7 +1050,7 @@ components:
         format: date-time
       description: The start date
 
-    end_date:
+    endDate:
       in: query
       name: end_date
       required: false
