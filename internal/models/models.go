@@ -8,6 +8,7 @@ type Services struct {
 	ID          int    `gorm:"primary_key;autoincremement"`
 	Name        string `gorm:"not null"`
 	DisplayName string `gorm:"not null;unique"`
+	Tenant      string `gorm:"not null"`
 	GHRepo      string
 	GLRepo      string
 	DeployFile  string

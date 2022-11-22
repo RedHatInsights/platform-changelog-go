@@ -33,6 +33,7 @@ type ServicesData struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`
 	DisplayName string `json:"display_name"`
+	Tenant      string `json:"tenant"`
 	GHRepo      string `json:"gh_repo"`
 	GLRepo      string `json:"gl_repo"`
 	DeployFile  string `json:"deploy_file"`

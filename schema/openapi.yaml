@@ -338,6 +338,9 @@ components:
         display_name:
           type: string
           description: Preferred name
+        tenant:
+          type: string
+          description: Tenant the service belongs to
         gh_repo:
           type: string
           description: Github repo url

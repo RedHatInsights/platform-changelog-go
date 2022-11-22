@@ -10,7 +10,7 @@ import (
 )
 
 func (conn *DBConnectorImpl) CreateServiceTableEntry(name string, s config.Service) (service models.Services, err error) {
-	newService := models.Services{Name: name, DisplayName: s.DisplayName, GHRepo: s.GHRepo, GLRepo: s.GLRepo, Branch: s.Branch, Namespace: s.Namespace, DeployFile: s.DeployFile}
+	newService := models.Services{Name: name, DisplayName: s.DisplayName, Tenant: s.Tenant, GHRepo: s.GHRepo, GLRepo: s.GLRepo, Branch: s.Branch, Namespace: s.Namespace, DeployFile: s.DeployFile}
 	results := conn.db.Create(&newService)
 
 	return newService, results.Error

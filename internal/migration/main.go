@@ -34,6 +34,12 @@ func Migrate(conn db.DBConnectorImpl) {
 
 func ReconcileServices(cfg *config.Config, conn db.DBConnectorImpl) {
 	for key, service := range cfg.Services {
+		// Validate the tenant field exists in the config
+		if !validateTenant(service.Tenant, cfg) {
+			logging.Log.Error("Tenant not validated: ", service.Tenant)
+			continue
+		}
+
 		_, rowsAffected, _ := conn.GetServiceByName(key)
 		if rowsAffected == 0 {
 			_, service := conn.CreateServiceTableEntry(key, service)
@@ -42,4 +48,13 @@ func ReconcileServices(cfg *config.Config, conn db.DBConnectorImpl) {
 			logging.Log.Info("Service already exists: ", service.DisplayName)
 		}
 	}
+}
+
+func validateTenant(tenant string, cfg *config.Config) bool {
+	for _, t := range cfg.Tenants {
+		if t.Name == tenant {
+			return true
+		}
+	}
+	return false
 }
