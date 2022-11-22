@@ -7,59 +7,59 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
-	"gorm.io/gorm"
 )
 
-func CreateServiceTableEntry(db *gorm.DB, name string, s config.Service) (result *gorm.DB, service models.Services) {
+func (conn *DBConnectorImpl) CreateServiceTableEntry(name string, s config.Service) (service models.Services, err error) {
 	newService := models.Services{Name: name, DisplayName: s.DisplayName, Tenant: s.Tenant, GHRepo: s.GHRepo, GLRepo: s.GLRepo, Branch: s.Branch, Namespace: s.Namespace, DeployFile: s.DeployFile}
-	results := db.Create(&newService)
-	return results, newService
+	results := conn.db.Create(&newService)
+
+	return newService, results.Error
 }
 
-func GetServicesAll(db *gorm.DB, offset int, limit int) (*gorm.DB, []structs.ExpandedServicesData, int64) {
+func (conn *DBConnectorImpl) GetServicesAll(offset int, limit int) ([]structs.ExpandedServicesData, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServicesAll)
 	defer callDurationTimer.ObserveDuration()
 
 	var count int64
 	var services []structs.ExpandedServicesData
 
-	dbQuery := db.Model(models.Services{})
+	dbQuery := conn.db.Model(models.Services{})
 	dbQuery.Find(&services).Count(&count)
 
 	result := dbQuery.Limit(limit).Offset(offset).Find(&services)
 
 	var servicesWithTimelines []structs.ExpandedServicesData
 	for i := 0; i < len(services); i++ {
-		_, _, s := GetLatest(db, services[i])
+		s, _, _ := conn.GetLatest(services[i])
 
 		servicesWithTimelines = append(servicesWithTimelines, s)
 	}
 
-	return result, servicesWithTimelines, count
+	return servicesWithTimelines, count, result.Error
 }
 
-func GetLatest(db *gorm.DB, service structs.ExpandedServicesData) (*gorm.DB, *gorm.DB, structs.ExpandedServicesData) {
+func (conn *DBConnectorImpl) GetLatest(service structs.ExpandedServicesData) (structs.ExpandedServicesData, error, error) {
 	l.Log.Debugf("Query name: %s", service.Name)
 
 	// TODO: Make one query to get the latest commit and deploy for each service
-	comResult := db.Model(models.Timelines{}).Select("*").Joins("JOIN services ON timelines.service_id = services.id").Where("services.name = ?", service.Name).Where("timelines.type = ?", "commit").Order("Timestamp desc").Limit(1).Find(&service.Commit)
+	comResult := conn.db.Model(models.Timelines{}).Select("*").Joins("JOIN services ON timelines.service_id = services.id").Where("services.name = ?", service.Name).Where("timelines.type = ?", "commit").Order("Timestamp desc").Limit(1).Find(&service.Commit)
 
-	depResult := db.Model(models.Timelines{}).Select("*").Joins("JOIN services ON timelines.service_id = services.id").Where("services.name = ?", service.Name).Where("timelines.type = ?", "deploy").Order("Timestamp desc").Limit(1).Find(&service.Deploy)
+	depResult := conn.db.Model(models.Timelines{}).Select("*").Joins("JOIN services ON timelines.service_id = services.id").Where("services.name = ?", service.Name).Where("timelines.type = ?", "deploy").Order("Timestamp desc").Limit(1).Find(&service.Deploy)
 
-	return comResult, depResult, service
+	return service, comResult.Error, depResult.Error
 }
 
-func GetServiceByName(db *gorm.DB, name string) (*gorm.DB, structs.ServicesData) {
+func (conn *DBConnectorImpl) GetServiceByName(name string) (structs.ServicesData, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServiceByName)
 	defer callDurationTimer.ObserveDuration()
 	var service structs.ServicesData
-	result := db.Model(models.Services{}).Where("name = ?", name).First(&service)
-	return result, service
+	result := conn.db.Model(models.Services{}).Where("name = ?", name).First(&service)
+	return service, result.RowsAffected, result.Error
 }
 
-func GetServiceByGHRepo(db *gorm.DB, service_url string) (*gorm.DB, structs.ServicesData) {
+func (conn *DBConnectorImpl) GetServiceByGHRepo(service_url string) (structs.ServicesData, error) {
 	var service structs.ServicesData
-	result := db.Model(models.Services{}).Where("gh_repo = ?", service_url).First(&service)
+	result := conn.db.Model(models.Services{}).Where("gh_repo = ?", service_url).First(&service)
 
-	return result, service
+	return service, result.Error
 }
