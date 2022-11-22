@@ -28,23 +28,32 @@ func initQuery(r *http.Request) (structs.Query, error) {
 	for k, v := range values {
 		k = strings.ToLower(k)
 
+		// timeline filters
 		if k == "ref" {
 			q.Ref = v
-		}
-		if k == "repo" {
+		} else if k == "repo" {
 			q.Repo = v
-		}
-		if k == "author" {
+		} else if k == "author" {
 			q.Author = v
-		}
-		if k == "merged_by" {
+		} else if k == "merged_by" {
 			q.Merged_By = v
-		}
-		if k == "cluster" {
+		} else if k == "cluster" {
 			q.Cluster = v
-		}
-		if k == "image" {
+		} else if k == "image" {
 			q.Image = v
+		}
+
+		// service filters
+		if k == "name" {
+			q.Service_Name = v
+		} else if k == "display_name" {
+			q.Service_Display_Name = v
+		} else if k == "tenant" {
+			q.Service_Tenant = v
+		} else if k == "namespace" {
+			q.Service_Namespace = v
+		} else if k == "branch" {
+			q.Service_Branch = v
 		}
 	}
 
