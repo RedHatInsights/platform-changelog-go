@@ -9,8 +9,8 @@ Github and Gitlab webhooks, as well as Deployment Pipeline tasks.
 This API will provide JSON responses to the requesting entity, mainly the [Platform
 Changelog Frontend](https://www.github.com/redhatinsights/platform-changelog).
 
-Initally, the service supports only Github webhooks authenticated via secret
-token, but will eventually also support Gitlab and Deployments hooks from Tekton.
+The service supports Github and Gitlab webhooks authenticated via secret
+token, and it will eventually support Deployments hooks from Tekton.
 
 ## Architecture
 

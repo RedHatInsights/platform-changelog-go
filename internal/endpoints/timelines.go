@@ -19,7 +19,7 @@ func (eh *EndpointHandler) GetTimelinesAll(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	timeline, count, err := eh.conn.GetTimelinesAll(q.Offset, q.Limit)
+	timeline, count, err := eh.conn.GetTimelinesAll(q.Offset, q.Limit, q)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -55,7 +55,7 @@ func (eh *EndpointHandler) GetTimelinesByService(w http.ResponseWriter, r *http.
 		return
 	}
 
-	timeline, count, err := eh.conn.GetTimelinesByService(service, q.Offset, q.Limit)
+	timeline, count, err := eh.conn.GetTimelinesByService(service, q.Offset, q.Limit, q)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

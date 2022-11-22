@@ -19,7 +19,7 @@ func (eh *EndpointHandler) GetDeploysAll(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	deploys, count, err := eh.conn.GetDeploysAll(q.Offset, q.Limit)
+	deploys, count, err := eh.conn.GetDeploysAll(q.Offset, q.Limit, q)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
@@ -51,7 +51,7 @@ func (eh *EndpointHandler) GetDeploysByService(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	deploys, count, err := eh.conn.GetDeploysByService(service, q.Offset, q.Limit)
+	deploys, count, err := eh.conn.GetDeploysByService(service, q.Offset, q.Limit, q)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))

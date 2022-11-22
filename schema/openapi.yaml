@@ -11,6 +11,9 @@ paths:
       summary: Returns list of registered services
       description: Returns a list of services that have been registered with the changelog
       operationId: get.services
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
       responses:
         '200':
           description: OK
@@ -29,6 +32,10 @@ paths:
       parameters:
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/refFilter'
+        - $ref: '#/components/parameters/repoFilter'
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -47,6 +54,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/refFilter'
+        - $ref: '#/components/parameters/repoFilter'
+        - $ref: '#/components/parameters/authorFilter'
+        - $ref: '#/components/parameters/merged_byFilter'
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -65,6 +78,12 @@ paths:
       parameters:
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/refFilter'
+        - $ref: '#/components/parameters/repoFilter'
+        - $ref: '#/components/parameters/clusterFilter'
+        - $ref: '#/components/parameters/imageFilter'
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -101,6 +120,8 @@ paths:
         - $ref: '#/components/parameters/service'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -120,6 +141,8 @@ paths:
         - $ref: '#/components/parameters/service'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -140,6 +163,8 @@ paths:
         - $ref: '#/components/parameters/service'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/startDate'
+        - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -967,6 +992,72 @@ components:
         maximum: 50
         default: 10
       description: The number of items to return.
+
+    refFilter:
+      in: query
+      name: ref
+      required: false
+      schema:
+        type: string
+      description: Filter by references
+
+    repoFilter:
+      in: query
+      name: repo
+      required: false
+      schema:
+        type: string
+      description: Filter by repositories
+
+    authorFilter:
+      in: query
+      name: author
+      required: false
+      schema:
+        type: string
+      description: Filter by authors
+
+    mergedByFilter:
+      in: query
+      name: merged_by
+      required: false
+      schema:
+        type: string
+      description: Filter by users who merged a PR
+
+    clusterFilter:
+      in: query
+      name: cluster
+      required: false
+      schema:
+        type: string
+      description: Filter by cluster names
+
+    imageFilter:
+      in: query
+      name: image
+      required: false
+      schema:
+        type: string
+      description: Filter by images
+
+    startDate:
+      in: query
+      name: start_date
+      required: false
+      schema:
+        type: string
+        format: date-time
+      description: The start date
+
+    endDate:
+      in: query
+      name: end_date
+      required: false
+      schema:
+        type: string
+        format: date-time
+      description: The end date
 
   responses:
     BadRequest:

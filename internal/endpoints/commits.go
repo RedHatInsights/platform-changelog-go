@@ -20,7 +20,7 @@ func (eh *EndpointHandler) GetCommitsAll(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	commits, count, err := eh.conn.GetCommitsAll(q.Offset, q.Limit)
+	commits, count, err := eh.conn.GetCommitsAll(q.Offset, q.Limit, q)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
@@ -52,7 +52,7 @@ func (eh *EndpointHandler) GetCommitsByService(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	commits, count, err := eh.conn.GetCommitsByService(service, q.Offset, q.Limit)
+	commits, count, err := eh.conn.GetCommitsByService(service, q.Offset, q.Limit, q)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))

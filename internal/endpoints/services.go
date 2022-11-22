@@ -22,7 +22,6 @@ func (eh *EndpointHandler) GetServicesAll(w http.ResponseWriter, r *http.Request
 
 	servicesWithTimelines, count, err := eh.conn.GetServicesAll(q.Offset, q.Limit)
 	if err != nil {
-
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return

@@ -13,7 +13,7 @@ import (
 /**
  * GetTimeline returns a timeline of commits and deploys for a service
  */
-func (conn *DBConnectorImpl) GetTimelinesAll(offset int, limit int) ([]models.Timelines, int64, error) {
+func (conn *DBConnectorImpl) GetTimelinesAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimelinesAll)
 	defer callDurationTimer.ObserveDuration()
 
@@ -25,13 +25,22 @@ func (conn *DBConnectorImpl) GetTimelinesAll(offset int, limit int) ([]models.Ti
 
 	db := conn.db.Model(models.Timelines{}).Select(fields)
 
+	if len(q.Repo) > 0 {
+		db = db.Where("timelines.repo IN ?", q.Repo)
+	}
+	if len(q.Ref) > 0 {
+		db = db.Where("timelines.ref IN ?", q.Ref)
+	}
+
+	db = FilterTimelineByDate(db, q.Start_Date, q.End_Date)
+
 	db.Find(&timelines).Count(&count)
 	result := conn.db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&timelines)
 
 	return timelines, count, result.Error
 }
 
-func (conn *DBConnectorImpl) GetTimelinesByService(service structs.ServicesData, offset int, limit int) ([]models.Timelines, int64, error) {
+func (conn *DBConnectorImpl) GetTimelinesByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimelinesByService)
 	defer callDurationTimer.ObserveDuration()
 
@@ -42,6 +51,8 @@ func (conn *DBConnectorImpl) GetTimelinesByService(service structs.ServicesData,
 	fields := fmt.Sprintf("%s,%s,%s", strings.Join(timelinesFields, ","), strings.Join(commitsFields, ","), strings.Join(deploysFields, ","))
 
 	db := conn.db.Model(models.Timelines{}).Select(fields).Where("service_id = ?", service.ID)
+
+	db = FilterTimelineByDate(db, q.Start_Date, q.End_Date)
 
 	db.Find(&timelines).Count(&count)
 	result := conn.db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&timelines)

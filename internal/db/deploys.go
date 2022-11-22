@@ -7,7 +7,7 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
-func (conn *DBConnectorImpl) GetDeploysAll(offset int, limit int) ([]models.Timelines, int64, error) {
+func (conn *DBConnectorImpl) GetDeploysAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysAll)
 	defer callDurationTimer.ObserveDuration()
 
@@ -16,13 +16,28 @@ func (conn *DBConnectorImpl) GetDeploysAll(offset int, limit int) ([]models.Time
 
 	db := conn.db.Model(models.Timelines{}).Where("timelines.type = ?", "deploy")
 
+	if len(q.Repo) > 0 {
+		db = db.Where("timelines.repo IN ?", q.Repo)
+	}
+	if len(q.Ref) > 0 {
+		db = db.Where("timelines.ref IN ?", q.Ref)
+	}
+	if len(q.Cluster) > 0 {
+		db = db.Where("timelines.cluster IN ?", q.Cluster)
+	}
+	if len(q.Image) > 0 {
+		db = db.Where("timelines.image IN ?", q.Image)
+	}
+
+	db = FilterTimelineByDate(db, q.Start_Date, q.End_Date)
+
 	db.Find(&deploys).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&deploys)
 
 	return deploys, count, result.Error
 }
 
-func (conn *DBConnectorImpl) GetDeploysByService(service structs.ServicesData, offset int, limit int) ([]models.Timelines, int64, error) {
+func (conn *DBConnectorImpl) GetDeploysByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysByService)
 	defer callDurationTimer.ObserveDuration()
 
@@ -30,6 +45,8 @@ func (conn *DBConnectorImpl) GetDeploysByService(service structs.ServicesData, o
 	var deploys []models.Timelines
 
 	db := conn.db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "deploy")
+
+	db = FilterTimelineByDate(db, q.Start_Date, q.End_Date)
 
 	db.Find(&deploys).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&deploys)

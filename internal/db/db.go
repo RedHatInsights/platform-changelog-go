@@ -83,22 +83,30 @@ func (conn *MockDBConnector) CreateCommitEntry(timeline []models.Timelines) erro
 	return nil
 }
 
-func (conn *MockDBConnector) GetCommitsAll(offset int, limit int) ([]models.Timelines, int64, error) {
+func (conn *MockDBConnector) GetCommitsAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	commits := []models.Timelines{}
 	for _, timeline := range conn.Timelines {
-		if timeline.Type == "commit" {
-			commits = append(commits, timeline)
+		if timeline.Type != "commit" || !filterCommit(timeline, q) {
+			continue
 		}
+
+		commits = append(commits, timeline)
 	}
 	return commits, int64(len(commits)), nil
 }
 
-func (conn *MockDBConnector) GetCommitsByService(service structs.ServicesData, offset int, limit int) ([]models.Timelines, int64, error) {
+func (conn *MockDBConnector) GetCommitsByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	commits := []models.Timelines{}
 	for _, timeline := range conn.Timelines {
-		if timeline.Type == "commit" && timeline.ServiceID == service.ID {
-			commits = append(commits, timeline)
+		if timeline.Type != "commit" || timeline.ServiceID != service.ID {
+			continue
 		}
+
+		if !filterCommit(timeline, q) {
+			continue
+		}
+
+		commits = append(commits, timeline)
 	}
 	return commits, int64(len(commits)), nil
 }
@@ -110,6 +118,26 @@ func (conn *MockDBConnector) GetCommitByRef(ref string) (models.Timelines, int64
 		}
 	}
 	return models.Timelines{}, 0, nil
+}
+
+func filterCommit(commit models.Timelines, q structs.Query) bool {
+	if !filterByField(commit.Repo, q.Repo) {
+		return false
+	}
+
+	if !filterByField(commit.Author, q.Author) {
+		return false
+	}
+
+	if !filterByField(commit.MergedBy, q.Merged_By) {
+		return false
+	}
+
+	if !filterByField(commit.Ref, q.Ref) {
+		return false
+	}
+
+	return true
 }
 
 func (conn *MockDBConnector) CreateServiceTableEntry(name string, s config.Service) (models.Services, error) {
@@ -202,16 +230,30 @@ func (conn *MockDBConnector) GetServiceByGHRepo(repo string) (structs.ServicesDa
 	return structs.ServicesData{}, nil
 }
 
-func (conn *MockDBConnector) GetTimelinesAll(offset int, limit int) ([]models.Timelines, int64, error) {
-	return conn.Timelines, int64(len(conn.Timelines)), nil
-}
-
-func (conn *MockDBConnector) GetTimelinesByService(service structs.ServicesData, offset int, limit int) ([]models.Timelines, int64, error) {
+func (conn *MockDBConnector) GetTimelinesAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	var timelines []models.Timelines
 	for _, timeline := range conn.Timelines {
-		if timeline.ServiceID == service.ID {
-			timelines = append(timelines, timeline)
+		if !filterTimeline(timeline, q) {
+			continue
 		}
+
+		timelines = append(timelines, timeline)
+	}
+	return timelines, int64(len(timelines)), nil
+}
+
+func (conn *MockDBConnector) GetTimelinesByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
+	var timelines []models.Timelines
+	for _, timeline := range conn.Timelines {
+		if timeline.ServiceID != service.ID {
+			continue
+		}
+
+		if !filterTimeline(timeline, q) {
+			continue
+		}
+
+		timelines = append(timelines, timeline)
 	}
 	return timelines, int64(len(timelines)), nil
 }
@@ -225,22 +267,46 @@ func (conn *MockDBConnector) GetTimelineByRef(ref string) (models.Timelines, int
 	return models.Timelines{}, 0, nil
 }
 
-func (conn *MockDBConnector) GetDeploysAll(offset int, limit int) ([]models.Timelines, int64, error) {
+func filterTimeline(timeline models.Timelines, q structs.Query) bool {
+	if !filterByField(timeline.Repo, q.Repo) {
+		return false
+	}
+
+	if !filterByField(timeline.Ref, q.Ref) {
+		return false
+	}
+
+	return true
+}
+
+func (conn *MockDBConnector) GetDeploysAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	deploys := []models.Timelines{}
 	for _, timeline := range conn.Timelines {
-		if timeline.Type == "deploy" {
-			deploys = append(deploys, timeline)
+		if timeline.Type != "deploy" {
+			continue
 		}
+
+		if !filterDeploy(timeline, q) {
+			continue
+		}
+
+		deploys = append(deploys, timeline)
 	}
 	return deploys, int64(len(deploys)), nil
 }
 
-func (conn *MockDBConnector) GetDeploysByService(service structs.ServicesData, offset int, limit int) ([]models.Timelines, int64, error) {
+func (conn *MockDBConnector) GetDeploysByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	deploys := []models.Timelines{}
 	for _, timeline := range conn.Timelines {
-		if timeline.Type == "deploy" && timeline.ServiceID == service.ID {
-			deploys = append(deploys, timeline)
+		if timeline.Type != "deploy" || timeline.ServiceID != service.ID {
+			continue
 		}
+
+		if !filterDeploy(timeline, q) {
+			continue
+		}
+
+		deploys = append(deploys, timeline)
 	}
 	return deploys, int64(len(deploys)), nil
 }
@@ -252,4 +318,24 @@ func (conn *MockDBConnector) GetDeployByRef(ref string) (models.Timelines, int64
 		}
 	}
 	return models.Timelines{}, 0, nil
+}
+
+func filterDeploy(deploy models.Timelines, q structs.Query) bool {
+	if !filterByField(deploy.Repo, q.Repo) {
+		return false
+	}
+
+	if !filterByField(deploy.Ref, q.Ref) {
+		return false
+	}
+
+	if !filterByField(deploy.Cluster, q.Cluster) {
+		return false
+	}
+
+	if !filterByField(deploy.Image, q.Image) {
+		return false
+	}
+
+	return true
 }
