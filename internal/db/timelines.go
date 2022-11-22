@@ -34,15 +34,6 @@ func (conn *DBConnectorImpl) GetTimelinesAll(offset int, limit int, q structs.Qu
 
 	db = FilterTimelineByDate(db, q.Start_Date, q.End_Date)
 
-	if len(q.Repo) > 0 {
-		db = db.Where("timelines.repo IN ?", q.Repo)
-	}
-	if len(q.Ref) > 0 {
-		db = db.Where("timelines.ref IN ?", q.Ref)
-	}
-
-	db = FilterTimelineByDate(db, q.Start_Date, q.End_Date)
-
 	db.Find(&timelines).Count(&count)
 	result := conn.db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&timelines)
 
@@ -60,8 +51,6 @@ func (conn *DBConnectorImpl) GetTimelinesByService(service structs.ServicesData,
 	fields := fmt.Sprintf("%s,%s,%s", strings.Join(timelinesFields, ","), strings.Join(commitsFields, ","), strings.Join(deploysFields, ","))
 
 	db := conn.db.Model(models.Timelines{}).Select(fields).Where("service_id = ?", service.ID)
-
-	db = FilterTimelineByDate(db, q.Start_Date, q.End_Date)
 
 	db = FilterTimelineByDate(db, q.Start_Date, q.End_Date)
 

@@ -31,21 +31,6 @@ func (conn *DBConnectorImpl) GetDeploysAll(offset int, limit int, q structs.Quer
 
 	db = FilterTimelineByDate(db, q.Start_Date, q.End_Date)
 
-	if len(q.Repo) > 0 {
-		db = db.Where("timelines.repo IN ?", q.Repo)
-	}
-	if len(q.Ref) > 0 {
-		db = db.Where("timelines.ref IN ?", q.Ref)
-	}
-	if len(q.Cluster) > 0 {
-		db = db.Where("timelines.cluster IN ?", q.Cluster)
-	}
-	if len(q.Image) > 0 {
-		db = db.Where("timelines.image IN ?", q.Image)
-	}
-
-	db = FilterTimelineByDate(db, q.Start_Date, q.End_Date)
-
 	db.Find(&deploys).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&deploys)
 
@@ -60,8 +45,6 @@ func (conn *DBConnectorImpl) GetDeploysByService(service structs.ServicesData, o
 	var deploys []models.Timelines
 
 	db := conn.db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "deploy")
-
-	db = FilterTimelineByDate(db, q.Start_Date, q.End_Date)
 
 	db = FilterTimelineByDate(db, q.Start_Date, q.End_Date)
 
