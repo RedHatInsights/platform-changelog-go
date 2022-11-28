@@ -26,19 +26,19 @@ func (conn *DBConnectorImpl) GetServicesAll(offset int, limit int, q structs.Que
 	db := conn.db.Model(models.Services{})
 
 	if len(q.Service_Name) > 0 {
-		db = db.Where("timelines.name IN ?", q.Service_Name)
+		db = db.Where("services.name IN ?", q.Service_Name)
 	}
 	if len(q.Service_Display_Name) > 0 {
-		db = db.Where("timelines.display_name IN ?", q.Service_Display_Name)
+		db = db.Where("services.display_name IN ?", q.Service_Display_Name)
 	}
 	if len(q.Service_Tenant) > 0 {
-		db = db.Where("timelines.tenant IN ?", q.Service_Tenant)
+		db = db.Where("services.tenant IN ?", q.Service_Tenant)
 	}
 	if len(q.Service_Namespace) > 0 {
-		db = db.Where("timelines.namespace IN ?", q.Service_Namespace)
+		db = db.Where("services.namespace IN ?", q.Service_Namespace)
 	}
 	if len(q.Service_Branch) > 0 {
-		db = db.Where("timelines.branch IN ?", q.Service_Branch)
+		db = db.Where("services.branch IN ?", q.Service_Branch)
 	}
 
 	db.Find(&services).Count(&count)
