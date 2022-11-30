@@ -129,7 +129,7 @@ func filterCommit(commit models.Timelines, q structs.Query) bool {
 		return false
 	}
 
-	if !filterByField(commit.MergedBy, q.Merged_By) {
+	if !filterByField(commit.MergedBy, q.MergedBy) {
 		return false
 	}
 
@@ -234,23 +234,23 @@ func (conn *MockDBConnector) GetServiceByGHRepo(repo string) (structs.ServicesDa
 }
 
 func filterService(service models.Services, q structs.Query) bool {
-	if !filterByField(service.Name, q.Service_Name) {
+	if !filterByField(service.Name, q.ServiceName) {
 		return false
 	}
 
-	if !filterByField(service.DisplayName, q.Service_Display_Name) {
+	if !filterByField(service.DisplayName, q.ServiceDisplayName) {
 		return false
 	}
 
-	if !filterByField(service.Tenant, q.Service_Tenant) {
+	if !filterByField(service.Tenant, q.ServiceTenant) {
 		return false
 	}
 
-	if !filterByField(service.Branch, q.Service_Branch) {
+	if !filterByField(service.Branch, q.ServiceBranch) {
 		return false
 	}
 
-	if !filterByField(service.Namespace, q.Service_Namespace) {
+	if !filterByField(service.Namespace, q.ServiceNamespace) {
 		return false
 	}
 

@@ -33,14 +33,14 @@ func (conn *DBConnectorImpl) GetCommitsAll(offset int, limit int, q structs.Quer
 	if len(q.Author) > 0 {
 		db = db.Where("timelines.author IN ?", q.Author)
 	}
-	if len(q.Merged_By) > 0 {
-		db = db.Where("timelines.merged_by IN ?", q.Merged_By)
+	if len(q.MergedBy) > 0 {
+		db = db.Where("timelines.merged_by IN ?", q.MergedBy)
 	}
 	if len(q.Ref) > 0 {
 		db = db.Where("timelines.ref IN ?", q.Ref)
 	}
 
-	db = FilterTimelineByDate(db, q.Start_Date, q.End_Date)
+	db = FilterTimelineByDate(db, q.StartDate, q.EndDate)
 
 	db.Find(&commits).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&commits)
@@ -57,7 +57,7 @@ func (conn *DBConnectorImpl) GetCommitsByService(service structs.ServicesData, o
 
 	db := conn.db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "commit")
 
-	db = FilterTimelineByDate(db, q.Start_Date, q.End_Date)
+	db = FilterTimelineByDate(db, q.StartDate, q.EndDate)
 
 	db.Find(&commits).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&commits)

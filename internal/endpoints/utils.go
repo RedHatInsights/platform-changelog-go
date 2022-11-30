@@ -19,41 +19,39 @@ func initQuery(r *http.Request) (structs.Query, error) {
 		Offset: 0,
 		Limit:  10,
 
-		Start_Date: r.URL.Query().Get("start_date"),
-		End_Date:   r.URL.Query().Get("end_date"),
+		StartDate: r.URL.Query().Get("start_date"),
+		EndDate:   r.URL.Query().Get("end_date"),
 	}
 
 	// allowing multiple values for all the keys
 	values := r.URL.Query()
 	for k, v := range values {
 		k = strings.ToLower(k)
-
+		switch k {
 		// timeline filters
-		if k == "ref" {
+		case "ref":
 			q.Ref = v
-		} else if k == "repo" {
+		case "repo":
 			q.Repo = v
-		} else if k == "author" {
+		case "author":
 			q.Author = v
-		} else if k == "merged_by" {
-			q.Merged_By = v
-		} else if k == "cluster" {
+		case "merged_by":
+			q.MergedBy = v
+		case "cluster":
 			q.Cluster = v
-		} else if k == "image" {
+		case "image":
 			q.Image = v
-		}
-
 		// service filters
-		if k == "name" {
-			q.Service_Name = v
-		} else if k == "display_name" {
-			q.Service_Display_Name = v
-		} else if k == "tenant" {
-			q.Service_Tenant = v
-		} else if k == "namespace" {
-			q.Service_Namespace = v
-		} else if k == "branch" {
-			q.Service_Branch = v
+		case "name":
+			q.ServiceName = v
+		case "display_name":
+			q.ServiceDisplayName = v
+		case "tenant":
+			q.ServiceTenant = v
+		case "namespace":
+			q.ServiceNamespace = v
+		case "branch":
+			q.ServiceBranch = v
 		}
 	}
 
