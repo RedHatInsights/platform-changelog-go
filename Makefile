@@ -28,6 +28,9 @@ run-api:
 
 	DEBUG=${DEBUG} ./platform-changelog-api
 
+run-api-mock:
+	DEBUG=${DEBUG} DB_IMPL=mock ./platform-changelog-api
+
 run-db:
 
 	podman run --rm -it -p ${POSTGRES_PORT} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_DB=${POSTGRES_DB} --name postgres postgres:12.4

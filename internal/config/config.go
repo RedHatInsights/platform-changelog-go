@@ -1,9 +1,9 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
 	"strings"
-	"encoding/json"
 
 	_ "embed"
 
@@ -14,6 +14,9 @@ import (
 
 //go:embed services.yaml
 var services []byte
+
+//go:embed tenant.yaml
+var tenants []byte
 
 type Config struct {
 	PublicPort             string
@@ -26,8 +29,10 @@ type Config struct {
 	GithubWebhookSecretKey string
 	GitlabWebhookSecretKey string
 	Services               map[string]Service
+	Tenants                map[string]Tenant
 	Debug                  bool
-	OpenAPISpec			   []byte
+	DBImpl                 string
+	OpenAPISpec            []byte
 }
 
 type DatabaseCfg struct {
@@ -48,11 +53,16 @@ type CloudwatchCfg struct {
 
 type Service struct {
 	DisplayName string `yaml:"display_name"`
+	Tenant      string `yaml:"tenant"`
 	GHRepo      string `yaml:"gh_repo,omitempty"`
 	GLRepo      string `yaml:"gl_repo,omitempty"`
 	Branch      string `yaml:"branch"`
 	Namespace   string `yaml:"namespace,omitempty"`
 	DeployFile  string `yaml:"deploy_file,omitempty"`
+}
+
+type Tenant struct {
+	Name string `yaml:"name"`
 }
 
 func readOpenAPISpec() []byte {
@@ -87,12 +97,18 @@ func Get() *Config {
 		loglevel = "ERROR"
 	}
 
+	dbImpl := os.Getenv("DB_IMPL")
+	if dbImpl == "" {
+		dbImpl = "impl"
+	}
+
 	// global logging
 	options.SetDefault("logLevel", loglevel)
 	options.SetDefault("Hostname", hostname)
 	options.SetDefault("GithubSecretKey", os.Getenv("GITHUB_SECRET_KEY"))
 	options.SetDefault("GitlabSecretKey", os.Getenv("GITLAB_SECRET_KEY"))
 	options.SetDefault("Debug", os.Getenv("DEBUG") == "true" || os.Getenv("DEBUG") == "1")
+	options.SetDefault("db.impl", dbImpl)
 
 	if clowder.IsClowderEnabled() {
 		cfg := clowder.LoadedConfig
@@ -142,6 +158,7 @@ func Get() *Config {
 		MetricsPort:            options.GetString("metricsPort"),
 		MetricsPath:            options.GetString("metricsPath"),
 		Debug:                  options.GetBool("Debug"),
+		DBImpl:                 options.GetString("db.impl"),
 		OpenAPISpec:            readOpenAPISpec(),
 		DatabaseConfig: DatabaseCfg{
 			DBUser:     options.GetString("db.user"),
@@ -176,6 +193,12 @@ func Get() *Config {
 	err = yaml.Unmarshal(services, config)
 	if err != nil {
 		panic("Unable to read services.yaml")
+	}
+
+	// read in tenant.yaml to the config
+	err = yaml.Unmarshal(tenants, config)
+	if err != nil {
+		panic("Unable to read tenants.yaml")
 	}
 
 	return config

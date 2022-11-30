@@ -1,0 +1,9 @@
+---
+# Validated tenants, list each tenant name as a string
+tenants:
+  insights:
+    name: Insights
+  ansible: 
+    name: Ansible
+  ocm:
+    name: OCM

@@ -9,7 +9,6 @@ import (
 	"fmt"
 
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
-	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	m "github.com/redhatinsights/platform-changelog-go/internal/models"
@@ -92,7 +91,7 @@ func getMessage(p RepInfo) string {
 }
 
 // GitlabWebhook gets data from the webhook and enters it into the DB
-func GitlabWebhook(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var payload []byte
@@ -103,10 +102,12 @@ func GitlabWebhook(w http.ResponseWriter, r *http.Request) {
 
 	if config.Get().Debug {
 		payload, err = ioutil.ReadAll(r.Body)
-	} else if (r.Header["X-gitlab-token"][0]) == config.Get().GitlabWebhookSecretKey {
+	} else if (r.Header["X-gitlab-token"] != nil) && (r.Header["X-gitlab-token"][0] == config.Get().GitlabWebhookSecretKey) {
 
 		payload, err = ioutil.ReadAll(r.Body)
 
+	} else {
+		err = fmt.Errorf("invalid or missing X-Gitlab-Token")
 	}
 	if err != nil {
 		l.Log.Error(err)
@@ -117,7 +118,7 @@ func GitlabWebhook(w http.ResponseWriter, r *http.Request) {
 
 	event, err := gitlab.ParseWebhook(gitlab.WebhookEventType(r), payload)
 	if err != nil {
-		l.Log.Error("could not parse webhook: err=%s\n", err)
+		l.Log.Errorf("could not parse webhook: err=%s\n", err)
 		metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), true)
 		return
 	}
@@ -131,16 +132,16 @@ func GitlabWebhook(w http.ResponseWriter, r *http.Request) {
 	case *gitlab.PushEvent:
 		for key, service := range services {
 			if service.GLRepo == getURL(e) {
-				_, s := db.GetServiceByName(db.DB, key)
+				s, _, _ := eh.conn.GetServiceByName(key)
 				if s.Branch != strings.Split((e.Ref), "/")[2] {
 					l.Log.Info("Branch mismatch: ", s.Branch, " != ", strings.Split((e.Ref), "/")[2])
 					writeResponse(w, http.StatusOK, `{"msg": "Not a monitored branch"}`)
 					return
 				}
 				commitData := getCommitData2(e, s)
-				result := db.CreateCommitEntry(db.DB, commitData)
-				if result.Error != nil {
-					l.Log.Errorf("Failed to insert webhook data: %v", result.Error)
+				err := eh.conn.CreateCommitEntry(commitData)
+				if err != nil {
+					l.Log.Errorf("Failed to insert webhook data: %v", err)
 					metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), true)
 					writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert webhook data"}`)
 					return

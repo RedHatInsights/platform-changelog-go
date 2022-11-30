@@ -5,12 +5,11 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
-func GetDeploysAll(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetDeploysAll(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
 	q, err := initQuery(r)
@@ -20,21 +19,21 @@ func GetDeploysAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, deploys, count := db.GetDeploysAll(db.DB, q.Offset, q.Limit)
-	if result.Error != nil {
+	deploys, count, err := eh.conn.GetDeploysAll(q.Offset, q.Limit, q)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
 	}
 
-	deploysList := structs.TimelinesList{count, deploys}
+	deploysList := structs.TimelinesList{Count: count, Data: deploys}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(deploysList)
 }
 
-func GetDeploysByService(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetDeploysByService(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 	serviceName := chi.URLParam(r, "service")
 
@@ -45,39 +44,39 @@ func GetDeploysByService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result, service := db.GetServiceByName(db.DB, serviceName)
-	if result.Error != nil {
+	service, _, err := eh.conn.GetServiceByName(serviceName)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Couldn't find the service"))
 		return
 	}
 
-	result, deploys, count := db.GetDeploysByService(db.DB, service, q.Offset, q.Limit)
-	if result.Error != nil {
+	deploys, count, err := eh.conn.GetDeploysByService(service, q.Offset, q.Limit, q)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
 	}
 
-	deploysList := structs.TimelinesList{count, deploys}
+	deploysList := structs.TimelinesList{Count: count, Data: deploys}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(deploysList)
 }
 
-func GetDeployByRef(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetDeployByRef(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 	ref := chi.URLParam(r, "ref")
 
-	result, deploy := db.GetDeployByRef(db.DB, ref)
-	if result.Error != nil {
+	deploy, rowsAffected, err := eh.conn.GetDeployByRef(ref)
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal server error"))
 		return
 	}
 
-	if result.RowsAffected == 0 {
+	if rowsAffected == 0 {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("Deploy not found"))
 		return

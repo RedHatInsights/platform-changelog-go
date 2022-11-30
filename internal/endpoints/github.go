@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/go-github/github"
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
-	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	m "github.com/redhatinsights/platform-changelog-go/internal/models"
@@ -16,7 +15,7 @@ import (
 )
 
 // GithubWebhook gets data from the webhook and enters it into the DB
-func GithubWebhook(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 	var payload []byte
@@ -39,7 +38,7 @@ func GithubWebhook(w http.ResponseWriter, r *http.Request) {
 
 	event, err := github.ParseWebHook(github.WebHookType(r), payload)
 	if err != nil {
-		l.Log.Error("could not parse webhook: err=%s\n", err)
+		l.Log.Errorf("could not parse webhook: err=%s\n", err)
 		metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
 		return
 	}
@@ -51,16 +50,16 @@ func GithubWebhook(w http.ResponseWriter, r *http.Request) {
 	case *github.PushEvent:
 		for key, service := range services {
 			if service.GHRepo == e.Repo.GetURL() {
-				_, s := db.GetServiceByName(db.DB, key)
+				s, _, _ := eh.conn.GetServiceByName(key)
 				if s.Branch != strings.Split(utils.DerefString(e.Ref), "/")[2] {
 					l.Log.Info("Branch mismatch: ", s.Branch, " != ", strings.Split(utils.DerefString(e.Ref), "/")[2])
 					writeResponse(w, http.StatusOK, `{"msg": "Not a monitored branch"}`)
 					return
 				}
 				commitData := getCommitData(e, s)
-				result := db.CreateCommitEntry(db.DB, commitData)
-				if result.Error != nil {
-					l.Log.Errorf("Failed to insert webhook data: %v", result.Error)
+				err := eh.conn.CreateCommitEntry(commitData)
+				if err != nil {
+					l.Log.Errorf("Failed to insert webhook data: %v", err)
 					metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
 					writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert webhook data"}`)
 					return

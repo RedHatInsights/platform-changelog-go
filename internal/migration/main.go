@@ -5,8 +5,6 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
-
-	"gorm.io/gorm"
 )
 
 func main() {
@@ -14,29 +12,49 @@ func main() {
 
 	cfg := config.Get()
 
-	db.DbConnect(cfg)
+	dbConnector := *db.NewDBConnector(cfg)
 
-	// Set up TimelineType Enum (gorm doesn't have a function for this)
-	db.DB.Exec("CREATE TYPE timeline_type AS ENUM ('unknown', 'commit', 'deploy')")
+	Migrate(dbConnector)
 
-	db.DB.AutoMigrate(
+	logging.Log.Info("DB Migration Complete")
+
+	ReconcileServices(cfg, dbConnector)
+}
+
+func Migrate(conn db.DBConnectorImpl) {
+	conn.Exec("CREATE TYPE timeline_type AS ENUM ('unknown', 'commit', 'deploy')")
+
+	conn.AutoMigrate(
 		&models.Services{},
 		&models.Timelines{},
 	)
 
 	logging.Log.Info("DB Migration Complete")
-
-	reconcileServices(db.DB, cfg)
 }
 
-func reconcileServices(g *gorm.DB, cfg *config.Config) {
+func ReconcileServices(cfg *config.Config, conn db.DBConnectorImpl) {
 	for key, service := range cfg.Services {
-		res, _ := db.GetServiceByName(g, key)
-		if res.RowsAffected == 0 {
-			_, service := db.CreateServiceTableEntry(g, key, service)
+		// Validate the tenant field exists in the config
+		if !validateTenant(service.Tenant, cfg) {
+			logging.Log.Error("Tenant not validated: ", service.Tenant)
+			continue
+		}
+
+		_, rowsAffected, _ := conn.GetServiceByName(key)
+		if rowsAffected == 0 {
+			_, service := conn.CreateServiceTableEntry(key, service)
 			logging.Log.Info("Created service: ", service)
 		} else {
 			logging.Log.Info("Service already exists: ", service.DisplayName)
 		}
 	}
+}
+
+func validateTenant(tenant string, cfg *config.Config) bool {
+	for _, t := range cfg.Tenants {
+		if t.Name == tenant {
+			return true
+		}
+	}
+	return false
 }

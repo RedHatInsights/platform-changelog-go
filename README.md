@@ -9,8 +9,8 @@ Github and Gitlab webhooks, as well as Deployment Pipeline tasks.
 This API will provide JSON responses to the requesting entity, mainly the [Platform
 Changelog Frontend](https://www.github.com/redhatinsights/platform-changelog).
 
-Initally, the service supports only Github webhooks authenticated via secret
-token, but will eventually also support Gitlab and Deployments hooks from Tekton.
+The service supports Github and Gitlab webhooks authenticated via secret
+token, and it will eventually support Deployments hooks from Tekton.
 
 ## Architecture
 
@@ -29,17 +29,24 @@ TODO: API Spec
 
 To add a service to be supported by platform-changelog, follow these steps:
 
-1. Add the service to `internal/config/services.yaml`
+1. Add your tenant to `internal/config/tenant.yaml` if it is not included.
+  ```yaml
+  tenant-name:
+    name: Tenant Name
+```
+
+2. Add the service to `internal/config/services.yaml`.
   
   ```yaml
   service-name:
     display_name: "Service Name"
+    tenant: <tenant>
     gh_repo: <https://github.com/org/repo>
     branch: master # branch to be monitored
     namespace: <namespace of the project>
 ```
 
-2. Submit an MR to this repo. It will be approved by an owner
+3. Submit an MR to this repo. It will be approved by an owner.
 
 ## Development
 
@@ -62,6 +69,13 @@ Docker can be substituted for podman if needed.
     $> make run-api DEBUG=1
 
 Note: The `DEBUG` argument allows us to send webhooks without needing the secret token.
+
+### Launching with a Mock Database
+
+    $> make -B build
+    $> make run-api-mock DEBUG=1
+
+Note: This is useful to avoid having to run the database locally, but this will not persist data between runs.
 
 The API should now be up and available on `localhost:8000`. You should be able to
 see the API in action by visiting `http://localhost:8000/api/v1/services`.
