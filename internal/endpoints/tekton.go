@@ -40,7 +40,7 @@ func decodeJSONBody(w http.ResponseWriter, r *http.Request) (TektonPayload, erro
 	return payload, nil
 }
 
-func TektonTaskRun(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) TektonTaskRun(w http.ResponseWriter, r *http.Request) {
 	metrics.IncTekton(r.Method, r.UserAgent(), false)
 
 	payload, err := decodeJSONBody(w, r)
@@ -53,7 +53,7 @@ func TektonTaskRun(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	deploy, err := ConvertTektonPayloadToTimeline(payload)
+	deploy, err := convertTektonPayloadToTimeline(eh.conn, payload)
 
 	if err != nil {
 		l.Log.Error(err)
@@ -62,12 +62,12 @@ func TektonTaskRun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := db.CreateDeployEntry(db.DB, deploy)
+	err = eh.conn.CreateDeployEntry(deploy)
 
-	if result.Error != nil {
-		l.Log.Error(result.Error)
+	if err != nil {
+		l.Log.Error(err)
 		metrics.IncTekton(r.Method, r.UserAgent(), true)
-		writeResponse(w, http.StatusInternalServerError, result.Error.Error())
+		writeResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -75,14 +75,18 @@ func TektonTaskRun(w http.ResponseWriter, r *http.Request) {
 }
 
 // Converting from TektonPayload struct to Timeline model
-func ConvertTektonPayloadToTimeline(payload TektonPayload) (models.Timelines, error) {
+func convertTektonPayloadToTimeline(conn db.DBConnector, payload TektonPayload) (models.Timelines, error) {
 	services := config.Get().Services
 
 	var deploy models.Timelines
 	// Validate that the app specified is onboarded
 	for key, service := range services {
 		if service.Namespace == payload.App {
-			_, s := db.GetServiceByName(db.DB, key)
+			s, _, err := conn.GetServiceByName(key)
+
+			if err != nil {
+				return deploy, err
+			}
 
 			deploy = models.Timelines{
 				ServiceID:       s.ID,
@@ -95,8 +99,10 @@ func ConvertTektonPayloadToTimeline(payload TektonPayload) (models.Timelines, er
 				TriggeredBy:     payload.TriggeredBy,
 				Status:          payload.Status,
 			}
+
+			return deploy, nil
 		}
 	}
 
-	return deploy, nil
+	return deploy, fmt.Errorf("app %s not onboarded", payload.App)
 }

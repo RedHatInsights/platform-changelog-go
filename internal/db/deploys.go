@@ -5,16 +5,15 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
-	"gorm.io/gorm"
 )
 
-func CreateDeployEntry(db *gorm.DB, deploy models.Timelines) *gorm.DB {
+func (conn *DBConnectorImpl) CreateDeployEntry(deploy models.Timelines) error {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlCreateCommitEntry)
 	defer callDurationTimer.ObserveDuration()
 
-	db.Create(&deploy)
+	conn.db = conn.db.Create(&deploy)
 
-	return db
+	return conn.db.Error
 }
 
 func (conn *DBConnectorImpl) GetDeploysAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {

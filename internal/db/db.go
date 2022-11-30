@@ -306,6 +306,11 @@ func filterTimeline(timeline models.Timelines, q structs.Query) bool {
 	return true
 }
 
+func (conn *MockDBConnector) CreateDeployEntry(timeline models.Timelines) error {
+	conn.Timelines = append(conn.Timelines, timeline)
+	return nil
+}
+
 func (conn *MockDBConnector) GetDeploysAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	deploys := []models.Timelines{}
 	for _, timeline := range conn.Timelines {
