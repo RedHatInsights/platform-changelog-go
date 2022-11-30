@@ -13,7 +13,7 @@ type DBConnector interface {
 	GetCommitByRef(ref string) (models.Timelines, int64, error)
 
 	CreateServiceTableEntry(name string, s config.Service) (models.Services, error)
-	GetServicesAll(offset int, limit int) ([]structs.ExpandedServicesData, int64, error)
+	GetServicesAll(offset int, limit int, q structs.Query) ([]structs.ExpandedServicesData, int64, error)
 	GetLatest(service structs.ExpandedServicesData) (structs.ExpandedServicesData, error, error)
 	GetServiceByName(name string) (structs.ServicesData, int64, error)
 	GetServiceByGHRepo(repo string) (structs.ServicesData, error)

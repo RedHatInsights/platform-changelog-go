@@ -3,17 +3,23 @@ package structs
 import "github.com/redhatinsights/platform-changelog-go/internal/models"
 
 type Query struct {
-	Offset     int
-	Limit      int
-	Ref        []string
-	Repo       []string
-	Author     []string
-	Merged_By  []string
-	Cluster    []string
-	Image      []string
-	Start_Date string
-	End_Date   string
+	Offset             int
+	Limit              int
+	Ref                []string
+	Repo               []string
+	Author             []string
+	MergedBy           []string
+	Cluster            []string
+	Image              []string
+	ServiceName        []string
+	ServiceDisplayName []string
+	ServiceTenant      []string
+	ServiceNamespace   []string
+	ServiceBranch      []string
+	StartDate          string
+	EndDate            string
 }
+
 type ServicesList struct {
 	Count int64          `json:"count"`
 	Data  []ServicesData `json:"data"`

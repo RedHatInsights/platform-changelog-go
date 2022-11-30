@@ -19,32 +19,39 @@ func initQuery(r *http.Request) (structs.Query, error) {
 		Offset: 0,
 		Limit:  10,
 
-		Start_Date: r.URL.Query().Get("start_date"),
-		End_Date:   r.URL.Query().Get("end_date"),
+		StartDate: r.URL.Query().Get("start_date"),
+		EndDate:   r.URL.Query().Get("end_date"),
 	}
 
 	// allowing multiple values for all the keys
 	values := r.URL.Query()
 	for k, v := range values {
 		k = strings.ToLower(k)
-
-		if k == "ref" {
+		switch k {
+		// timeline filters
+		case "ref":
 			q.Ref = v
-		}
-		if k == "repo" {
+		case "repo":
 			q.Repo = v
-		}
-		if k == "author" {
+		case "author":
 			q.Author = v
-		}
-		if k == "merged_by" {
-			q.Merged_By = v
-		}
-		if k == "cluster" {
+		case "merged_by":
+			q.MergedBy = v
+		case "cluster":
 			q.Cluster = v
-		}
-		if k == "image" {
+		case "image":
 			q.Image = v
+		// service filters
+		case "name":
+			q.ServiceName = v
+		case "display_name":
+			q.ServiceDisplayName = v
+		case "tenant":
+			q.ServiceTenant = v
+		case "namespace":
+			q.ServiceNamespace = v
+		case "branch":
+			q.ServiceBranch = v
 		}
 	}
 

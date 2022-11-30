@@ -16,17 +16,34 @@ func (conn *DBConnectorImpl) CreateServiceTableEntry(name string, s config.Servi
 	return newService, results.Error
 }
 
-func (conn *DBConnectorImpl) GetServicesAll(offset int, limit int) ([]structs.ExpandedServicesData, int64, error) {
+func (conn *DBConnectorImpl) GetServicesAll(offset int, limit int, q structs.Query) ([]structs.ExpandedServicesData, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServicesAll)
 	defer callDurationTimer.ObserveDuration()
 
 	var count int64
 	var services []structs.ExpandedServicesData
 
-	dbQuery := conn.db.Model(models.Services{})
-	dbQuery.Find(&services).Count(&count)
+	db := conn.db.Model(models.Services{})
 
-	result := dbQuery.Limit(limit).Offset(offset).Find(&services)
+	if len(q.ServiceName) > 0 {
+		db = db.Where("services.name IN ?", q.ServiceName)
+	}
+	if len(q.ServiceDisplayName) > 0 {
+		db = db.Where("services.display_name IN ?", q.ServiceDisplayName)
+	}
+	if len(q.ServiceTenant) > 0 {
+		db = db.Where("services.tenant IN ?", q.ServiceTenant)
+	}
+	if len(q.ServiceNamespace) > 0 {
+		db = db.Where("services.namespace IN ?", q.ServiceNamespace)
+	}
+	if len(q.ServiceBranch) > 0 {
+		db = db.Where("services.branch IN ?", q.ServiceBranch)
+	}
+
+	db.Find(&services).Count(&count)
+
+	result := db.Limit(limit).Offset(offset).Find(&services)
 
 	var servicesWithTimelines []structs.ExpandedServicesData
 	for i := 0; i < len(services); i++ {

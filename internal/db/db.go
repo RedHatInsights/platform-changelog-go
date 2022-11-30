@@ -129,7 +129,7 @@ func filterCommit(commit models.Timelines, q structs.Query) bool {
 		return false
 	}
 
-	if !filterByField(commit.MergedBy, q.Merged_By) {
+	if !filterByField(commit.MergedBy, q.MergedBy) {
 		return false
 	}
 
@@ -155,10 +155,13 @@ func (conn *MockDBConnector) CreateServiceTableEntry(name string, s config.Servi
 	return newService, nil
 }
 
-func (conn *MockDBConnector) GetServicesAll(offset int, limit int) ([]structs.ExpandedServicesData, int64, error) {
+func (conn *MockDBConnector) GetServicesAll(offset int, limit int, q structs.Query) ([]structs.ExpandedServicesData, int64, error) {
 	servicesWithTimelines := []structs.ExpandedServicesData{}
 
 	for _, service := range conn.Services {
+		if !filterService(service, q) {
+			continue
+		}
 		serviceWithTimeline, _, _ := conn.GetLatest(structs.ExpandedServicesData{
 			ServicesData: structs.ServicesData{
 				ID:          service.ID,
@@ -228,6 +231,30 @@ func (conn *MockDBConnector) GetServiceByGHRepo(repo string) (structs.ServicesDa
 		}
 	}
 	return structs.ServicesData{}, nil
+}
+
+func filterService(service models.Services, q structs.Query) bool {
+	if !filterByField(service.Name, q.ServiceName) {
+		return false
+	}
+
+	if !filterByField(service.DisplayName, q.ServiceDisplayName) {
+		return false
+	}
+
+	if !filterByField(service.Tenant, q.ServiceTenant) {
+		return false
+	}
+
+	if !filterByField(service.Branch, q.ServiceBranch) {
+		return false
+	}
+
+	if !filterByField(service.Namespace, q.ServiceNamespace) {
+		return false
+	}
+
+	return true
 }
 
 func (conn *MockDBConnector) GetTimelinesAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {

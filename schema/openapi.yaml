@@ -14,6 +14,11 @@ paths:
       parameters:
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
+        - $ref: '#/components/parameters/nameParam'
+        - $ref: '#/components/parameters/displayNameParam'
+        - $ref: '#/components/parameters/tenantParam'
+        - $ref: '#/components/parameters/namespaceParam'
+        - $ref: '#/components/parameters/branchParam'
       responses:
         '200':
           description: OK
@@ -1061,6 +1066,47 @@ components:
         type: string
         format: date-time
       description: The end date
+
+    # service parameters
+    nameParam:
+      in: query
+      name: name
+      required: false
+      schema:
+        type: string
+      description: The service name (heading in services.yml)
+
+    displayNameParam:
+      in: query
+      name: display_name
+      required: false
+      schema:
+        type: string
+      description: The service's display name (shown in the UI)'
+
+    tenantParam:
+      in: query
+      name: tenant
+      required: false
+      schema:
+        type: string
+      description: The tenant the service belongs to
+
+    namespaceParam:
+      in: query
+      name: namespace
+      required: false
+      schema:
+        type: string
+      description: The namespace the service is in
+    
+    branchParam:
+      in: query
+      name: branch
+      required: false
+      schema:
+        type: string
+      description: Branch the service is monitored on (i.e. master)
 
   responses:
     BadRequest:
