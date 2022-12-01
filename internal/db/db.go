@@ -1,6 +1,7 @@
 package db
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
@@ -23,7 +24,14 @@ func NewDBConnector(cfg *config.Config) *DBConnectorImpl {
 		host     = cfg.DatabaseConfig.DBHost
 		port     = cfg.DatabaseConfig.DBPort
 	)
-	dsn := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s sslmode=disable", user, password, dbname, host, port)
+
+	sslConfigString, err := buildPostgresSslConfigString(cfg)
+	if err != nil {
+		l.Log.Fatal("Error building postgres ssl config string: ", err)
+		return nil
+	}
+
+	dsn := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s %s", user, password, dbname, host, port, sslConfigString)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -33,6 +41,16 @@ func NewDBConnector(cfg *config.Config) *DBConnectorImpl {
 	l.Log.Info("DB initialization complete")
 
 	return &DBConnectorImpl{db: db}
+}
+
+func buildPostgresSslConfigString(cfg *config.Config) (string, error) {
+	if cfg.DatabaseConfig.DBSSLMode == "disable" {
+		return "sslmode=disable", nil
+	} else if cfg.DatabaseConfig.DBSSLMode == "verify-full" {
+		return "sslmode=verify-full sslrootcert=" + cfg.DatabaseConfig.RDSCa, nil
+	} else {
+		return "", errors.New("Invalid SSL configuration for database connection: " + cfg.DatabaseConfig.DBSSLMode)
+	}
 }
 
 func (conn *DBConnectorImpl) AutoMigrate(serviceModel *models.Services, timelineModel *models.Timelines) error {
