@@ -7,7 +7,7 @@ USER 0
 
 RUN go get -d ./... && \
     go build -o platform-changelog-api cmd/api/main.go && \
-    go build -o platform-changelog-migrate internal/migration/main.go
+    go build -o platform-changelog-migration internal/migration/main.go
 
 
 FROM registry.access.redhat.com/ubi8-minimal:latest
@@ -15,7 +15,7 @@ FROM registry.access.redhat.com/ubi8-minimal:latest
 WORKDIR /
 
 COPY --from=builder /go/src/app/platform-changelog-api ./platform-changelog-api
-COPY --from=builder /go/src/app/platform-changelog-migrate ./platform-changelog-migrate
+COPY --from=builder /go/src/app/platform-changelog-migration ./platform-changelog-migration
 COPY --from=builder /go/src/app/schema/openapi.yaml ./schema/openapi.yaml
 
 # install postgresql from centos if not building on RHSM system
