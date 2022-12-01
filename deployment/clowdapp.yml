@@ -21,7 +21,7 @@ objects:
       podSpec:
         initContainers:
           - command:
-            - ./platform-changelog-migration
+            - ./platform-changelog-migrate
             image: ${IMAGE}:${IMAGE_TAG}
             inheritEnv: True
         minReadySeconds: 15
