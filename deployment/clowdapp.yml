@@ -29,7 +29,7 @@ objects:
         image: ${IMAGE}:${IMAGE_TAG}
         command:
           - ./platform-changelog-api
-        livelinessProbe:
+        livenessProbe:
           failureThreshold: 3
           httpGet:
             path: /healthz
