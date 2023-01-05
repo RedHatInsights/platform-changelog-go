@@ -20,6 +20,11 @@ type Query struct {
 	EndDate            string
 }
 
+// Add Link object to these structs for more clear pagination
+// https://jsonapi.org/format/#fetching-pagination
+
+// That would include adding a middleware and changing all these List structs
+// to be covered by one ResponseData struct
 type ServicesList struct {
 	Count int64          `json:"count"`
 	Data  []ServicesData `json:"data"`

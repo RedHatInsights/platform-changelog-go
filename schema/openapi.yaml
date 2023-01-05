@@ -133,7 +133,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Timeline'
+                $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
 
@@ -154,7 +154,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Timeline'
+                $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
 
@@ -176,7 +176,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Timeline'
+                $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
 
@@ -294,9 +294,14 @@ components:
             $ref: '#/components/schemas/Service'
 
     TimelinesData:
-      type: array
-      items:
-        $ref: '#/components/schemas/Timeline'
+      type: object
+      properties:
+        count:
+          type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Timeline'
 
     Data:
       type: object
