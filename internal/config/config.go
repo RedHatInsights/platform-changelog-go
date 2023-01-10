@@ -1,7 +1,6 @@
 package config
 
 import (
-	"encoding/json"
 	"os"
 	"strings"
 
@@ -32,7 +31,7 @@ type Config struct {
 	Tenants                map[string]Tenant
 	Debug                  bool
 	DBImpl                 string
-	OpenAPISpec            []byte
+	OpenAPIPath            string
 }
 
 type DatabaseCfg struct {
@@ -65,25 +64,6 @@ type Tenant struct {
 	Name string `yaml:"name"`
 }
 
-func readOpenAPISpec() []byte {
-	var openAPISpec OpenAPISpec
-	openAPISpecFile, err := os.Open("schema/openapi.yaml")
-	if err != nil {
-		panic(err)
-	}
-	defer openAPISpecFile.Close()
-	decoder := yaml.NewDecoder(openAPISpecFile)
-	err = decoder.Decode(&openAPISpec)
-	if err != nil {
-		panic(err)
-	}
-	openAPISpecJSON, err := json.Marshal(openAPISpec)
-	if err != nil {
-		panic(err)
-	}
-	return openAPISpecJSON
-}
-
 func Get() *Config {
 	options := viper.New()
 
@@ -107,6 +87,7 @@ func Get() *Config {
 	options.SetDefault("Hostname", hostname)
 	options.SetDefault("GithubSecretKey", os.Getenv("GITHUB_SECRET_KEY"))
 	options.SetDefault("GitlabSecretKey", os.Getenv("GITLAB_SECRET_KEY"))
+	options.SetDefault("openapi.path", "schema/openapi.yaml")
 	options.SetDefault("Debug", os.Getenv("DEBUG") == "true" || os.Getenv("DEBUG") == "1")
 	options.SetDefault("db.impl", dbImpl)
 
@@ -159,7 +140,7 @@ func Get() *Config {
 		MetricsPath:            options.GetString("metricsPath"),
 		Debug:                  options.GetBool("Debug"),
 		DBImpl:                 options.GetString("db.impl"),
-		OpenAPISpec:            readOpenAPISpec(),
+		OpenAPIPath:            options.GetString("openapi.path"),
 		DatabaseConfig: DatabaseCfg{
 			DBUser:     options.GetString("db.user"),
 			DBPassword: options.GetString("db.password"),

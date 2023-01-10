@@ -53,6 +53,14 @@ func (eh *EndpointHandler) TektonTaskRun(w http.ResponseWriter, r *http.Request)
 
 	defer r.Body.Close()
 
+	err = validateTektonPayload(payload)
+
+	if err != nil {
+		metrics.IncTekton(r.Method, r.UserAgent(), true)
+		writeResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	deploy, err := convertTektonPayloadToTimeline(eh.conn, payload)
 
 	if err != nil {
@@ -72,6 +80,24 @@ func (eh *EndpointHandler) TektonTaskRun(w http.ResponseWriter, r *http.Request)
 	}
 
 	writeResponse(w, http.StatusOK, `{"msg": "Tekton info received"}`)
+}
+
+// Validate the payload contains necessary data
+// Timestamp, App, Status
+func validateTektonPayload(payload TektonPayload) error {
+	if payload.Timestamp == nil {
+		return fmt.Errorf("timestamp is required")
+	}
+
+	if payload.App == "" {
+		return fmt.Errorf("app is required")
+	}
+
+	if payload.Status == "" {
+		return fmt.Errorf("status is required")
+	}
+
+	return nil
 }
 
 // Converting from TektonPayload struct to Timeline model

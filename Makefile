@@ -49,7 +49,7 @@ test-gitlab-webhook:
 
 test-tekton-task:
 
-	curl -X POST http://localhost:8000/api/v1/tekton --data "@tests/tekton_run.json" -H "Content-Type: application/json"
+	curl -X POST http://localhost:8000/api/v1/tekton --data "@tests/tekton/valid.json" -H "Content-Type: application/json"
 
 compose:
 

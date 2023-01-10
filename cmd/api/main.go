@@ -14,20 +14,6 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 )
 
-func lubdub(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("lubdub"))
-}
-
-func openAPIHandler(cfg *config.Config) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
-		w.Write(cfg.OpenAPISpec)
-	})
-}
-
 func main() {
 	logging.InitLogger()
 
@@ -50,10 +36,10 @@ func main() {
 
 	// Mount the root of the api router on /api/v1
 	r.Mount("/api/v1", sub)
-	r.Get("/", lubdub)
+	r.Get("/", handler.LubdubHandler)
 
-	mr.Get("/", lubdub)
-	mr.Get("/healthz", lubdub)
+	mr.Get("/", handler.LubdubHandler)
+	mr.Get("/healthz", handler.LubdubHandler)
 	mr.Handle("/metrics", promhttp.Handler())
 
 	sub.Post("/github-webhook", handler.GithubWebhook)
@@ -74,7 +60,7 @@ func main() {
 	sub.Get("/commits/{ref}", handler.GetCommitByRef)
 	sub.Get("/deploys/{ref}", handler.GetDeployByRef)
 
-	sub.Get("/openapi.json", openAPIHandler(cfg))
+	sub.Get("/openapi.json", handler.OpenAPIHandler(cfg))
 
 	srv := http.Server{
 		Addr:    ":" + cfg.PublicPort,
