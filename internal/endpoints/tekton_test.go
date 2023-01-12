@@ -11,9 +11,13 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/endpoints"
+	"github.com/redhatinsights/platform-changelog-go/internal/logging"
 )
 
 var _ = Describe("Handler", func() {
+
+	logging.InitLogger()
+
 	// test the TektonTaskRun function
 	DescribeTable("TektonTaskRun", func(expected_status int, message string, data_path string) {
 
