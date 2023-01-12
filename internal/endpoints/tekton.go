@@ -13,6 +13,7 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
 )
 
+// require each field
 type TektonPayload *struct {
 	Status      string     `json:"status"`
 	Timestamp   *time.Time `json:"timestamp"`
@@ -28,13 +29,17 @@ func decodeJSONBody(w http.ResponseWriter, r *http.Request) (TektonPayload, erro
 	}
 
 	if r.Body == nil {
-		return nil, fmt.Errorf("json body is required")
+		return nil, fmt.Errorf("json body required")
 	}
 
 	var payload TektonPayload
 
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
+
+	if !dec.More() {
+		return nil, fmt.Errorf("empty json body provided")
+	}
 
 	err := dec.Decode(&payload)
 	if err != nil {
@@ -90,11 +95,6 @@ func (eh *EndpointHandler) TektonTaskRun(w http.ResponseWriter, r *http.Request)
 // Validate the payload contains necessary data
 // Timestamp, App, Status
 func validateTektonPayload(payload TektonPayload) error {
-	var empty TektonPayload
-	if payload == nil || payload == empty {
-		return fmt.Errorf("json response is empty")
-	}
-
 	if payload.Timestamp == nil {
 		return fmt.Errorf("timestamp is required")
 	}

@@ -18,8 +18,36 @@ var _ = Describe("Handler", func() {
 
 	logging.InitLogger()
 
+	Describe("Tekton Run with empty body", func() {
+		It("should return 400", func() {
+			// create a mock db connection & endpoint handler
+
+			var cfg config.Config = config.Config{
+				DBImpl: "mock",
+			}
+			dbConnector := db.NewMockDBConnector(&cfg)
+			handler := endpoints.NewHandler(dbConnector)
+
+			// create a request
+			req, err := http.NewRequest("POST", "/api/v1/tekton", nil)
+			Expect(err).To(BeNil())
+
+			req.Header.Set("Content-Type", "application/json")
+
+			rr := httptest.NewRecorder()
+
+			router := chi.NewRouter()
+			router.Post("/api/v1/tekton", handler.TektonTaskRun)
+
+			router.ServeHTTP(rr, req)
+
+			Expect(rr.Code).To(Equal(http.StatusBadRequest))
+			Expect(rr.Body.String()).To(Equal("json body required"))
+		})
+	})
+
 	// test the TektonTaskRun function
-	DescribeTable("TektonTaskRun", func(expected_status int, message string, data_path string) {
+	DescribeTable("Tekton Run with JSON body", func(expected_status int, message string, data_path string) {
 
 		f, err := os.Open(data_path)
 		Expect(err).To(BeNil())
@@ -50,7 +78,7 @@ var _ = Describe("Handler", func() {
 		Expect(rr.Body.String()).To(ContainSubstring(message))
 	},
 		Entry("Valid", http.StatusOK, "Tekton info received", "../../tests/tekton/valid.json"),
-		Entry("Empty", http.StatusBadRequest, "json body is required", "../../tests/empty.json"),
+		Entry("Empty", http.StatusBadRequest, "empty json body provided", "../../tests/empty.json"),
 		Entry("Missing timestamp", http.StatusBadRequest, "timestamp is required", "../../tests/tekton/missing_timestamp.json"),
 		Entry("Missing app", http.StatusBadRequest, "app is required", "../../tests/tekton/missing_app.json"),
 		Entry("Missing status", http.StatusBadRequest, "status is required", "../../tests/tekton/missing_status.json"),
