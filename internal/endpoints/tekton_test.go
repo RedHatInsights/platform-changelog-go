@@ -46,6 +46,7 @@ var _ = Describe("Handler", func() {
 		Expect(rr.Body.String()).To(ContainSubstring(message))
 	},
 		Entry("Valid", http.StatusOK, "Tekton info received", "../../tests/tekton/valid.json"),
+		Entry("Empty", http.StatusBadRequest, "json body is required", "../../tests/empty.json"),
 		Entry("Missing timestamp", http.StatusBadRequest, "timestamp is required", "../../tests/tekton/missing_timestamp.json"),
 		Entry("Missing app", http.StatusBadRequest, "app is required", "../../tests/tekton/missing_app.json"),
 		Entry("Missing status", http.StatusBadRequest, "status is required", "../../tests/tekton/missing_status.json"),

@@ -27,6 +27,10 @@ func decodeJSONBody(w http.ResponseWriter, r *http.Request) (TektonPayload, erro
 		return nil, fmt.Errorf("invalid Content-Type")
 	}
 
+	if r.Body == nil {
+		return nil, fmt.Errorf("json body is required")
+	}
+
 	var payload TektonPayload
 
 	dec := json.NewDecoder(r.Body)
@@ -56,6 +60,7 @@ func (eh *EndpointHandler) TektonTaskRun(w http.ResponseWriter, r *http.Request)
 	err = validateTektonPayload(payload)
 
 	if err != nil {
+		l.Log.Error(err)
 		metrics.IncTekton(r.Method, r.UserAgent(), true)
 		writeResponse(w, http.StatusBadRequest, err.Error())
 		return
@@ -85,6 +90,11 @@ func (eh *EndpointHandler) TektonTaskRun(w http.ResponseWriter, r *http.Request)
 // Validate the payload contains necessary data
 // Timestamp, App, Status
 func validateTektonPayload(payload TektonPayload) error {
+	var empty TektonPayload
+	if payload == nil || payload == empty {
+		return fmt.Errorf("json response is empty")
+	}
+
 	if payload.Timestamp == nil {
 		return fmt.Errorf("timestamp is required")
 	}
