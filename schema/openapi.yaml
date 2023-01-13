@@ -4,7 +4,6 @@ info:
   title: Platform Changelog API
   description: Platform Changelog API Provides Change Data for Monitored Services
   version: 1.0.0
-
 paths:
   /services:
     get:
@@ -12,13 +11,13 @@ paths:
       description: Returns a list of services that have been registered with the changelog
       operationId: get.services
       parameters:
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/nameParam'
-        - $ref: '#/components/parameters/displayNameParam'
-        - $ref: '#/components/parameters/tenantParam'
-        - $ref: '#/components/parameters/namespaceParam'
-        - $ref: '#/components/parameters/branchParam'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/nameParam'
+      - $ref: '#/components/parameters/displayNameParam'
+      - $ref: '#/components/parameters/tenantParam'
+      - $ref: '#/components/parameters/namespaceParam'
+      - $ref: '#/components/parameters/branchParam'
       responses:
         '200':
           description: OK
@@ -28,19 +27,18 @@ paths:
                 $ref: '#/components/schemas/ServicesData'
         '400':
           $ref: '#/components/responses/BadRequest'
-
   /timelines:
     get:
       summary: Returns an array of timelines
       description: Returns a list of all timelines
       operationId: get.timelines
       parameters:
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/refFilter'
-        - $ref: '#/components/parameters/repoFilter'
-        - $ref: '#/components/parameters/startDate'
-        - $ref: '#/components/parameters/endDate'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/refFilter'
+      - $ref: '#/components/parameters/repoFilter'
+      - $ref: '#/components/parameters/startDate'
+      - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -50,21 +48,20 @@ paths:
                 $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
-
   /commits:
     get:
       summary: Returns an array of commits
       description: Returns a list of all commits
       operationId: get.commits
       parameters:
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/refFilter'
-        - $ref: '#/components/parameters/repoFilter'
-        - $ref: '#/components/parameters/authorFilter'
-        - $ref: '#/components/parameters/merged_byFilter'
-        - $ref: '#/components/parameters/startDate'
-        - $ref: '#/components/parameters/endDate'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/refFilter'
+      - $ref: '#/components/parameters/repoFilter'
+      - $ref: '#/components/parameters/authorFilter'
+      - $ref: '#/components/parameters/mergedByFilter'
+      - $ref: '#/components/parameters/startDate'
+      - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -74,21 +71,20 @@ paths:
                 $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
-
   /deploys:
     get:
       summary: Returns an array of deploys
       description: Returns a list of all deploys
       operationId: get.deploys
       parameters:
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/refFilter'
-        - $ref: '#/components/parameters/repoFilter'
-        - $ref: '#/components/parameters/clusterFilter'
-        - $ref: '#/components/parameters/imageFilter'
-        - $ref: '#/components/parameters/startDate'
-        - $ref: '#/components/parameters/endDate'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/refFilter'
+      - $ref: '#/components/parameters/repoFilter'
+      - $ref: '#/components/parameters/clusterFilter'
+      - $ref: '#/components/parameters/imageFilter'
+      - $ref: '#/components/parameters/startDate'
+      - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -98,14 +94,13 @@ paths:
                 $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
-
   /services/{service}:
     get:
       summary: Returns an individual service
       description: returns an individual service
       operationId: get.services.service
       parameters:
-        - $ref: '#/components/parameters/service'
+      - $ref: '#/components/parameters/service'
       responses:
         '200':
           description: OK
@@ -115,18 +110,17 @@ paths:
                 $ref: '#/components/schemas/Service'
         '400':
           $ref: '#/components/responses/BadRequest'
-
   /services/{service}/timelines:
     get:
       summary: Returns all the commits and deploys for a specific service
       description: Returns an array containing timelines for a specific service
       operationId: get.services.service.timelines
       parameters:
-        - $ref: '#/components/parameters/service'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/startDate'
-        - $ref: '#/components/parameters/endDate'
+      - $ref: '#/components/parameters/service'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/startDate'
+      - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -136,18 +130,17 @@ paths:
                 $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
-
   /services/{service}/commits:
     get:
       summary: Returns all the commits for a specific service
       description: Returns an array containing commits for a specific service
       operationId: get.services.service.commits
       parameters:
-        - $ref: '#/components/parameters/service'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/startDate'
-        - $ref: '#/components/parameters/endDate'
+      - $ref: '#/components/parameters/service'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/startDate'
+      - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -157,19 +150,17 @@ paths:
                 $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
-
-
   /services/{service}/deploys:
     get:
       summary: Returns all the deploys for a specific service
       description: Returns an array containing deploys for a specific service
       operationId: get.services.service.deploys
       parameters:
-        - $ref: '#/components/parameters/service'
-        - $ref: '#/components/parameters/offsetParam'
-        - $ref: '#/components/parameters/limitParam'
-        - $ref: '#/components/parameters/startDate'
-        - $ref: '#/components/parameters/endDate'
+      - $ref: '#/components/parameters/service'
+      - $ref: '#/components/parameters/offsetParam'
+      - $ref: '#/components/parameters/limitParam'
+      - $ref: '#/components/parameters/startDate'
+      - $ref: '#/components/parameters/endDate'
       responses:
         '200':
           description: OK
@@ -179,14 +170,13 @@ paths:
                 $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
-
   /timelines/{ref}:
     get:
       summary: Get data on a particular commit or deploy
       description: Get data on a particular timelines
       operationId: get.timelines.ref
       parameters:
-        - $ref: '#/components/parameters/ref'
+      - $ref: '#/components/parameters/ref'
       responses:
         '200':
           description: OK
@@ -196,14 +186,13 @@ paths:
                 $ref: '#/components/schemas/Data'
         '400':
           $ref: '#/components/responses/BadRequest'
-
   /commits/{ref}:
     get:
       summary: Get data on a particular commit
       description: Get data on a particular commit
       operationId: get.commits.ref
       parameters:
-        - $ref: '#/components/parameters/ref'
+      - $ref: '#/components/parameters/ref'
       responses:
         '200':
           description: OK
@@ -213,14 +202,13 @@ paths:
                 $ref: '#/components/schemas/Data'
         '400':
           $ref: '#/components/responses/BadRequest'
-
   /deploys/{ref}:
     get:
       summary: Get data on a particular deploy
       description: Get data on a particular deploy
       operationId: get.deploys.ref
       parameters:
-        - $ref: '#/components/parameters/ref'
+      - $ref: '#/components/parameters/ref'
       responses:
         '200':
           description: OK
@@ -230,7 +218,6 @@ paths:
                 $ref: '#/components/schemas/Data'
         '400':
           $ref: '#/components/responses/BadRequest'
-
   /github-webhook:
     post:
       description: Create a new commit from Github
@@ -255,7 +242,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Message'
-
   /gitlab-webhook:
     post:
       description: Create a new commit from Gitlab
@@ -280,7 +266,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Message'
-
 components:
   schemas:
     ServicesData:
@@ -292,7 +277,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Service'
-
     TimelinesData:
       type: object
       properties:
@@ -302,7 +286,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Timeline'
-
     Data:
       type: object
       properties:
@@ -316,7 +299,7 @@ components:
           type: string
         repo:
           type: string
-        ref: 
+        ref:
           type: string
         author:
           type: string
@@ -336,7 +319,6 @@ components:
         url:
           type: string
           description: Link to the merged PR
-
     Service:
       type: object
       properties:
@@ -372,7 +354,6 @@ components:
         latest_deploy:
           $ref: '#/components/schemas/Data'
           optional: true
-
     Timeline:
       type: object
       properties:
@@ -382,7 +363,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Data'
-
     Error:
       type: object
       properties:
@@ -391,7 +371,6 @@ components:
           description: Error message
       required:
       - message
-
     Message:
       type: object
       properties:
@@ -400,7 +379,6 @@ components:
           description: Message text
       required:
       - msg
-
     GithubWebhook:
       type: object
       properties:
@@ -840,7 +818,6 @@ components:
               type: array
               items:
                 type: string
-
     GitlabWebhook:
       type: object
       properties:
@@ -967,7 +944,6 @@ components:
             visibility_level:
               type: integer
               format: int32
-
   parameters:
     service:
       in: path
@@ -976,7 +952,6 @@ components:
       schema:
         type: string
       description: The service name
-
     ref:
       in: path
       name: ref
@@ -984,7 +959,6 @@ components:
       schema:
         type: string
       description: The commit reference
-
     offsetParam:
       in: query
       name: offset
@@ -993,8 +967,8 @@ components:
         type: integer
         minimum: 0
         default: 0
-      description: The number of items to skip before starting to collect the result set.
-
+      description: The number of items to skip before starting to collect the result
+        set.
     limitParam:
       in: query
       name: limit
@@ -1005,7 +979,6 @@ components:
         maximum: 50
         default: 10
       description: The number of items to return.
-
     refFilter:
       in: query
       name: ref
@@ -1013,7 +986,6 @@ components:
       schema:
         type: string
       description: Filter by references
-
     repoFilter:
       in: query
       name: repo
@@ -1021,7 +993,6 @@ components:
       schema:
         type: string
       description: Filter by repositories
-
     authorFilter:
       in: query
       name: author
@@ -1029,7 +1000,6 @@ components:
       schema:
         type: string
       description: Filter by authors
-
     mergedByFilter:
       in: query
       name: merged_by
@@ -1037,7 +1007,6 @@ components:
       schema:
         type: string
       description: Filter by users who merged a PR
-
     clusterFilter:
       in: query
       name: cluster
@@ -1045,7 +1014,6 @@ components:
       schema:
         type: string
       description: Filter by cluster names
-
     imageFilter:
       in: query
       name: image
@@ -1053,7 +1021,6 @@ components:
       schema:
         type: string
       description: Filter by images
-
     startDate:
       in: query
       name: start_date
@@ -1062,7 +1029,6 @@ components:
         type: string
         format: date-time
       description: The start date
-
     endDate:
       in: query
       name: end_date
@@ -1071,8 +1037,6 @@ components:
         type: string
         format: date-time
       description: The end date
-
-    # service parameters
     nameParam:
       in: query
       name: name
@@ -1080,7 +1044,6 @@ components:
       schema:
         type: string
       description: The service name (heading in services.yml)
-
     displayNameParam:
       in: query
       name: display_name
@@ -1088,7 +1051,6 @@ components:
       schema:
         type: string
       description: The service's display name (shown in the UI)'
-
     tenantParam:
       in: query
       name: tenant
@@ -1096,7 +1058,6 @@ components:
       schema:
         type: string
       description: The tenant the service belongs to
-
     namespaceParam:
       in: query
       name: namespace
@@ -1104,7 +1065,6 @@ components:
       schema:
         type: string
       description: The namespace the service is in
-    
     branchParam:
       in: query
       name: branch
@@ -1112,7 +1072,6 @@ components:
       schema:
         type: string
       description: Branch the service is monitored on (i.e. master)
-
   responses:
     BadRequest:
       description: Bad Request
