@@ -266,6 +266,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Message'
+  /tekton:
+    post:
+      description: Report a new deployment through Tekton
+      operationId: post.tektonTaskRun
+      requestBody:
+        description: Simple JSON Data from the Tekton task
+        required: true
+        content:
+          appplication/json:
+            schema:
+              $ref: '#/components/schemas/TektonPayload'
+      responses:
+        '200':
+          description: OK message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        default:
+          description: An Error has occurred
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Message'
 components:
   schemas:
     ServicesData:
@@ -944,6 +968,22 @@ components:
             visibility_level:
               type: integer
               format: int32
+    TektonPayload:
+      type: object
+      properties:
+        status:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        app:
+          type: string
+        env:
+          type: string
+        triggered_by:
+          type: string
+        ref:
+          type: string
   parameters:
     service:
       in: path

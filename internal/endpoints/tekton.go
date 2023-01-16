@@ -13,7 +13,6 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
 )
 
-// require each field
 type TektonPayload *struct {
 	Status      string     `json:"status"`
 	Timestamp   *time.Time `json:"timestamp"`
