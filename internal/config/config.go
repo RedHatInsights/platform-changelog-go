@@ -40,6 +40,7 @@ type DatabaseCfg struct {
 	DBName     string
 	DBHost     string
 	DBPort     string
+	DBSSLMode  string
 	RDSCa      string
 }
 
@@ -105,6 +106,7 @@ func Get() *Config {
 		options.SetDefault("db.host", cfg.Database.Hostname)
 		options.SetDefault("db.port", cfg.Database.Port)
 		options.SetDefault("rdsCa", cfg.Database.RdsCa)
+		options.SetDefault("db.sslmode", "verify-full")
 		// cloudwatch
 		options.SetDefault("logGroup", cfg.Logging.Cloudwatch.LogGroup)
 		options.SetDefault("cwRegion", cfg.Logging.Cloudwatch.Region)
@@ -121,6 +123,7 @@ func Get() *Config {
 		options.SetDefault("db.name", "gumbaroo")
 		options.SetDefault("db.host", "0.0.0.0")
 		options.SetDefault("db.port", "5432")
+		options.SetDefault("db.sslmode", "disable")
 		// cloudwatch
 		options.SetDefault("logGroup", "platform-dev")
 		options.SetDefault("cwRegion", "us-east-1")
@@ -147,6 +150,7 @@ func Get() *Config {
 			DBName:     options.GetString("db.name"),
 			DBHost:     options.GetString("db.host"),
 			DBPort:     options.GetString("db.port"),
+			DBSSLMode:  options.GetString("db.sslmode"),
 		},
 		CloudwatchConfig: CloudwatchCfg{
 			CWLogGroup:  options.GetString("logGroup"),
