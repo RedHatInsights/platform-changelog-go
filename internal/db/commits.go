@@ -42,7 +42,7 @@ func (conn *DBConnectorImpl) GetCommitsAll(offset int, limit int, q structs.Quer
 
 	db = FilterTimelineByDate(db, q.StartDate, q.EndDate)
 
-	db.Find(&commits).Count(&count)
+	db.Model(&commits).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&commits)
 
 	return commits, count, result.Error
@@ -59,7 +59,7 @@ func (conn *DBConnectorImpl) GetCommitsByService(service structs.ServicesData, o
 
 	db = FilterTimelineByDate(db, q.StartDate, q.EndDate)
 
-	db.Find(&commits).Count(&count)
+	db.Model(&commits).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&commits)
 
 	return commits, count, result.Error

@@ -41,7 +41,8 @@ func (conn *DBConnectorImpl) GetServicesAll(offset int, limit int, q structs.Que
 		db = db.Where("services.branch IN ?", q.ServiceBranch)
 	}
 
-	db.Find(&services).Count(&count)
+	// Uses the Services model here to reflect the proper db relation
+	db.Model(models.Services{}).Count(&count)
 
 	result := db.Limit(limit).Offset(offset).Find(&services)
 
