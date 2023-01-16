@@ -40,7 +40,7 @@ func (conn *DBConnectorImpl) GetDeploysAll(offset int, limit int, q structs.Quer
 
 	db = FilterTimelineByDate(db, q.StartDate, q.EndDate)
 
-	db.Find(&deploys).Count(&count)
+	db.Model(&deploys).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&deploys)
 
 	return deploys, count, result.Error
@@ -57,7 +57,7 @@ func (conn *DBConnectorImpl) GetDeploysByService(service structs.ServicesData, o
 
 	db = FilterTimelineByDate(db, q.StartDate, q.EndDate)
 
-	db.Find(&deploys).Count(&count)
+	db.Model(&deploys).Count(&count)
 	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&deploys)
 
 	return deploys, count, result.Error
