@@ -24,6 +24,16 @@ var (
 		Help: "Total number of incoming webhook errors",
 	}, []string{"source", "method", "user_agent"})
 
+	tekton = pa.NewCounterVec(p.CounterOpts{
+		Name: "platform_changelog_tekton_runs_total",
+		Help: "Total number of tekton runs",
+	}, []string{"method", "user_agent"})
+
+	tektonErrors = pa.NewCounterVec(p.CounterOpts{
+		Name: "platform_changelog_tekton_errors_total",
+		Help: "Total number of tekton errors",
+	}, []string{"method", "user_agent"})
+
 	responseCodes = pa.NewCounterVec(p.CounterOpts{
 		Name: "platform_changelog_response_codes_total",
 		Help: "Total number of response codes",
@@ -104,6 +114,14 @@ func IncWebhooks(source string, method string, userAgent string, err bool) {
 		webhooks.With(p.Labels{"source": source, "method": method, "user_agent": userAgent}).Inc()
 	} else {
 		webhookErrors.With(p.Labels{"source": source, "method": method, "user_agent": userAgent}).Inc()
+	}
+}
+
+func IncTekton(method string, userAgent string, err bool) {
+	if !err {
+		tekton.With(p.Labels{"method": method, "user_agent": userAgent}).Inc()
+	} else {
+		tektonErrors.With(p.Labels{"method": method, "user_agent": userAgent}).Inc()
 	}
 }
 

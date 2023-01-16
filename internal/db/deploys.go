@@ -7,6 +7,15 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
+func (conn *DBConnectorImpl) CreateDeployEntry(deploy models.Timelines) error {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlCreateCommitEntry)
+	defer callDurationTimer.ObserveDuration()
+
+	conn.db = conn.db.Create(&deploy)
+
+	return conn.db.Error
+}
+
 func (conn *DBConnectorImpl) GetDeploysAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysAll)
 	defer callDurationTimer.ObserveDuration()

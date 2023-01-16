@@ -7,11 +7,6 @@ import (
 )
 
 type DBConnector interface {
-	CreateCommitEntry(timeline []models.Timelines) error
-	GetCommitsAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
-	GetCommitsByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
-	GetCommitByRef(ref string) (models.Timelines, int64, error)
-
 	CreateServiceTableEntry(name string, s config.Service) (models.Services, error)
 	GetServicesAll(offset int, limit int, q structs.Query) ([]structs.ExpandedServicesData, int64, error)
 	GetLatest(service structs.ExpandedServicesData) (structs.ExpandedServicesData, error, error)
@@ -22,6 +17,12 @@ type DBConnector interface {
 	GetTimelinesByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
 	GetTimelineByRef(ref string) (models.Timelines, int64, error)
 
+	CreateCommitEntry(timeline []models.Timelines) error
+	GetCommitsAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
+	GetCommitsByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
+	GetCommitByRef(ref string) (models.Timelines, int64, error)
+
+	CreateDeployEntry(timeline models.Timelines) error
 	GetDeploysAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
 	GetDeploysByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
 	GetDeployByRef(ref string) (models.Timelines, int64, error)
