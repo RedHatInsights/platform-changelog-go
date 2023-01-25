@@ -41,15 +41,15 @@ check-db:
 
 test-github-webhook:
 
-	curl -X POST -H "X-Github-Event: push" -H "Content-Type: application/json" --data "@tests/github_webhook.json" http://localhost:8000/api/v1/github-webhook
+	curl -X POST -H "X-Github-Event: push" -H "Content-Type: application/json" --data "@tests/github_webhook.json" http://localhost:8000/api/platform-changelog/v1/github-webhook
 
 test-gitlab-webhook:
 
-	curl -X POST -H "X-Gitlab-Event: Push Hook" -H "Content-Type: application/json" --data "@tests/gitlab_webhook.json" http://localhost:8000/api/v1/gitlab-webhook
+	curl -X POST -H "X-Gitlab-Event: Push Hook" -H "Content-Type: application/json" --data "@tests/gitlab_webhook.json" http://localhost:8000/api/platform-changelog/v1/gitlab-webhook
 
 test-tekton-task:
 
-	curl -X POST http://localhost:8000/api/v1/tekton --data "@tests/tekton/valid.json" -H "Content-Type: application/json"
+	curl -X POST http://localhost:8000/api/platform-changelog/v1/tekton --data "@tests/tekton/valid.json" -H "Content-Type: application/json"
 
 compose:
 
