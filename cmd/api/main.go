@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	chi_middleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
@@ -33,6 +34,8 @@ func main() {
 	r := chi.NewRouter()
 	mr := chi.NewRouter()
 	sub := chi.NewRouter().With(metrics.ResponseMetricsMiddleware)
+
+	r.Use(chi_middleware.Logger)
 
 	// Mount the root of the api router on /api/platform-changelog/v1
 	r.Mount("/api/platform-changelog/v1", sub)
