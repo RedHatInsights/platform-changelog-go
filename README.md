@@ -90,7 +90,7 @@ To send the webhook, you can use curl or `make test-github-webhook`. The curl co
 
 `curl -X POST -H "X-Github-Event: push" -H "Content-Type: application/json" --data "@tests/github_webhook.json" http://localhost:8000/api/platform-changelog/v1/github-webhook`
 
-From there, you should be able to open a browser and see the results at: http://localhost:8000/api/v1/commits. There should be commits matching the webhook data that was sent.
+From there, you should be able to open a browser and see the results at: http://localhost:8000/api/platform-changelog/v1/commits. There should be commits matching the webhook data that was sent.
 
 ## Running Tests
 
