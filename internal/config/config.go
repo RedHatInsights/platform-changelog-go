@@ -106,7 +106,7 @@ func Get() *Config {
 		options.SetDefault("db.host", cfg.Database.Hostname)
 		options.SetDefault("db.port", cfg.Database.Port)
 		options.SetDefault("rdsCa", cfg.Database.RdsCa)
-		options.SetDefault("db.sslmode", "verify-full")
+		options.SetDefault("db.sslmode", cfg.Database.SslMode)
 		// cloudwatch
 		options.SetDefault("logGroup", cfg.Logging.Cloudwatch.LogGroup)
 		options.SetDefault("cwRegion", cfg.Logging.Cloudwatch.Region)
