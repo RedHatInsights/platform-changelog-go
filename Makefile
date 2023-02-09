@@ -17,7 +17,7 @@ lint:
 
 test:
 
-	go test -p 1 -v ./...
+	ginkgo -r -v
 
 run-migration:
 

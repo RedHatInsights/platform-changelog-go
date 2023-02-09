@@ -92,9 +92,11 @@ To send the webhook, you can use curl or `make test-github-webhook`. The curl co
 
 From there, you should be able to open a browser and see the results at: http://localhost:8000/api/platform-changelog/v1/commits. There should be commits matching the webhook data that was sent.
 
-## Running Tests
+## Running Unit Tests
 
-TODO: Get some tests in here
+Aside from the Webhook tests, the other tests use the Ginkgo testing framework. The service is still in development, so there are not many tests available.
+
+Use `make test` to run all unit tests.
 
 # Get Help
 
