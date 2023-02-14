@@ -10,6 +10,8 @@ objects:
     name: platform-changelog
   spec:
     envName: ${ENV_NAME}
+    testing:
+      iqePlugin: platform-changelog
     database:
       name: platformchangelog
     deployments:
