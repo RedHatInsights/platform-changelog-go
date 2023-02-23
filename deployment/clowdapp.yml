@@ -61,6 +61,8 @@ objects:
             value: ${LOGLEVEL}
           - name: DB_IMPL
             value: ${DB_IMPL}
+          - name: DEBUG
+            value: ${DEBUG}
     jobs:
     - name: vacuum
       schedule: '@daily'
@@ -120,3 +122,5 @@ parameters:
   value: 'true'
 - name: DB_IMPL
   value: 'impl'
+- name: DEBUG
+  value: 'false'
