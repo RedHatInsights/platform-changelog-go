@@ -103,14 +103,14 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 	if config.Get().Debug {
 		payload, err = ioutil.ReadAll(r.Body)
 	} else if (r.Header["X-gitlab-token"] != nil) && (r.Header["X-gitlab-token"][0] == config.Get().GitlabWebhookSecretKey) {
-
 		payload, err = ioutil.ReadAll(r.Body)
-
 	} else {
 		err = fmt.Errorf("invalid or missing X-Gitlab-Token")
 	}
+
 	if err != nil {
 		l.Log.Error(err)
+		writeResponse(w, http.StatusBadRequest, fmt.Sprintf(`{"msg": "%s"}`, err.Error()))
 		metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), true)
 		return
 	}
@@ -119,6 +119,7 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 	event, err := gitlab.ParseWebhook(gitlab.WebhookEventType(r), payload)
 	if err != nil {
 		l.Log.Errorf("could not parse webhook: err=%s\n", err)
+		writeResponse(w, http.StatusBadRequest, `{"msg": "Could not parse webhook"}`)
 		metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), true)
 		return
 	}

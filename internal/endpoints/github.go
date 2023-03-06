@@ -31,6 +31,7 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 	}
 	if err != nil {
 		l.Log.Error(err)
+		writeResponse(w, http.StatusUnauthorized, `{"msg": "Invalid secret key"}`)
 		metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
 		return
 	}
@@ -39,6 +40,7 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 	event, err := github.ParseWebHook(github.WebHookType(r), payload)
 	if err != nil {
 		l.Log.Errorf("could not parse webhook: err=%s\n", err)
+		writeResponse(w, http.StatusBadRequest, `{"msg": "Could not parse webhook"}`)
 		metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
 		return
 	}
