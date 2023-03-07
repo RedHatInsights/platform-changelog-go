@@ -6,6 +6,9 @@ POSTGRES_DB=gumbaroo
 POSTGRES_PORT=5432:5432
 POSTGRES_HOST=localhost
 
+GITHUB_WEBHOOK_KEY = "1234567890"
+GITHUB_WEBHOOK_SIGNATURE := $(shell cat tests/github_webhook.json | openssl dgst -sha256 -hmac "$(GITHUB_WEBHOOK_KEY)" | sed -e 's/.*= //')
+
 .PHONY: build
 
 build: platform-changelog-api platform-changelog-migration
@@ -31,11 +34,11 @@ run-migration: platform-changelog-migration
 
 run-api: platform-changelog-api
 
-	DEBUG=${DEBUG} ./platform-changelog-api
+	GITHUB_SECRET_KEY=$(GITHUB_WEBHOOK_KEY) DEBUG=${DEBUG} ./platform-changelog-api
 
 run-api-mock: platform-changelog-api
 
-	DEBUG=${DEBUG} DB_IMPL=mock ./platform-changelog-api
+	GITHUB_SECRET_KEY=$(GITHUB_WEBHOOK_KEY) DEBUG=${DEBUG} DB_IMPL=mock ./platform-changelog-api
 
 run-db:
 
@@ -47,7 +50,7 @@ check-db:
 
 test-github-webhook:
 
-	curl -X POST -H "X-Github-Event: push" -H "Content-Type: application/json" --data "@tests/github_webhook.json" http://localhost:8000/api/platform-changelog/v1/github-webhook
+	curl -X POST -H "X-Hub-Signature-256: sha256=$(GITHUB_WEBHOOK_SIGNATURE)" -H "X-Github-Event: push"   -H "Content-Type: application/json" --data-binary "@tests/github_webhook.json" http://localhost:8000/api/platform-changelog/v1/github-webhook
 
 test-gitlab-webhook:
 

@@ -6,6 +6,7 @@ require (
 	github.com/aws/aws-sdk-go v1.43.36
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/google/go-github v17.0.0+incompatible
+	github.com/google/go-github/v50 v50.1.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/jackc/pgconn v1.11.0 // indirect
 	github.com/onsi/ginkgo/v2 v2.6.1 // indirect
