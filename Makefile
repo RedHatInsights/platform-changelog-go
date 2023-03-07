@@ -28,12 +28,12 @@ run-migration:
 	./platform-changelog-migration
 
 run-api:
-	go build -o platform-changelog-api cmd/api/main.go
 
-	DEBUG=${DEBUG} ./platform-changelog-api
+	GITHUB_SECRET_KEY=$(GITHUB_WEBHOOK_KEY) DEBUG=${DEBUG} ./platform-changelog-api
 
 run-api-mock:
-	DEBUG=${DEBUG} DB_IMPL=mock ./platform-changelog-api
+
+	GITHUB_SECRET_KEY=$(GITHUB_WEBHOOK_KEY) DEBUG=${DEBUG} DB_IMPL=mock ./platform-changelog-api
 
 run-db:
 
@@ -45,8 +45,7 @@ check-db:
 
 test-github-webhook:
 
-
-	curl -X POST -H "X-Hub-Signature-256: sha256=$(GITHUB_WEBHOOK_SIGNATURE)" -H "X-Github-Event: push"   -H "Content-Type: application/json" --data-binary "@tests/github_webhook.json" http://localhost:9999/api/platform-changelog/v1/github-webhook
+	curl -X POST -H "X-Hub-Signature-256: sha256=$(GITHUB_WEBHOOK_SIGNATURE)" -H "X-Github-Event: push"   -H "Content-Type: application/json" --data-binary "@tests/github_webhook.json" http://localhost:8000/api/platform-changelog/v1/github-webhook
 
 test-gitlab-webhook:
 
