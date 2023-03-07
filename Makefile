@@ -6,9 +6,15 @@ POSTGRES_DB=gumbaroo
 POSTGRES_PORT=5432:5432
 POSTGRES_HOST=localhost
 
-build:
+.PHONY: build
 
-	go build -o platform-changelog-api cmd/api/main.go
+build: platform-changelog-api platform-changelog-migration
+
+platform-changelog-api:
+	go build -o $@ cmd/api/main.go
+
+platform-changelog-migration:
+	go build -o $@ internal/migration/main.go
 
 lint:
 
@@ -19,16 +25,16 @@ test:
 
 	go test -p 1 -v ./...
 
-run-migration:
+run-migration: platform-changelog-migration
 
-	go build -o platform-changelog-migration internal/migration/main.go
 	./platform-changelog-migration
 
-run-api:
+run-api: platform-changelog-api
 
 	DEBUG=${DEBUG} ./platform-changelog-api
 
-run-api-mock:
+run-api-mock: platform-changelog-api
+
 	DEBUG=${DEBUG} DB_IMPL=mock ./platform-changelog-api
 
 run-db:
@@ -62,3 +68,7 @@ compose-quiet:
 compose-down:
 
 	podman-compose -f development/compose.yml down
+
+clean:
+	go clean
+	rm -f platform-changelog-api platform-changelog-migration
