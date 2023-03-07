@@ -25,6 +25,7 @@ run-migration:
 	./platform-changelog-migration
 
 run-api:
+	go build -o platform-changelog-api cmd/api/main.go
 
 	DEBUG=${DEBUG} ./platform-changelog-api
 
@@ -41,7 +42,9 @@ check-db:
 
 test-github-webhook:
 
-	curl -X POST -H "X-Github-Event: push" -H "Content-Type: application/json" --data "@tests/github_webhook.json" http://localhost:8000/api/platform-changelog/v1/github-webhook
+	cat tests/github_webhook.json | openssl dgst -sha256 -hmac "1234" | sed -e 's/.*= //'
+
+	curl -X POST -H "X-Hub-Signature-256: sha256=24096a1c936dec944f4dc7f0f351881467feab1be2c57fba03af62a9928fa09d" -H "X-Github-Event: push"   -H "Content-Type: application/json" --data-binary "@tests/github_webhook.json" http://localhost:9999/api/platform-changelog/v1/github-webhook
 
 test-gitlab-webhook:
 
@@ -62,3 +65,4 @@ compose-quiet:
 compose-down:
 
 	podman-compose -f development/compose.yml down
+
