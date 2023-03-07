@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
-    "fmt"
 
 	"github.com/google/go-github/v50/github"
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
@@ -25,14 +24,9 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 
 	services := config.Get().Services
 
-    /*
-	payload, err = ioutil.ReadAll(r.Body)
-    fmt.Println("payload:", string(payload))
-    */
 	if config.Get().Debug {
 		payload, err = ioutil.ReadAll(r.Body)
 	} else {
-        fmt.Println("config.Get().GithubWebhookSecretKey):", config.Get().GithubWebhookSecretKey)
 		payload, err = github.ValidatePayload(r, []byte(config.Get().GithubWebhookSecretKey))
 	}
 	if err != nil {
@@ -40,7 +34,6 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 		metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
 		return
 	}
-    fmt.Println("VALID")
 	defer r.Body.Close()
 
 	event, err := github.ParseWebHook(github.WebHookType(r), payload)

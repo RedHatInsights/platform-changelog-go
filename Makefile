@@ -6,6 +6,9 @@ POSTGRES_DB=gumbaroo
 POSTGRES_PORT=5432:5432
 POSTGRES_HOST=localhost
 
+GITHUB_WEBHOOK_KEY = "1234567890"
+GITHUB_WEBHOOK_SIGNATURE := $(shell cat tests/github_webhook.json | openssl dgst -sha256 -hmac "$(GITHUB_WEBHOOK_KEY)" | sed -e 's/.*= //')
+
 build:
 
 	go build -o platform-changelog-api cmd/api/main.go
@@ -42,9 +45,8 @@ check-db:
 
 test-github-webhook:
 
-	cat tests/github_webhook.json | openssl dgst -sha256 -hmac "1234" | sed -e 's/.*= //'
 
-	curl -X POST -H "X-Hub-Signature-256: sha256=24096a1c936dec944f4dc7f0f351881467feab1be2c57fba03af62a9928fa09d" -H "X-Github-Event: push"   -H "Content-Type: application/json" --data-binary "@tests/github_webhook.json" http://localhost:9999/api/platform-changelog/v1/github-webhook
+	curl -X POST -H "X-Hub-Signature-256: sha256=$(GITHUB_WEBHOOK_SIGNATURE)" -H "X-Github-Event: push"   -H "Content-Type: application/json" --data-binary "@tests/github_webhook.json" http://localhost:9999/api/platform-changelog/v1/github-webhook
 
 test-gitlab-webhook:
 
