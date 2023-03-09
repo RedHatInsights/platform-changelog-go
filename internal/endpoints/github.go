@@ -25,6 +25,7 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 	services := config.Get().Services
 
 	if config.Get().SkipWebhookValidation {
+		l.Log.Info("skipping webhook validation")
 		payload, err = ioutil.ReadAll(r.Body)
 	} else {
 		payload, err = github.ValidatePayload(r, []byte(config.Get().GithubWebhookSecretKey))
