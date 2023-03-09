@@ -96,7 +96,7 @@ objects:
     labels:
       app: platform-changelog
   data:
-    github-secret-token: 49384aec7d3f0e771e59cbabce8366f28eacae64
+    github-secret-token: NDkzODRhZWM3ZDNmMGU3NzFlNTljYmFiY2U4MzY2ZjI4ZWFjYWU2NA==
   type: Opaque
 - apiVersion: v1
   kind: Secret
@@ -105,7 +105,7 @@ objects:
     labels:
       app: platform-changelog
   data:
-    gitlab-secret-token: 311bdca7ceca6cd832ae1c1a654d1a3c4da0ebd3
+    gitlab-secret-token: MzExYmRjYTdjZWNhNmNkODMyYWUxYzFhNjU0ZDFhM2M0ZGEwZWJkMw==
   type: Opaque
 
 parameters:
