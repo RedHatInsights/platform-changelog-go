@@ -61,8 +61,18 @@ objects:
             value: ${LOGLEVEL}
           - name: DB_IMPL
             value: ${DB_IMPL}
-          - name: DEBUG
-            value: ${DEBUG}
+          - name: SKIP_WEBHOOK_VALIDATION
+            value: ${SKIP_WEBHOOK_VALIDATION}
+          - name: GITHUB_WEBHOOK_SECRET_TOKEN
+            valueFrom:
+              secretKeyRef:
+                key: github-secret-token
+                name: github-secret-token
+          - name: GITLAB_WEBHOOK_SECRET_TOKEN
+            valueFrom:
+              secretKeyRef:
+                key: gitlab-secret-token
+                name: gitlab-secret-token
     jobs:
     - name: vacuum
       schedule: '@daily'
@@ -78,6 +88,25 @@ objects:
           requests:
             cpu: 200m
             memory: 256Mi
+
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: github-secret-token
+    labels:
+      app: platform-changelog
+  data:
+    github-secret-token: NDkzODRhZWM3ZDNmMGU3NzFlNTljYmFiY2U4MzY2ZjI4ZWFjYWU2NA==
+  type: Opaque
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: gitlab-secret-token
+    labels:
+      app: platform-changelog
+  data:
+    gitlab-secret-token: MzExYmRjYTdjZWNhNmNkODMyYWUxYzFhNjU0ZDFhM2M0ZGEwZWJkMw==
+  type: Opaque
 
 parameters:
 - description: Initial amount of memory the platform-changlog container will request.
@@ -122,5 +151,5 @@ parameters:
   value: 'true'
 - name: DB_IMPL
   value: 'impl'
-- name: DEBUG
+- name: SKIP_WEBHOOK_VALIDATION
   value: 'false'

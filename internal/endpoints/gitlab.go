@@ -100,13 +100,20 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 
 	services := config.Get().Services
 
-	if config.Get().Debug {
-		payload, err = ioutil.ReadAll(r.Body)
-	} else if (r.Header["X-gitlab-token"] != nil) && (r.Header["X-gitlab-token"][0] == config.Get().GitlabWebhookSecretKey) {
-		payload, err = ioutil.ReadAll(r.Body)
+	if config.Get().SkipWebhookValidation {
+		l.Log.Info("skipping webhook validation")
 	} else {
-		err = fmt.Errorf("invalid or missing X-Gitlab-Token")
+		token := r.Header.Get("X-Gitlab-Token")
+
+		if token == "" || token != config.Get().GitlabWebhookSecretKey {
+			l.Log.Error("invalid or missing X-Gitlab-Token")
+			writeResponse(w, http.StatusBadRequest, `{"msg": "invalid or missing X-Gitlab-Token"}`)
+			metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), true)
+			return
+		}
 	}
+
+	payload, err = ioutil.ReadAll(r.Body)
 
 	if err != nil {
 		l.Log.Error(err)

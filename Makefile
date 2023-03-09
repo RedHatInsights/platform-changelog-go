@@ -9,6 +9,8 @@ POSTGRES_HOST=localhost
 GITHUB_WEBHOOK_KEY = "1234567890"
 GITHUB_WEBHOOK_SIGNATURE := $(shell cat tests/github_webhook.json | openssl dgst -sha256 -hmac "$(GITHUB_WEBHOOK_KEY)" | sed -e 's/.*= //')
 
+GITLAB_WEBHOOK_KEY = "0987654321"
+
 .PHONY: build
 
 build: platform-changelog-api platform-changelog-migration
@@ -34,11 +36,11 @@ run-migration: platform-changelog-migration
 
 run-api: platform-changelog-api
 
-	GITHUB_SECRET_KEY=$(GITHUB_WEBHOOK_KEY) DEBUG=${DEBUG} ./platform-changelog-api
+	GITHUB_SECRET_KEY=$(GITHUB_WEBHOOK_KEY) GITLAB_SECRET_KEY=$(GITLAB_WEBHOOK_KEY) ./platform-changelog-api
 
 run-api-mock: platform-changelog-api
 
-	GITHUB_SECRET_KEY=$(GITHUB_WEBHOOK_KEY) DEBUG=${DEBUG} DB_IMPL=mock ./platform-changelog-api
+	GITHUB_SECRET_KEY=$(GITHUB_WEBHOOK_KEY) GITLAB_SECRET_KEY=$(GITLAB_WEBHOOK_KEY) DB_IMPL=mock ./platform-changelog-api
 
 run-db:
 
@@ -54,7 +56,7 @@ test-github-webhook:
 
 test-gitlab-webhook:
 
-	curl -X POST -H "X-Gitlab-Event: Push Hook" -H "Content-Type: application/json" --data "@tests/gitlab_webhook.json" http://localhost:8000/api/platform-changelog/v1/gitlab-webhook
+	curl -X POST -H "X-Gitlab-Token: $(GITLAB_WEBHOOK_KEY)" -H "X-Gitlab-Event: Push Hook" -H "Content-Type: application/json" --data "@tests/gitlab_webhook.json" http://localhost:8000/api/platform-changelog/v1/gitlab-webhook
 
 test-tekton-task:
 
