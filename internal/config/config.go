@@ -25,6 +25,7 @@ type Config struct {
 	Hostname               string
 	CloudwatchConfig       CloudwatchCfg
 	DatabaseConfig         DatabaseCfg
+	SkipWebhookValidation  bool
 	GithubWebhookSecretKey string
 	GitlabWebhookSecretKey string
 	Services               map[string]Service
@@ -85,6 +86,7 @@ func Get() *Config {
 	// global logging
 	options.SetDefault("logLevel", loglevel)
 	options.SetDefault("Hostname", hostname)
+	options.SetDefault("SkipWebhookValidation", os.Getenv("SKIP_WEBHOOK_VALIDATION") == "true" || os.Getenv("SKIP_WEBHOOK_VALIDATION") == "1")
 	options.SetDefault("GithubSecretKey", os.Getenv("GITHUB_SECRET_KEY"))
 	options.SetDefault("GitlabSecretKey", os.Getenv("GITLAB_SECRET_KEY"))
 	options.SetDefault("openapi.path", "schema/openapi.yaml")
@@ -135,6 +137,7 @@ func Get() *Config {
 	config := &Config{
 		Hostname:               options.GetString("Hostname"),
 		LogLevel:               options.GetString("logLevel"),
+		SkipWebhookValidation:  options.GetBool("SkipWebhookValidation"),
 		GithubWebhookSecretKey: options.GetString("GithubSecretKey"),
 		GitlabWebhookSecretKey: options.GetString("GitlabSecretKey"),
 		PublicPort:             options.GetString("publicPort"),

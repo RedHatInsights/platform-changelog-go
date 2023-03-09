@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -23,7 +24,11 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 
 	services := config.Get().Services
 
-	payload, err = github.ValidatePayload(r, []byte(config.Get().GithubWebhookSecretKey))
+	if config.Get().SkipWebhookValidation {
+		payload, err = ioutil.ReadAll(r.Body)
+	} else {
+		payload, err = github.ValidatePayload(r, []byte(config.Get().GithubWebhookSecretKey))
+	}
 
 	if err != nil {
 		l.Log.Error(err)

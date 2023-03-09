@@ -61,7 +61,8 @@ objects:
             value: ${LOGLEVEL}
           - name: DB_IMPL
             value: ${DB_IMPL}
-
+          - name: SKIP_WEBHOOK_VALIDATION
+            value: ${SKIP_WEBHOOK_VALIDATION}
           - name: GITHUB_WEBHOOK_SECRET_TOKEN
             valueFrom:
               secretKeyRef:
@@ -97,7 +98,6 @@ objects:
   data:
     github-secret-token: 49384aec7d3f0e771e59cbabce8366f28eacae64
   type: Opaque
-
 - apiVersion: v1
   kind: Secret
   metadata:
@@ -151,3 +151,5 @@ parameters:
   value: 'true'
 - name: DB_IMPL
   value: 'impl'
+- name: SKIP_WEBHOOK_VALIDATION
+  value: 'false'
