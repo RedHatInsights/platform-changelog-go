@@ -1,7 +1,6 @@
 package endpoints
 
 import (
-	"io/ioutil"
 	"net/http"
 	"strings"
 
@@ -24,11 +23,8 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 
 	services := config.Get().Services
 
-	if config.Get().Debug {
-		payload, err = ioutil.ReadAll(r.Body)
-	} else {
-		payload, err = github.ValidatePayload(r, []byte(config.Get().GithubWebhookSecretKey))
-	}
+	payload, err = github.ValidatePayload(r, []byte(config.Get().GithubWebhookSecretKey))
+
 	if err != nil {
 		l.Log.Error(err)
 		writeResponse(w, http.StatusUnauthorized, `{"msg": "Invalid secret key"}`)

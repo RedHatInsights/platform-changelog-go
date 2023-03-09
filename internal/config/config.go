@@ -29,7 +29,6 @@ type Config struct {
 	GitlabWebhookSecretKey string
 	Services               map[string]Service
 	Tenants                map[string]Tenant
-	Debug                  bool
 	DBImpl                 string
 	OpenAPIPath            string
 }
@@ -89,7 +88,6 @@ func Get() *Config {
 	options.SetDefault("GithubSecretKey", os.Getenv("GITHUB_SECRET_KEY"))
 	options.SetDefault("GitlabSecretKey", os.Getenv("GITLAB_SECRET_KEY"))
 	options.SetDefault("openapi.path", "schema/openapi.yaml")
-	options.SetDefault("Debug", os.Getenv("DEBUG") == "true" || os.Getenv("DEBUG") == "1")
 	options.SetDefault("db.impl", dbImpl)
 
 	if clowder.IsClowderEnabled() {
@@ -138,10 +136,10 @@ func Get() *Config {
 		Hostname:               options.GetString("Hostname"),
 		LogLevel:               options.GetString("logLevel"),
 		GithubWebhookSecretKey: options.GetString("GithubSecretKey"),
+		GitlabWebhookSecretKey: options.GetString("GitlabSecretKey"),
 		PublicPort:             options.GetString("publicPort"),
 		MetricsPort:            options.GetString("metricsPort"),
 		MetricsPath:            options.GetString("metricsPath"),
-		Debug:                  options.GetBool("Debug"),
 		DBImpl:                 options.GetString("db.impl"),
 		OpenAPIPath:            options.GetString("openapi.path"),
 		DatabaseConfig: DatabaseCfg{
