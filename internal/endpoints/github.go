@@ -28,13 +28,13 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 		l.Log.Info("skipping webhook validation")
 		payload, err = ioutil.ReadAll(r.Body)
 	} else {
-
 		if config.Get().GithubWebhookSecretKey == "" {
-			l.Log.Error("invalid or missing X-Hub-Signature-256")
-			writeResponse(w, http.StatusBadRequest, `{"msg": "invalid or missing X-Hub-Signature-256"}`)
+			l.Log.Error("invalid or missing github webhook secret key")
+			writeResponse(w, http.StatusInternalServerError, `{"msg": "invalid or missing github webhook secret key"}`)
 			metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
 			return
 		}
+
 		payload, err = github.ValidatePayload(r, []byte(config.Get().GithubWebhookSecretKey))
 	}
 
