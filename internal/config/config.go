@@ -87,8 +87,8 @@ func Get() *Config {
 	options.SetDefault("logLevel", loglevel)
 	options.SetDefault("Hostname", hostname)
 	options.SetDefault("SkipWebhookValidation", os.Getenv("SKIP_WEBHOOK_VALIDATION") == "true" || os.Getenv("SKIP_WEBHOOK_VALIDATION") == "1")
-	options.SetDefault("GithubSecretKey", os.Getenv("GITHUB_SECRET_KEY"))
-	options.SetDefault("GitlabSecretKey", os.Getenv("GITLAB_SECRET_KEY"))
+	options.SetDefault("GithubSecretKey", os.Getenv("GITHUB_WEBHOOK_SECRET_TOKEN"))
+	options.SetDefault("GitlabSecretKey", os.Getenv("GITLAB_WEBHOOK_SECRET_TOKEN"))
 	options.SetDefault("openapi.path", "schema/openapi.yaml")
 	options.SetDefault("db.impl", dbImpl)
 
