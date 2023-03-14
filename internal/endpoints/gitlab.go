@@ -105,7 +105,7 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 	} else {
 		if config.Get().GitlabWebhookSecretKey == "" {
 			l.Log.Error("missing gitlab webhook secret key")
-			writeResponse(w, http.StatusInternalServerError, `{"msg": "missing github webhook secret key"}`)
+			writeResponse(w, http.StatusInternalServerError, `{"msg": "missing gitlab webhook secret key"}`)
 			metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), true)
 			return
 		}

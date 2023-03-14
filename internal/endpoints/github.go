@@ -29,8 +29,8 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 		payload, err = ioutil.ReadAll(r.Body)
 	} else {
 		if config.Get().GithubWebhookSecretKey == "" {
-			l.Log.Error("invalid or missing github secret key")
-			writeResponse(w, http.StatusInternalServerError, `{"msg": "invalid or missing github secret key"}`)
+			l.Log.Error("invalid or missing github webhook secret key")
+			writeResponse(w, http.StatusInternalServerError, `{"msg": "invalid or missing github webhook secret key"}`)
 			metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
 			return
 		}
