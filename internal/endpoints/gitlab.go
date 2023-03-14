@@ -103,6 +103,13 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 	if config.Get().SkipWebhookValidation {
 		l.Log.Info("skipping webhook validation")
 	} else {
+		if config.Get().GitlabWebhookSecretKey == "" {
+			l.Log.Error("missing gitlab webhook secret key")
+			writeResponse(w, http.StatusInternalServerError, `{"msg": "missing github webhook secret key"}`)
+			metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), true)
+			return
+		}
+
 		token := r.Header.Get("X-Gitlab-Token")
 
 		if token == "" || token != config.Get().GitlabWebhookSecretKey {
