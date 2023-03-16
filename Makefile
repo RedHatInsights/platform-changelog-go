@@ -36,11 +36,11 @@ run-migration: platform-changelog-migration
 
 run-api: platform-changelog-api
 
-	GITHUB_SECRET_KEY=$(GITHUB_WEBHOOK_KEY) GITLAB_SECRET_KEY=$(GITLAB_WEBHOOK_KEY) ./platform-changelog-api
+	GITHUB_WEBHOOK_SECRET_TOKEN=$(GITHUB_WEBHOOK_KEY) GITLAB_WEBHOOK_SECRET_TOKEN=$(GITLAB_WEBHOOK_KEY) ./platform-changelog-api
 
 run-api-mock: platform-changelog-api
 
-	GITHUB_SECRET_KEY=$(GITHUB_WEBHOOK_KEY) GITLAB_SECRET_KEY=$(GITLAB_WEBHOOK_KEY) DB_IMPL=mock ./platform-changelog-api
+	GITHUB_WEBHOOK_SECRET_TOKEN=$(GITHUB_WEBHOOK_KEY) GITLAB_WEBHOOK_SECRET_TOKEN=$(GITLAB_WEBHOOK_KEY) DB_IMPL=mock ./platform-changelog-api
 
 run-db:
 

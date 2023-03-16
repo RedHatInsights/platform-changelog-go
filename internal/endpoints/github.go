@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -30,7 +31,7 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 	} else {
 		if config.Get().GithubWebhookSecretKey == "" {
 			l.Log.Error("invalid or missing github webhook secret key")
-			writeResponse(w, http.StatusInternalServerError, `{"msg": "invalid or missing github webhook secret key"}`)
+			writeResponse(w, http.StatusInternalServerError, `{"msg": "server has an invalid or missing github webhook secret key"}`)
 			metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
 			return
 		}
@@ -40,7 +41,7 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 
 	if err != nil {
 		l.Log.Error(err)
-		writeResponse(w, http.StatusUnauthorized, `{"msg": "Invalid secret key"}`)
+		writeResponse(w, http.StatusUnauthorized, fmt.Sprintf(`{"msg": "%s"}`, err.Error()))
 		metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
 		return
 	}
@@ -49,7 +50,7 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 	event, err := github.ParseWebHook(github.WebHookType(r), payload)
 	if err != nil {
 		l.Log.Errorf("could not parse webhook: err=%s\n", err)
-		writeResponse(w, http.StatusBadRequest, `{"msg": "Could not parse webhook"}`)
+		writeResponse(w, http.StatusBadRequest, `{"msg": "could not parse webhook"}`)
 		metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
 		return
 	}
