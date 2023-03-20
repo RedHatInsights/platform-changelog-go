@@ -90,6 +90,72 @@ objects:
             memory: 256Mi
 
 - apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: platform-changelog
+    annotations:
+      serviceaccounts.openshift.io/oauth-redirectreference.prometheus: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"platform-changelog"}}'
+- apiVersion: v1
+  kind: Deployment
+  metadata:
+    labels:
+      app: platform-changelog
+    name: platform-changelog
+    annotations:
+      ignore-check.kube-linter.io/minimum-three-replicas: "oauth-proxy does not need 3 replicas"
+  spec:
+    replicas: ${{PROXY_REPLICAS}}
+    selector:
+      matchLabels:
+        app: platform-changelog
+    template:
+      metadata:
+        labels:
+          app: platform-changelog
+      spec:
+        serviceAccountName: platform-changelog
+        containers:
+        - name: oauth-proxy
+          image: ${OAUTH_PROXY_IMAGE_NAME}:${OAUTH_PROXY_IMAGE_TAG}
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 3000
+            name: http
+            protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /oauth/healthz
+              port: http
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 3
+            periodSeconds: 10
+            successThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: /oauth/healthz
+              port: http
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 3
+            periodSeconds: 10
+            successThreshold: 1
+          resources:
+            limits:
+              cpu: 20m
+              memory: 64Mi
+            requests:
+              cpu: 10m
+              memory: 20Mi
+          args:
+          - --https-address=:3000
+          - --provider=openshift
+          - --openshift-service-account=platform-changelog
+          - --upstream=http://localhost:9000
+
+- apiVersion: v1
   kind: Secret
   metadata:
     name: github-secret-token
@@ -153,3 +219,9 @@ parameters:
   value: 'impl'
 - name: SKIP_WEBHOOK_VALIDATION
   value: 'false'
+- name: PROXY_REPLICAS
+  value: '1'
+- name: OAUTH_PROXY_IMAGE_NAME
+  value: quay.io/openshift/origin-oauth-proxy
+- name: OAUTH_PROXY_IMAGE_TAG
+  value: "4.10.0"
