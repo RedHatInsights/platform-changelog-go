@@ -100,7 +100,7 @@ objects:
   metadata:
     labels:
       app: platform-changelog
-    name: platform-changelog
+    name: platform-changelog-oauth-proxy
     annotations:
       ignore-check.kube-linter.io/minimum-three-replicas: "oauth-proxy does not need 3 replicas"
   spec:
@@ -119,7 +119,7 @@ objects:
           image: ${OAUTH_PROXY_IMAGE_NAME}:${OAUTH_PROXY_IMAGE_TAG}
           imagePullPolicy: IfNotPresent
           ports:
-          - containerPort: 3000
+          - containerPort: 4180
             name: http
             protocol: TCP
           readinessProbe:
@@ -144,16 +144,17 @@ objects:
             successThreshold: 1
           resources:
             limits:
-              cpu: 20m
-              memory: 64Mi
+              cpu: ${API_CPU_LIMIT}
+              memory: ${API_MEMORY_LIMIT}
             requests:
-              cpu: 10m
-              memory: 20Mi
+              cpu: 200m
+              memory: 256Mi
           args:
-          - --https-address=:3000
+          - --https-address=
           - --provider=openshift
           - --openshift-service-account=platform-changelog
           - --upstream=http://localhost:9000
+          - --cookie-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
 
 - apiVersion: v1
   kind: Secret
