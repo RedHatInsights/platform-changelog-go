@@ -95,7 +95,7 @@ objects:
     name: platform-changelog
     annotations:
       serviceaccounts.openshift.io/oauth-redirectreference.prometheus: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"platform-changelog"}}'
-- apiVersion: v1
+- apiVersion: apps/v1
   kind: Deployment
   metadata:
     labels:
