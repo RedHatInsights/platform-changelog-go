@@ -165,7 +165,7 @@ objects:
     port:
       targetPort: 9000
     to:
-      kind: ClowdApp
+      kind: Service
       name: platform-changelog
     tls:
       termination: reencrypt
