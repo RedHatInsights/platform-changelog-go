@@ -160,12 +160,10 @@ objects:
 - apiVersion: route.openshift.io/v1
   kind: Route
   metadata:
-    annotations:
     name: platform-changelog
   spec:
-    host: ${HOST}
     port:
-      targetPort: http
+      targetPort: 9000
     to:
       kind: ClowdApp
       name: platform-changelog
