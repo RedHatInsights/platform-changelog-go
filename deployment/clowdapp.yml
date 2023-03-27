@@ -128,7 +128,7 @@ objects:
             httpGet:
               path: /oauth/healthz
               port: http
-              scheme: HTTPS
+              scheme: HTTP
             initialDelaySeconds: 5
             timeoutSeconds: 1
             failureThreshold: 3
@@ -138,7 +138,7 @@ objects:
             httpGet:
               path: /oauth/healthz
               port: http
-              scheme: HTTPS
+              scheme: HTTP
             initialDelaySeconds: 5
             timeoutSeconds: 1
             failureThreshold: 3
@@ -152,24 +152,12 @@ objects:
               cpu: 200m
               memory: 256Mi
           args:
+          - --http-address=:4180
           - --https-address=
           - --provider=openshift
           - --openshift-service-account=platform-changelog
           - --upstream=http://localhost:9000
           - --cookie-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
-- apiVersion: route.openshift.io/v1
-  kind: Route
-  metadata:
-    name: platform-changelog
-  spec:
-    port:
-      targetPort: 9000
-    to:
-      kind: Service
-      name: platform-changelog
-    tls:
-      termination: reencrypt
-      insecureEdgeTerminationPolicy: Redirect
 
 - apiVersion: v1
   kind: Secret
