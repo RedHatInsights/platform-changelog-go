@@ -57,6 +57,8 @@ objects:
             cpu: ${API_CPU_REQUEST}
             memory: ${API_MEMORY_REQUEST}
         env:
+          - name: HOST
+            value: ${HOST}
           - name: LOGLEVEL
             value: ${LOGLEVEL}
           - name: DB_IMPL
@@ -155,6 +157,21 @@ objects:
           - --openshift-service-account=platform-changelog
           - --upstream=http://localhost:9000
           - --cookie-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    annotations:
+    name: platform-changelog
+  spec:
+    host: ${HOST}
+    port:
+      targetPort: http
+    to:
+      kind: ClowdApp
+      name: platform-changelog
+    tls:
+      termination: reencrypt
+      insecureEdgeTerminationPolicy: Redirect
 
 - apiVersion: v1
   kind: Secret
