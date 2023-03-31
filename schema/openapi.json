@@ -349,7 +349,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Data"
+                  "$ref": "#/components/schemas/Timeline"
                 }
               }
             }
@@ -376,7 +376,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Data"
+                  "$ref": "#/components/schemas/Timeline"
                 }
               }
             }
@@ -403,7 +403,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Data"
+                  "$ref": "#/components/schemas/Timeline"
                 }
               }
             }
@@ -540,7 +540,7 @@
           }
         }
       },
-      "Data": {
+      "Timeline": {
         "type": "object",
         "properties": {
           "id": {
@@ -627,26 +627,12 @@
             "description": "monitored branch"
           },
           "latest_commit": {
-            "$ref": "#/components/schemas/Data",
+            "$ref": "#/components/schemas/Timeline",
             "optional": true
           },
           "latest_deploy": {
-            "$ref": "#/components/schemas/Data",
+            "$ref": "#/components/schemas/Timeline",
             "optional": true
-          }
-        }
-      },
-      "Timeline": {
-        "type": "object",
-        "properties": {
-          "count": {
-            "type": "integer"
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Data"
-            }
           }
         }
       },
