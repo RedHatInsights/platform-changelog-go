@@ -284,7 +284,6 @@ components:
         count:
           type: integer
         data:
-          type: array
           items:
             $ref: '#/components/schemas/Service'
     TimelinesData:
@@ -293,7 +292,6 @@ components:
         count:
           type: integer
         data:
-          type: array
           items:
             $ref: '#/components/schemas/Timeline'
     Data:
@@ -370,7 +368,6 @@ components:
         count:
           type: integer
         data:
-          type: array
           items:
             $ref: '#/components/schemas/Data'
     Error:

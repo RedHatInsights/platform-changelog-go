@@ -519,7 +519,6 @@
             "type": "integer"
           },
           "data": {
-            "type": "array",
             "items": {
               "$ref": "#/components/schemas/Service"
             }
@@ -533,7 +532,6 @@
             "type": "integer"
           },
           "data": {
-            "type": "array",
             "items": {
               "$ref": "#/components/schemas/Timeline"
             }
@@ -643,7 +641,6 @@
             "type": "integer"
           },
           "data": {
-            "type": "array",
             "items": {
               "$ref": "#/components/schemas/Data"
             }
