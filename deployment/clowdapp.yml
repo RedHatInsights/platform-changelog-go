@@ -97,6 +97,19 @@ objects:
     name: platform-changelog
     annotations:
       serviceaccounts.openshift.io/oauth-redirectreference.prometheus: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"platform-changelog"}}'
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: platform-changelog-oauth-proxy
+  spec:
+    clusterIP: None
+    ports:
+    - name: http
+      port: 4180
+      protocol: TCP
+    selector:
+      app: platform-changelog
+      pod: platform-changelog-oauth-proxy
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -114,6 +127,7 @@ objects:
       metadata:
         labels:
           app: platform-changelog
+          pod: platform-changelog-oauth-proxy
       spec:
         serviceAccountName: platform-changelog
         containers:
