@@ -91,21 +91,40 @@ objects:
             cpu: 200m
             memory: 256Mi
 
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      app: platform-changelog
+    name: platform-changelog-nginx
+  spec:
+    port:
+      targetPort: 8080
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: reencrypt
+    to:
+      kind: Service
+      name: platform-changelog-ui
+      weight: 100
+    wildcardPolicy: None
 - apiVersion: v1
   kind: ServiceAccount
   metadata:
     name: platform-changelog
     annotations:
-      serviceaccounts.openshift.io/oauth-redirectreference.prometheus: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"platform-changelog"}}'
+      serviceaccounts.openshift.io/oauth-redirectreference.primary: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"platform-changelog-nginx"}}'
 - apiVersion: v1
   kind: Service
   metadata:
+    annotations:
+      service.alpha.openshift.io/serving-cert-secret-name: platform-changelog-auth
     name: platform-changelog-oauth-proxy
   spec:
     clusterIP: None
     ports:
     - name: http
-      port: 4180
+      port: 8443
       protocol: TCP
     selector:
       app: platform-changelog
@@ -135,14 +154,14 @@ objects:
           image: ${OAUTH_PROXY_IMAGE_NAME}:${OAUTH_PROXY_IMAGE_TAG}
           imagePullPolicy: IfNotPresent
           ports:
-          - containerPort: 4180
+          - containerPort: 8443
             name: http
             protocol: TCP
           readinessProbe:
             httpGet:
               path: /oauth/healthz
               port: http
-              scheme: HTTP
+              scheme: HTTPS
             initialDelaySeconds: 5
             timeoutSeconds: 1
             failureThreshold: 3
@@ -152,7 +171,7 @@ objects:
             httpGet:
               path: /oauth/healthz
               port: http
-              scheme: HTTP
+              scheme: HTTPS
             initialDelaySeconds: 5
             timeoutSeconds: 1
             failureThreshold: 3
@@ -166,12 +185,27 @@ objects:
               cpu: 200m
               memory: 256Mi
           args:
-          - --http-address=:4180
-          - --https-address=
+          - --https-address=:8443
           - --provider=openshift
           - --openshift-service-account=platform-changelog
           - --upstream=http://localhost:9000
-          - --cookie-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
+          - --tls-cert=/etc/tls/private/tls.crt
+          - --tls-key=/etc/tls/private/tls.key
+          - --cookie-secret-file=/etc/proxy/secrets/platform-changelog-cookie
+          volumeMounts:
+          - mountPath: /etc/proxy/secrets
+            name: platform-changelog-cookie
+          - mountPath: /etc/tls/private
+            name: platform-changelog-proxy-tls
+        volumes:
+        - name: platform-changelog-cookie
+          secret:
+            defaultMode: 420
+            secretName: platform-changelog-cookie
+        - name: platform-changelog-proxy-tls
+          secret:
+            defaultMode: 420
+            secretName: platform-changelog-auth
 
 - apiVersion: v1
   kind: Secret
@@ -191,6 +225,14 @@ objects:
   data:
     gitlab-secret-token: MzExYmRjYTdjZWNhNmNkODMyYWUxYzFhNjU0ZDFhM2M0ZGEwZWJkMw==
   type: Opaque
+- apiVersion: v1
+  kind: Secret
+  metadata:
+    name: platform-changelog-cookie
+    labels:
+      app: platform-changelog
+  data:
+    platform-changelog-cookie: dG1Vb204R28tbzRua3FsOFRzbldPV0ZKMnd0T0tKZjdZMkZmTFRXaTI3dz0=
 
 parameters:
 - description: Initial amount of memory the platform-changlog container will request.
@@ -242,4 +284,4 @@ parameters:
 - name: OAUTH_PROXY_IMAGE_NAME
   value: quay.io/openshift/origin-oauth-proxy
 - name: OAUTH_PROXY_IMAGE_TAG
-  value: "4.10.0"
+  value: "latest"
