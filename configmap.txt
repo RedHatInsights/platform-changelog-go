@@ -40,68 +40,16 @@ data:
             text/css
             text/plain
             text/x-component;
-            listen 8080;
+            listen localhost:8080;
             disable_symlinks off;
             root /usr/share/nginx/html;
             
-            location /oauth/auth {
-                internal;
-                proxy_pass https://platform-changelog-oauth-proxy:8443;
-            }
-
-            location /oauth/ {
-                proxy_pass       https://platform-changelog-oauth-proxy:8443;
-                proxy_set_header Host                    $host;
-                proxy_set_header X-Real-IP               $remote_addr;
-                proxy_set_header X-Scheme                $scheme;
-                proxy_set_header X-Auth-Request-Redirect $request_uri;
-            }
 
             location /api/platform-changelog/v1 {
-                auth_request /oauth/auth;
-                error_page 401 = /oauth/sign_in;
-
-                # pass Set-Cookie headers from the subrequest response back to requestor
-                auth_request_set $auth_cookie $upstream_http_set_cookie;
-                add_header Set-Cookie $auth_cookie;
-
-                # pass information via X-User and X-Email headers to backend,
-                # requires running with --set-xauthrequest flag
-                auth_request_set $user   $upstream_http_x_auth_request_user;
-                auth_request_set $email  $upstream_http_x_auth_request_email;
-                proxy_set_header X-User  $user;
-                proxy_set_header X-Email $email;
-
                 proxy_pass http://platform-changelog-api:9000;
             }
 
             location / {
-                auth_request /oauth/auth;
-                error_page 401 = /oauth/sign_in;
-
-                # pass Set-Cookie headers from the subrequest response back to requestor
-                auth_request_set $auth_cookie $upstream_http_set_cookie;
-                add_header Set-Cookie $auth_cookie;
-
-                # When using the --set-authorization-header flag, some provider's cookies can exceed the 4kb
-                # limit and so the OAuth2 Proxy splits these into multiple parts.
-                # Nginx normally only copies the first `Set-Cookie` header from the auth_request to the response,
-                # so if your cookies are larger than 4kb, you will need to extract additional cookies manually.
-                auth_request_set $auth_cookie_name_upstream_1 $upstream_cookie_auth_cookie_name_1;
-
-                # Extract the Cookie attributes from the first Set-Cookie header and append them
-                # to the second part ($upstream_cookie_* variables only contain the raw cookie content)
-                if ($auth_cookie ~* "(; .*)") {
-                    set $auth_cookie_name_0 $auth_cookie;
-                    set $auth_cookie_name_1 "auth_cookie_name_1=$auth_cookie_name_upstream_1$1";
-                }
-
-                # Send both Set-Cookie headers now if there was a second part
-                if ($auth_cookie_name_upstream_1) {
-                    add_header Set-Cookie $auth_cookie_name_0;
-                    add_header Set-Cookie $auth_cookie_name_1;
-                }
-
                 try_files $uri /index.html;
             }
 
