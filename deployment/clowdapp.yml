@@ -102,33 +102,44 @@ objects:
       targetPort: 8080
     tls:
       insecureEdgeTerminationPolicy: Redirect
-      termination: reencrypt
+      termination: edge
+      #termination: reencrypt
     to:
       kind: Service
       name: platform-changelog-ui
       weight: 100
     wildcardPolicy: None
+
 - apiVersion: v1
   kind: ServiceAccount
   metadata:
     name: platform-changelog
     annotations:
       serviceaccounts.openshift.io/oauth-redirectreference.primary: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"platform-changelog-nginx"}}'
+
+
 - apiVersion: v1
   kind: Service
   metadata:
+    name: platform-changelog-oauth-proxy
+    labels:
+      app: platform-changelog
     annotations:
       service.alpha.openshift.io/serving-cert-secret-name: platform-changelog-auth
-    name: platform-changelog-oauth-proxy
   spec:
-    clusterIP: None
     ports:
-    - name: http
+    - name: https-8443
       port: 8443
       protocol: TCP
+      targetPort: 8443
     selector:
       app: platform-changelog
       pod: platform-changelog-oauth-proxy
+    sessionAffinity: None
+    type: ClusterIP
+
+
+
 - apiVersion: apps/v1
   kind: Deployment
   metadata:
@@ -262,7 +273,7 @@ parameters:
   value: DEBUG
 - description: The number of replicas to use for the platform-changlog
   name: API_REPLICAS
-  value: '3'
+  value: '1'
 - description: Image
   name: IMAGE
   required: true
