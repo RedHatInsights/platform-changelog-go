@@ -29,7 +29,7 @@ var _ = Describe("Handler", func() {
 			handler := endpoints.NewHandler(dbConnector)
 
 			// create a request
-			req, err := http.NewRequest("POST", "/api/platform-changelog/v1/tekton", nil)
+			req, err := http.NewRequest("POST", "/api/v1/tekton", nil)
 			Expect(err).To(BeNil())
 
 			req.Header.Set("Content-Type", "application/json")
@@ -37,7 +37,7 @@ var _ = Describe("Handler", func() {
 			rr := httptest.NewRecorder()
 
 			router := chi.NewRouter()
-			router.Post("/api/platform-changelog/v1/tekton", handler.TektonTaskRun)
+			router.Post("/api/v1/tekton", handler.TektonTaskRun)
 
 			router.ServeHTTP(rr, req)
 
@@ -62,7 +62,7 @@ var _ = Describe("Handler", func() {
 		handler := endpoints.NewHandler(dbConnector)
 
 		// create a request
-		req, err := http.NewRequest("POST", "/api/platform-changelog/v1/tekton", f)
+		req, err := http.NewRequest("POST", "/api/v1/tekton", f)
 		Expect(err).To(BeNil())
 
 		req.Header.Set("Content-Type", "application/json")
@@ -70,7 +70,7 @@ var _ = Describe("Handler", func() {
 		rr := httptest.NewRecorder()
 
 		router := chi.NewRouter()
-		router.Post("/api/platform-changelog/v1/tekton", handler.TektonTaskRun)
+		router.Post("/api/v1/tekton", handler.TektonTaskRun)
 
 		router.ServeHTTP(rr, req)
 
