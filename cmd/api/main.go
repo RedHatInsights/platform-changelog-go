@@ -34,8 +34,8 @@ func main() {
 	mr := chi.NewRouter()
 	sub := chi.NewRouter().With(metrics.ResponseMetricsMiddleware)
 
-	// Mount the root of the api router on /api/platform-changelog/v1
-	r.Mount("/api/platform-changelog/v1", sub)
+	// Mount the root of the api router on /api/v1
+	r.Mount("/api/v1", sub)
 	r.Get("/", handler.LubdubHandler)
 
 	mr.Get("/", handler.LubdubHandler)
