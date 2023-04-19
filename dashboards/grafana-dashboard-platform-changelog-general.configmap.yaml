@@ -27,7 +27,7 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 105138,
+      "id": 105851,
       "links": [],
       "liveNow": false,
       "panels": [
@@ -108,7 +108,7 @@ data:
               "datasource": {
                 "uid": "$datasource"
               },
-              "expr": "platform_changelog_webhooks_total - platform_changelog_webhooks_errors_total",
+              "expr": "platform_changelog_webhooks - platform_changelog_webhooks_errors",
               "interval": "",
               "legendFormat": "",
               "refId": "B"
@@ -194,7 +194,7 @@ data:
               "datasource": {
                 "uid": "$datasource"
               },
-              "expr": "platform_changelog_webhooks_errors_total",
+              "expr": "platform_changelog_webhooks_errors",
               "interval": "",
               "legendFormat": "",
               "refId": "B"
@@ -279,7 +279,7 @@ data:
               "datasource": {
                 "uid": "$datasource"
               },
-              "expr": "platform_changelog_tekton_runs_total - platform_changelog_tekton_errors_total",
+              "expr": "platform_changelog_tekton_runs - platform_changelog_tekton_errors",
               "interval": "",
               "legendFormat": "",
               "refId": "B"
@@ -365,7 +365,7 @@ data:
               "datasource": {
                 "uid": "$datasource"
               },
-              "expr": "platform_changelog_tekton_errors_total",
+              "expr": "platform_changelog_tekton_errors",
               "interval": "",
               "legendFormat": "",
               "refId": "B"
@@ -398,6 +398,68 @@ data:
           "panels": [],
           "title": "General",
           "type": "row"
+        },
+        {
+          "datasource": {
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "max": 1,
+              "min": 0,
+              "thresholds": {
+                "mode": "percentage",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 98
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 5,
+            "x": 0,
+            "y": 5
+          },
+          "id": 58,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "text": {}
+          },
+          "pluginVersion": "9.3.8",
+          "targets": [
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "exemplar": true,
+              "expr": "avg(avg_over_time(up{service=\"platform-changelog-api\"}[$__interval]))",
+              "interval": "",
+              "legendFormat": "{{pod}}",
+              "refId": "A"
+            }
+          ],
+          "title": "API Up",
+          "type": "gauge"
         },
         {
           "datasource": {
@@ -434,9 +496,9 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 10,
+            "h": 6,
             "w": 5,
-            "x": 0,
+            "x": 5,
             "y": 5
           },
           "id": 52,
@@ -463,9 +525,11 @@ data:
               "datasource": {
                 "uid": "$datasource"
               },
-              "expr": "platform_changelog_requests_total",
+              "editorMode": "code",
+              "expr": "sum_over_time(platform_changelog_requests[$__interval])",
               "interval": "",
               "legendFormat": "",
+              "range": true,
               "refId": "B"
             }
           ],
@@ -486,67 +550,6 @@ data:
           "type": "stat"
         },
         {
-          "datasource": {
-            "uid": "$datasource"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "decimals": 2,
-              "mappings": [],
-              "max": 1,
-              "min": 0,
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 95
-                  }
-                ]
-              },
-              "unit": "percentunit"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 10,
-            "w": 5,
-            "x": 5,
-            "y": 5
-          },
-          "id": 20,
-          "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "mean"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
-          },
-          "pluginVersion": "9.3.8",
-          "targets": [
-            {
-              "datasource": {
-                "uid": "$datasource"
-              },
-              "expr": "sum(increase(platform_changelog_response_codes_total{code!~\"2.*\"}[24h])) / sum(increase(platform_changelog_response_codes_total[24h]))",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "title": "Non-200 Status Codes",
-          "type": "gauge"
-        },
-        {
           "aliasColors": {},
           "bars": false,
           "dashLength": 10,
@@ -564,7 +567,7 @@ data:
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 7,
+            "h": 6,
             "w": 10,
             "x": 10,
             "y": 5
@@ -639,6 +642,146 @@ data:
           }
         },
         {
+          "datasource": {
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 5,
+            "x": 0,
+            "y": 11
+          },
+          "id": 34,
+          "links": [],
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.3.8",
+          "targets": [
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "expr": "sum(increase(kube_pod_container_status_restarts_total{container=\"platform-changelog-api\"}[$__range]))",
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "title": "Pod Restarts",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "decimals": 2,
+              "mappings": [],
+              "max": 1,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 95
+                  }
+                ]
+              },
+              "unit": "percentunit"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 5,
+            "x": 5,
+            "y": 11
+          },
+          "id": 20,
+          "options": {
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true
+          },
+          "pluginVersion": "9.3.8",
+          "targets": [
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "expr": "sum(sum_over_time(platform_changelog_responses{code!~\"2.*\"}[$__interval])) / sum(sum_over_time(platform_changelog_responses[$__interval]))",
+              "interval": "",
+              "legendFormat": "",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Non-200 Status Codes",
+          "type": "gauge"
+        },
+        {
           "aliasColors": {},
           "bars": false,
           "dashLength": 10,
@@ -659,7 +802,7 @@ data:
             "h": 6,
             "w": 10,
             "x": 10,
-            "y": 12
+            "y": 11
           },
           "hiddenSeries": false,
           "id": 30,
@@ -737,82 +880,6 @@ data:
           "fieldConfig": {
             "defaults": {
               "color": {
-                "mode": "thresholds"
-              },
-              "mappings": [
-                {
-                  "options": {
-                    "match": "null",
-                    "result": {
-                      "text": "N/A"
-                    }
-                  },
-                  "type": "special"
-                }
-              ],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "none"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 3,
-            "w": 10,
-            "x": 0,
-            "y": 15
-          },
-          "id": 34,
-          "links": [],
-          "maxDataPoints": 100,
-          "options": {
-            "colorMode": "none",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "horizontal",
-            "reduceOptions": {
-              "calcs": [
-                "mean"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "text": {},
-            "textMode": "auto"
-          },
-          "pluginVersion": "9.3.8",
-          "targets": [
-            {
-              "datasource": {
-                "uid": "$datasource"
-              },
-              "expr": "sum(increase(kube_pod_container_status_restarts_total{container=\"platform-changelog-api\"}[$__range]))",
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "title": "Pod Restarts",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "uid": "$datasource"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
                 "mode": "palette-classic"
               },
               "custom": {
@@ -866,28 +933,24 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 20,
+            "h": 7,
+            "w": 13,
             "x": 0,
-            "y": 18
+            "y": 17
           },
           "id": 8,
           "interval": "",
           "links": [],
           "options": {
             "legend": {
-              "calcs": [
-                "mean",
-                "max",
-                "sum"
-              ],
-              "displayMode": "table",
-              "placement": "right",
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
               "showLegend": true
             },
             "tooltip": {
-              "mode": "multi",
-              "sort": "asc"
+              "mode": "single",
+              "sort": "none"
             }
           },
           "pluginVersion": "9.3.8",
@@ -896,7 +959,7 @@ data:
               "datasource": {
                 "uid": "$datasource"
               },
-              "expr": "sum(increase(platform_changelog_response_codes_total[5m])) by (code)",
+              "expr": "sum(increase(platform_changelog_responses[5m])) by (code)",
               "legendFormat": "{{code}}",
               "refId": "A"
             }
@@ -904,6 +967,88 @@ data:
           "title": "Responses By Code",
           "transparent": true,
           "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "$datasource"
+          },
+          "description": "Uses time range interval to find average",
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byRegexp",
+                  "options": "[5-9][0-9][0-9]+"
+                },
+                "properties": [
+                  {
+                    "id": "thresholds",
+                    "value": {
+                      "mode": "absolute",
+                      "steps": [
+                        {
+                          "color": "red",
+                          "value": null
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 7,
+            "x": 13,
+            "y": 17
+          },
+          "id": 57,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "max"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.3.8",
+          "targets": [
+            {
+              "datasource": {
+                "uid": "$datasource"
+              },
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(sum_over_time(platform_changelog_responses[$__interval])) by (code)",
+              "interval": "",
+              "legendFormat": "{{code}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "API Reponse Counts",
+          "type": "stat"
         }
       ],
       "refresh": false,
@@ -916,7 +1061,7 @@ data:
         "list": [
           {
             "current": {
-              "selected": true,
+              "selected": false,
               "text": "crcs02ue1-prometheus",
               "value": "crcs02ue1-prometheus"
             },
@@ -936,7 +1081,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-15m",
+        "from": "now-30m",
         "to": "now"
       },
       "timepicker": {
