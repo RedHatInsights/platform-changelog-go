@@ -10,33 +10,33 @@ import (
 
 var (
 	requests = pa.NewCounterVec(p.CounterOpts{
-		Name: "platform_changelog_requests_total",
-		Help: "Total number of requests",
+		Name: "platform_changelog_requests",
+		Help: "Number of requests",
 	}, []string{"path", "method", "user_agent"})
 
 	webhooks = pa.NewCounterVec(p.CounterOpts{
-		Name: "platform_changelog_webhooks_total",
-		Help: "Total number of incoming webhooks",
+		Name: "platform_changelog_webhooks",
+		Help: "Number of incoming webhooks",
 	}, []string{"source", "method", "user_agent"})
 
 	webhookErrors = pa.NewCounterVec(p.CounterOpts{
-		Name: "platform_changelog_webhooks_errors_total",
-		Help: "Total number of incoming webhook errors",
+		Name: "platform_changelog_webhooks_errors",
+		Help: "Number of incoming webhook errors",
 	}, []string{"source", "method", "user_agent"})
 
 	tekton = pa.NewCounterVec(p.CounterOpts{
-		Name: "platform_changelog_tekton_runs_total",
-		Help: "Total number of tekton runs",
+		Name: "platform_changelog_tekton_runs",
+		Help: "Number of tekton runs",
 	}, []string{"method", "user_agent"})
 
 	tektonErrors = pa.NewCounterVec(p.CounterOpts{
-		Name: "platform_changelog_tekton_errors_total",
-		Help: "Total number of tekton errors",
+		Name: "platform_changelog_tekton_errors",
+		Help: "Number of tekton errors",
 	}, []string{"method", "user_agent"})
 
 	responseCodes = pa.NewCounterVec(p.CounterOpts{
-		Name: "platform_changelog_response_codes_total",
-		Help: "Total number of response codes",
+		Name: "platform_changelog_responses",
+		Help: "Number of response codes",
 	}, []string{"code"})
 
 	SqlCreateCommitEntry = pa.NewHistogram(p.HistogramOpts{
