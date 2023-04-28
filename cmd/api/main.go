@@ -42,6 +42,7 @@ func main() {
 	mr.Get("/healthz", handler.LubdubHandler)
 	mr.Handle("/metrics", promhttp.Handler())
 
+	sub.Post("/github-jenkins", handler.GithubJenkins)
 	sub.Post("/github-webhook", handler.GithubWebhook)
 	sub.Post("/gitlab-webhook", handler.GitlabWebhook)
 	sub.Post("/tekton", handler.TektonTaskRun)

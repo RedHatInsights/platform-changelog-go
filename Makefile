@@ -58,6 +58,10 @@ test-gitlab-webhook:
 
 	curl -X POST -H "X-Gitlab-Token: $(GITLAB_WEBHOOK_KEY)" -H "X-Gitlab-Event: Push Hook" -H "Content-Type: application/json" --data "@tests/gitlab_webhook.json" http://localhost:8000/api/v1/gitlab-webhook
 
+test-github-json:
+
+	curl -X POST http://localhost:8000/api/v1/github --data "@tests/github_dump.json" -H "Content-Type: application/json"
+
 test-tekton-task:
 
 	curl -X POST http://localhost:8000/api/v1/tekton --data "@tests/tekton/valid.json" -H "Content-Type: application/json"

@@ -22,7 +22,7 @@ type TektonPayload *struct {
 	Ref         string     `json:"ref,omitempty"`
 }
 
-func decodeJSONBody(w http.ResponseWriter, r *http.Request) (TektonPayload, error) {
+func decodeTektonJSONBody(w http.ResponseWriter, r *http.Request) (TektonPayload, error) {
 	if r.Header.Get("Content-Type") != "application/json" {
 		return nil, fmt.Errorf("invalid Content-Type")
 	}
@@ -51,7 +51,7 @@ func decodeJSONBody(w http.ResponseWriter, r *http.Request) (TektonPayload, erro
 func (eh *EndpointHandler) TektonTaskRun(w http.ResponseWriter, r *http.Request) {
 	metrics.IncTekton(r.Method, r.UserAgent(), false)
 
-	payload, err := decodeJSONBody(w, r)
+	payload, err := decodeTektonJSONBody(w, r)
 	if err != nil {
 		l.Log.Error(err)
 		metrics.IncTekton(r.Method, r.UserAgent(), true)

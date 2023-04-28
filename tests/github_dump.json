@@ -1,0 +1,20 @@
+{
+    "app": "rbac",
+    "repo": "https://github.com/RedHatInsights/insights-rbac",
+    "merged_by": "Jane Doe",
+    "timestamp": "2019-08-01T00:00:00Z",
+    "commits": [
+        {
+            "timestamp": "2019-08-01T00:00:00Z",
+            "ref": "3adfljk324",
+            "author": "John Doe",
+            "message": "Relavant RBAC commit message"
+        },
+        {
+            "timestamp": "2019-08-02T00:00:00Z",
+            "ref": "otherj32409",
+            "author": "John Doe",
+            "message": "More relavant RBAC commit message"
+        }
+    ]
+}
