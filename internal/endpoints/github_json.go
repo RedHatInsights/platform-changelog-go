@@ -11,6 +11,7 @@ import (
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
+	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
 // This endpoint is different than the github and gitlab endpoints
@@ -61,6 +62,10 @@ func decodeGithubJSONBody(w http.ResponseWriter, r *http.Request) (GithubPayload
 func (eh *EndpointHandler) GithubJenkins(w http.ResponseWriter, r *http.Request) {
 	metrics.IncJenkins("github", r.Method, r.UserAgent(), false)
 
+	// log everything for now
+	l.Log.Info("Github Jenkins run received")
+	l.Log.Info(r.Body)
+
 	payload, err := decodeGithubJSONBody(w, r)
 	if err != nil {
 		l.Log.Error(err)
@@ -98,7 +103,7 @@ func (eh *EndpointHandler) GithubJenkins(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	writeResponse(w, http.StatusOK, `{"msg": "Tekton info received"}`)
+	writeResponse(w, http.StatusOK, `{"msg": "Commit info received"}`)
 }
 
 // Validate the payload contains necessary data
@@ -132,36 +137,40 @@ func validateGithubPayload(payload GithubPayload) error {
 	return nil
 }
 
-// Converting from TektonPayload struct to Timeline model
-func convertGithubPayloadToTimelines(conn db.DBConnector, payload GithubPayload) ([]models.Timelines, error) {
+// Converting from GithubPayload struct to Timeline model
+func convertGithubPayloadToTimelines(conn db.DBConnector, payload GithubPayload) (commits []models.Timelines, err error) {
 	services := config.Get().Services
 
-	var commits []models.Timelines
-	// Validate that the app specified is onboarded
-	for key, service := range services {
-		if service.Namespace == payload.App {
-			s, _, err := conn.GetServiceByName(key)
+	// find the service
+	var service structs.ServicesData
+
+	for key, s := range services {
+		if s.GHRepo == payload.Repo { // match on the github repo, unlike tekton
+			service, _, err = conn.GetServiceByName(key)
 
 			if err != nil {
 				return commits, err
 			}
-
-			for _, commit := range payload.Commits {
-				commits = append(commits, models.Timelines{
-					ServiceID: s.ID,
-					Timestamp: *commit.Timestamp,
-					Type:      "commit",
-					Repo:      s.Name,
-					Ref:       commit.Ref,
-					Author:    commit.Author,
-					MergedBy:  payload.MergedBy,
-					Message:   commit.Message,
-				})
-			}
-
-			return commits, nil
 		}
 	}
 
-	return commits, fmt.Errorf("app %s not onboarded", payload.App)
+	if service == (structs.ServicesData{}) {
+		// create the service?
+		return commits, fmt.Errorf("app %s is not onboarded", payload.App)
+	}
+
+	for _, commit := range payload.Commits {
+		commits = append(commits, models.Timelines{
+			ServiceID: service.ID,
+			Timestamp: *commit.Timestamp,
+			Type:      "commit",
+			Repo:      service.Name,
+			Ref:       commit.Ref,
+			Author:    commit.Author,
+			MergedBy:  payload.MergedBy,
+			Message:   commit.Message,
+		})
+	}
+
+	return commits, nil
 }
