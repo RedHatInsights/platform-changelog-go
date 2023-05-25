@@ -51,6 +51,10 @@ func decodeTektonJSONBody(w http.ResponseWriter, r *http.Request) (TektonPayload
 func (eh *EndpointHandler) TektonTaskRun(w http.ResponseWriter, r *http.Request) {
 	metrics.IncTekton(r.Method, r.UserAgent(), false)
 
+	// log everything for now
+	l.Log.Info("Tekton TaskRun received")
+	l.Log.Info(r.Body)
+
 	payload, err := decodeTektonJSONBody(w, r)
 	if err != nil {
 		l.Log.Error(err)
@@ -139,5 +143,5 @@ func convertTektonPayloadToTimeline(conn db.DBConnector, payload TektonPayload) 
 		}
 	}
 
-	return deploy, fmt.Errorf("app %s not onboarded", payload.App)
+	return deploy, fmt.Errorf("app %s is not onboarded", payload.App)
 }
