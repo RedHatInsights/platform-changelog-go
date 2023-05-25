@@ -23,3 +23,15 @@ services:
     gl_repo: https://gitlab.cee.redhat.com/insights-platform/insights-engine
     branch: master 
     namespace: engine-prod
+  cloud-connector:
+    display_name: Cloud Connector
+    tenant: Insights
+    gh_repo: https://github.com/RedHatInsights/cloud-connector
+    branch: master 
+    namespace: cloud-connector-stage
+  cloud-connector-stage:
+    display_name: Cloud Connector Stage
+    tenant: Insights
+    gh_repo: https://github.com/RedHatInsights/cloud-connector
+    branch: master 
+    namespace: cloud-connector-stage
