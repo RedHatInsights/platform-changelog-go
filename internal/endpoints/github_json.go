@@ -19,7 +19,7 @@ import (
 // on each push to a monitored branch (configured in app-interface)
 
 type GithubPayload *struct {
-	Timestamp *time.Time     `json:"timestamp"`
+	Timestamp time.Time      `json:"timestamp"`
 	App       string         `json:"app"`
 	Repo      string         `json:"repo,omitempty"`
 	MergedBy  string         `json:"merged_by,omitempty"`
@@ -27,10 +27,10 @@ type GithubPayload *struct {
 }
 
 type GithubCommit struct {
-	Timestamp *time.Time `json:"timestamp"`
-	Ref       string     `json:"ref"`
-	Author    string     `json:"author,omitempty"`
-	Message   string     `json:"message,omitempty"`
+	Timestamp time.Time `json:"timestamp"`
+	Ref       string    `json:"ref"`
+	Author    string    `json:"author,omitempty"`
+	Message   string    `json:"message,omitempty"`
 }
 
 func decodeGithubJSONBody(w http.ResponseWriter, r *http.Request) (GithubPayload, error) {
@@ -108,7 +108,7 @@ func (eh *EndpointHandler) GithubJenkins(w http.ResponseWriter, r *http.Request)
 
 // Validate the payload contains necessary data
 func validateGithubPayload(payload GithubPayload) error {
-	if payload.Timestamp == nil {
+	if payload.Timestamp.IsZero() {
 		return fmt.Errorf("timestamp is required")
 	}
 
@@ -125,7 +125,7 @@ func validateGithubPayload(payload GithubPayload) error {
 	}
 
 	for _, commit := range payload.Commits {
-		if commit.Timestamp == nil {
+		if commit.Timestamp.IsZero() {
 			return fmt.Errorf("all commits need a timestamp")
 		}
 
@@ -162,7 +162,7 @@ func convertGithubPayloadToTimelines(conn db.DBConnector, payload GithubPayload)
 	for _, commit := range payload.Commits {
 		commits = append(commits, models.Timelines{
 			ServiceID: service.ID,
-			Timestamp: *commit.Timestamp,
+			Timestamp: commit.Timestamp,
 			Type:      "commit",
 			Repo:      service.Name,
 			Ref:       commit.Ref,
