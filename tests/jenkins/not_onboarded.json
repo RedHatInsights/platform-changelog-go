@@ -1,0 +1,14 @@
+{
+    "app": "platform-changelog",
+    "repo": "https://github.com/RedHatInsights/platform-changelog-go",
+    "merged_by": "Jane Doe",
+    "timestamp": "2019-08-01T00:00:00Z",
+    "commits": [
+        {
+            "timestamp": "2019-08-01T00:00:00Z",
+            "ref": "3adfljk324",
+            "author": "John Doe",
+            "message": "Fix"
+        }
+    ]
+}

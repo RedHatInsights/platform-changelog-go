@@ -24,6 +24,16 @@ var (
 		Help: "Number of incoming webhook errors",
 	}, []string{"source", "method", "user_agent"})
 
+	jenkins = pa.NewCounterVec(p.CounterOpts{
+		Name: "platform_changelog_jenkins",
+		Help: "Number of jenkins endpoint hits",
+	}, []string{"source", "method", "user_agent"})
+
+	jenkinsErrors = pa.NewCounterVec(p.CounterOpts{
+		Name: "platform_changelog_jenkins_errors",
+		Help: "Number of jenkins endpoint errors",
+	}, []string{"source", "method", "user_agent"})
+
 	tekton = pa.NewCounterVec(p.CounterOpts{
 		Name: "platform_changelog_tekton_runs",
 		Help: "Number of tekton runs",
@@ -114,6 +124,14 @@ func IncWebhooks(source string, method string, userAgent string, err bool) {
 		webhooks.With(p.Labels{"source": source, "method": method, "user_agent": userAgent}).Inc()
 	} else {
 		webhookErrors.With(p.Labels{"source": source, "method": method, "user_agent": userAgent}).Inc()
+	}
+}
+
+func IncJenkins(source string, method string, userAgent string, err bool) {
+	if !err {
+		jenkins.With(p.Labels{"source": source, "method": method, "user_agent": userAgent}).Inc()
+	} else {
+		jenkinsErrors.With(p.Labels{"source": source, "method": method, "user_agent": userAgent}).Inc()
 	}
 }
 
