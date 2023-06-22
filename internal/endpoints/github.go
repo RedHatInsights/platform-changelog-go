@@ -1,112 +1,176 @@
 package endpoints
 
 import (
+	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"strings"
+	"time"
 
-	"github.com/google/go-github/v50/github"
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
+	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
-	m "github.com/redhatinsights/platform-changelog-go/internal/models"
+	"github.com/redhatinsights/platform-changelog-go/internal/models"
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
-	"github.com/redhatinsights/platform-changelog-go/internal/utils"
 )
 
-// GithubWebhook gets data from the webhook and enters it into the DB
-func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request) {
+// This endpoint is different than the github and gitlab endpoints
+// This will be used as a part of the Jenkins pipeline
+// on each push to a monitored branch (configured in app-interface)
 
-	var err error
-	var payload []byte
+type GithubPayload *struct {
+	Timestamp time.Time      `json:"timestamp"`
+	App       string         `json:"app"`
+	Repo      string         `json:"repo,omitempty"`
+	MergedBy  string         `json:"merged_by,omitempty"`
+	Commits   []GithubCommit `json:"commits"`
+}
 
-	metrics.IncWebhooks("github", r.Method, r.UserAgent(), false)
+type GithubCommit struct {
+	Timestamp time.Time `json:"timestamp"`
+	Ref       string    `json:"ref"`
+	Author    string    `json:"author,omitempty"`
+	Message   string    `json:"message,omitempty"`
+}
 
-	services := config.Get().Services
-
-	if config.Get().SkipWebhookValidation {
-		l.Log.Info("skipping webhook validation")
-		payload, err = ioutil.ReadAll(r.Body)
-	} else {
-		if config.Get().GithubWebhookSecretKey == "" {
-			l.Log.Error("invalid or missing github webhook secret key")
-			writeResponse(w, http.StatusInternalServerError, `{"msg": "server has an invalid or missing github webhook secret key"}`)
-			metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
-			return
-		}
-
-		payload, err = github.ValidatePayload(r, []byte(config.Get().GithubWebhookSecretKey))
+func decodeGithubJSONBody(w http.ResponseWriter, r *http.Request) (GithubPayload, error) {
+	if r.Header.Get("Content-Type") != "application/json" {
+		return nil, fmt.Errorf("invalid Content-Type")
 	}
+
+	if r.Body == nil {
+		return nil, fmt.Errorf("json body required")
+	}
+
+	var payload GithubPayload
+
+	dec := json.NewDecoder(r.Body)
+	dec.DisallowUnknownFields()
+
+	if !dec.More() {
+		return nil, fmt.Errorf("empty json body provided")
+	}
+
+	err := dec.Decode(&payload)
+	if err != nil {
+		return nil, err
+	}
+
+	return payload, nil
+}
+
+func (eh *EndpointHandler) Github(w http.ResponseWriter, r *http.Request) {
+	metrics.IncJenkins("github", r.Method, r.UserAgent(), false)
+
+	// log everything for now
+	l.Log.Info("Github Jenkins run received")
+	l.Log.Info(r.Body)
+
+	payload, err := decodeGithubJSONBody(w, r)
+	if err != nil {
+		l.Log.Error(err)
+		metrics.IncJenkins("github", r.Method, r.UserAgent(), true)
+		writeResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	defer r.Body.Close()
+
+	err = validateGithubPayload(payload)
 
 	if err != nil {
 		l.Log.Error(err)
-		writeResponse(w, http.StatusUnauthorized, fmt.Sprintf(`{"msg": "%s"}`, err.Error()))
-		metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
+		metrics.IncJenkins("github", r.Method, r.UserAgent(), true)
+		writeResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	defer r.Body.Close()
 
-	event, err := github.ParseWebHook(github.WebHookType(r), payload)
+	commits, err := convertGithubPayloadToTimelines(eh.conn, payload)
+
 	if err != nil {
-		l.Log.Errorf("could not parse webhook: err=%s\n", err)
-		writeResponse(w, http.StatusBadRequest, `{"msg": "could not parse webhook"}`)
-		metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
+		l.Log.Error(err)
+		metrics.IncJenkins("github", r.Method, r.UserAgent(), true)
+		writeResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	switch e := event.(type) {
-	case *github.PingEvent:
-		writeResponse(w, http.StatusOK, `{"msg": "ok"}`)
-		return
-	case *github.PushEvent:
-		for key, service := range services {
-			if service.GHRepo == e.Repo.GetURL() {
-				s, _, _ := eh.conn.GetServiceByName(key)
-				if s.Branch != strings.Split(utils.DerefString(e.Ref), "/")[2] {
-					l.Log.Info("Branch mismatch: ", s.Branch, " != ", strings.Split(utils.DerefString(e.Ref), "/")[2])
-					writeResponse(w, http.StatusOK, `{"msg": "Not a monitored branch"}`)
-					return
-				}
-				commitData := getCommitData(e, s)
-				err := eh.conn.CreateCommitEntry(commitData)
-				if err != nil {
-					l.Log.Errorf("Failed to insert webhook data: %v", err)
-					metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
-					writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert webhook data"}`)
-					return
-				}
-				l.Log.Infof("Created %d commit entries for %s", len(commitData), key)
-				writeResponse(w, http.StatusOK, `{"msg": "ok"}`)
-				return
-			}
-		}
-		// catch for if the service is not registered
-		l.Log.Infof("Service not found for %s", e.Repo.GetURL())
-		writeResponse(w, http.StatusOK, `{"msg": "The service is not registered"}`)
-		return
-	default:
-		l.Log.Errorf("Event type %T not supported", e)
-		writeResponse(w, http.StatusOK, `{"msg": "Event from this repo is not a push event"}`)
+	err = eh.conn.CreateCommitEntry(commits)
+
+	if err != nil {
+		l.Log.Error(err)
+		metrics.IncJenkins("github", r.Method, r.UserAgent(), true)
+		writeResponse(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	writeResponse(w, http.StatusOK, `{"msg": "Commit info received"}`)
 }
 
-func getCommitData(g *github.PushEvent, s structs.ServicesData) []m.Timelines {
-	var commits []m.Timelines
-	for _, commit := range g.Commits {
-		record := m.Timelines{
-			ServiceID: s.ID,
-			Repo:      utils.DerefString(g.GetRepo().Name),
-			Ref:       commit.GetID(),
-			Type:      "commit",
-			Timestamp: commit.Timestamp.Time,
-			Author:    utils.DerefString(commit.GetAuthor().Login),
-			MergedBy:  g.Pusher.GetName(),
-			Message:   commit.GetMessage(),
-		}
-		commits = append(commits, record)
+// Validate the payload contains necessary data
+func validateGithubPayload(payload GithubPayload) error {
+	if payload.Timestamp.IsZero() {
+		return fmt.Errorf("timestamp is required")
 	}
 
-	return commits
+	if payload.App == "" {
+		return fmt.Errorf("app is required")
+	}
+
+	if payload.Commits == nil {
+		return fmt.Errorf("commits is required")
+	}
+
+	if len(payload.Commits) == 0 {
+		return fmt.Errorf("commits should not be empty")
+	}
+
+	for _, commit := range payload.Commits {
+		if commit.Timestamp.IsZero() {
+			return fmt.Errorf("all commits need a timestamp")
+		}
+
+		if commit.Ref == "" {
+			return fmt.Errorf("all commits need a ref")
+		}
+	}
+
+	return nil
+}
+
+// Converting from GithubPayload struct to Timeline model
+func convertGithubPayloadToTimelines(conn db.DBConnector, payload GithubPayload) (commits []models.Timelines, err error) {
+	services := config.Get().Services
+
+	// find the service
+	var service structs.ServicesData
+
+	for key, s := range services {
+		if s.GHRepo == payload.Repo { // match on the github repo, unlike tekton
+			service, _, err = conn.GetServiceByName(key)
+
+			if err != nil {
+				return commits, err
+			}
+		}
+	}
+
+	if service == (structs.ServicesData{}) {
+		// create the service?
+		return commits, fmt.Errorf("app %s is not onboarded", payload.App)
+	}
+
+	for _, commit := range payload.Commits {
+		commits = append(commits, models.Timelines{
+			ServiceID: service.ID,
+			Timestamp: commit.Timestamp,
+			Type:      "commit",
+			Repo:      service.Name,
+			Ref:       commit.Ref,
+			Author:    commit.Author,
+			MergedBy:  payload.MergedBy,
+			Message:   commit.Message,
+		})
+	}
+
+	return commits, nil
 }

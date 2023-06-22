@@ -251,17 +251,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Message'
-  /github-jenkins:
+  /github:
     post:
       description: Create a new Github commit from Jenkins job
-      operationId: post.githubJenkins
+      operationId: post.github
       requestBody:
         description: Simple JSON Data from commit Jenkins job
         required: true
         content:
           appplication/json:
             schema:
-              $ref: '#/components/schemas/JenkinsPayload'
+              $ref: '#/components/schemas/GithubPayload'
       responses:
         '200':
           description: OK message
@@ -403,7 +403,7 @@ components:
           description: Message text
       required:
         - msg
-    JenkinsPayload:
+    GithubPayload:
       type: object
       properties:
         app:

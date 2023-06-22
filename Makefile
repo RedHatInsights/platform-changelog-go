@@ -50,6 +50,10 @@ check-db:
 
 	psql -h ${POSTGRES_HOST} --user ${POSTGRES_USER} --db ${POSTGRES_DB}
 
+test-github:
+
+	curl -X POST http://localhost:8000/api/v1/github --data "@tests/jenkins/github_dump.json" -H "Content-Type: application/json"
+
 test-github-webhook:
 
 	curl -X POST -H "X-Hub-Signature-256: sha256=$(GITHUB_WEBHOOK_SIGNATURE)" -H "X-Github-Event: push"   -H "Content-Type: application/json" --data-binary "@tests/github_webhook.json" http://localhost:8000/api/v1/github-webhook
@@ -57,10 +61,6 @@ test-github-webhook:
 test-gitlab-webhook:
 
 	curl -X POST -H "X-Gitlab-Token: $(GITLAB_WEBHOOK_KEY)" -H "X-Gitlab-Event: Push Hook" -H "Content-Type: application/json" --data "@tests/gitlab_webhook.json" http://localhost:8000/api/v1/gitlab-webhook
-
-test-github-json:
-
-	curl -X POST http://localhost:8000/api/v1/github --data "@tests/github_dump.json" -H "Content-Type: application/json"
 
 test-tekton-task:
 
