@@ -470,6 +470,45 @@
         }
       }
     },
+    "/github": {
+      "post": {
+        "description": "Create a new Github commit from Jenkins job",
+        "operationId": "post.github",
+        "requestBody": {
+          "description": "Simple JSON Data from commit Jenkins job",
+          "required": true,
+          "content": {
+            "appplication/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GithubPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "An Error has occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tekton": {
       "post": {
         "description": "Report a new deployment through Tekton",
@@ -659,6 +698,45 @@
         "required": [
           "msg"
         ]
+      },
+      "GithubPayload": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "type": "string"
+          },
+          "repo": {
+            "type": "string"
+          },
+          "merged_by": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "commits": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "timestamp": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "ref": {
+                  "type": "string"
+                },
+                "author": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       },
       "TektonPayload": {
         "type": "object",

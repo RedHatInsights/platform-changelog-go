@@ -31,7 +31,7 @@ var _ = Describe("Handler", func() {
 			handler := endpoints.NewHandler(dbConnector)
 
 			// create a request
-			req, err := http.NewRequest("POST", "/api/v1/github-jenkins", nil)
+			req, err := http.NewRequest("POST", "/api/v1/github", nil)
 			Expect(err).To(BeNil())
 
 			req.Header.Set("Content-Type", "application/json")
@@ -39,7 +39,7 @@ var _ = Describe("Handler", func() {
 			rr := httptest.NewRecorder()
 
 			router := chi.NewRouter()
-			router.Post("/api/v1/github-jenkins", handler.TektonTaskRun)
+			router.Post("/api/v1/github", handler.TektonTaskRun)
 
 			router.ServeHTTP(rr, req)
 
@@ -75,7 +75,7 @@ var _ = Describe("Handler", func() {
 		Expect(s.Name).To(Equal("rbac"))
 
 		// create a request
-		req, err := http.NewRequest("POST", "/api/v1/github-jenkins", f)
+		req, err := http.NewRequest("POST", "/api/v1/github", f)
 		Expect(err).To(BeNil())
 
 		req.Header.Set("Content-Type", "application/json")
@@ -83,7 +83,7 @@ var _ = Describe("Handler", func() {
 		rr := httptest.NewRecorder()
 
 		router := chi.NewRouter()
-		router.Post("/api/v1/github-jenkins", handler.GithubJenkins)
+		router.Post("/api/v1/github", handler.Github)
 
 		router.ServeHTTP(rr, req)
 
