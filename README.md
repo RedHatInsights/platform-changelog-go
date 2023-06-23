@@ -3,20 +3,21 @@
 ## Overview
 
 The Platform Changelog is a system for keeping track of changes as they occur
-across the platform by leverage different types of notification events, such as
-Github and Gitlab webhooks, as well as Deployment Pipeline tasks.
+across the platform by leveraging different types of notification events, such as
+Github and Gitlab webhooks, as well as Tekton Pipeline tasks.
 
-This API will provide JSON responses to the requesting entity, mainly the [Platform
+This API provides JSON responses to the requesting entity, mainly the [Platform
 Changelog Frontend](https://www.github.com/redhatinsights/platform-changelog).
 
-The service supports Github and Gitlab webhooks authenticated via secret
-token, and it will eventually support Deployments hooks from Tekton.
+Github and Gitlab webhooks authenticated via secret token as described in the Git api.
 
 ## Architecture
 
 Platform Changelog is a backend API that connects to a backend database for storing
 supported incoming events. The current implementation supports a Postgres database
 and respondes to incoming requests with JSON responses.
+
+Also, we are integrating with App-SRE tooling to better capture information from RedHat tooling.
 
 A frontend application has also been developed for displaying this information in
 an easy to read, and searchable manner.
@@ -80,17 +81,21 @@ Note: This is useful to avoid having to run the database locally, but this will 
 The API should now be up and available on `localhost:8000`. You should be able to
 see the API in action by visiting `http://localhost:8000/api/v1/services`.
 
-### Testing Webhooks to the API Manually
+### Testing POST Requests to the API Manually
 
-Launch the API as instructed above, then we can send test webhooks to the API.
+Launch the API as instructed above, then we can send test requests to the API.
 
-Test webhook json is provided in the `tests` directory in this repo.
+The app is designed to take in commit and deployment data through `/api/v1/github` and `/api/v1/tekton` respectively. Using webhooks is also included, but they will not be used to track our platform.
 
-To send the webhook, you can use curl or `make test-github-webhook`. The curl command is:
+Test json is provided in the `tests` directory in this repo.
 
-`curl -X POST -H "X-Github-Event: push" -H "Content-Type: application/json" --data "@tests/github_webhook.json" http://localhost:8000/api/v1/github-webhook`
+To send the requests, you can use curl the following makefile commands: 
+- `make test-github`
+- `make test-github-webhook`
+- `make test-gitlab-webhook`
+- `make test-tekton-task`.
 
-From there, you should be able to open a browser and see the results at: http://localhost:8000/api/v1/commits. There should be commits matching the webhook data that was sent.
+From there, you should be able to open a browser and see the results populated at: http://localhost:8000/api/v1/commits. There will be commits matching the webhook data that was sent.
 
 ## Running Tests
 
