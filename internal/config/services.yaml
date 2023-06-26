@@ -1,4 +1,10 @@
 services:
+  platform-changelog:
+    display_name: Platform Changelog
+    tenant: Insights
+    gh_repo: https://github.com/RedHatInsights/platform-changelog-go
+    branch: master
+    namespace: platform-changelog-stage
   rbac:
     display_name: RBAC
     tenant: Insights
@@ -59,4 +65,15 @@ services:
     gh_repo: https://github.com/RedHatInsights/xjoin-api-gateway
     branch: master
     namespace: xjoin-stage
-  
+  host-inventory-stage:
+    display_name: Host Inventory
+    tenant: Insights
+    gh_repo: https://github.com/RedHatInsights/insights-host-inventory
+    branch: master
+    namespace: host-inventory-stage
+  advisor:
+    display_name: Advisor
+    tenant: Insights
+    gl_repo: https://gitlab.cee.redhat.com/insights-platform/advisor-backend
+    branch: master
+    namespace: advisor-stage
