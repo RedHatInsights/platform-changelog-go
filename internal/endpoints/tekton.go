@@ -120,7 +120,7 @@ func convertTektonPayloadToTimeline(conn db.DBConnector, payload TektonPayload) 
 	var deploy models.Timelines
 	// Validate that the app specified is onboarded
 	for key, service := range services {
-		if service.Namespace == payload.App {
+		if service.Name == payload.App {
 			s, _, err := conn.GetServiceByName(key)
 
 			if err != nil {
