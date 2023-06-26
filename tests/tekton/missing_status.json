@@ -1,5 +1,5 @@
 {
     "timestamp": "2022-10-16T11:51:25+05:30",
-    "app": "ingress-prod", 
+    "app": "ingress", 
     "env": "insights-prod"
 }

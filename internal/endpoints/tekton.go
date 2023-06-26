@@ -118,30 +118,29 @@ func convertTektonPayloadToTimeline(conn db.DBConnector, payload TektonPayload) 
 	services := config.Get().Services
 
 	var deploy models.Timelines
+	name := payload.App
 	// Validate that the app specified is onboarded
-	for key, service := range services {
-		if service.Name == payload.App {
-			s, _, err := conn.GetServiceByName(key)
-
-			if err != nil {
-				return deploy, err
-			}
-
-			deploy = models.Timelines{
-				ServiceID:       s.ID,
-				Timestamp:       *payload.Timestamp,
-				Type:            "deploy",
-				Repo:            s.Name,
-				Ref:             payload.Ref,
-				DeployNamespace: payload.App,
-				Cluster:         payload.Env,
-				TriggeredBy:     payload.TriggeredBy,
-				Status:          payload.Status,
-			}
-
-			return deploy, nil
-		}
+	if services[name] == (config.Service{}) {
+		return deploy, fmt.Errorf("app %s is not onboarded", name)
 	}
 
-	return deploy, fmt.Errorf("app %s is not onboarded", payload.App)
+	s, _, err := conn.GetServiceByName(name)
+
+	if err != nil {
+		return deploy, err
+	}
+
+	deploy = models.Timelines{
+		ServiceID:       s.ID,
+		Timestamp:       *payload.Timestamp,
+		Type:            "deploy",
+		Repo:            s.Name,
+		Ref:             payload.Ref,
+		DeployNamespace: payload.App,
+		Cluster:         payload.Env,
+		TriggeredBy:     payload.TriggeredBy,
+		Status:          payload.Status,
+	}
+
+	return deploy, nil
 }
