@@ -65,7 +65,7 @@ services:
     gh_repo: https://github.com/RedHatInsights/xjoin-api-gateway
     branch: master
     namespace: xjoin-stage
-  host-inventory-stage:
+  host-inventory:
     display_name: Host Inventory
     tenant: Insights
     gh_repo: https://github.com/RedHatInsights/insights-host-inventory
