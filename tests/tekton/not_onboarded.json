@@ -1,6 +1,6 @@
 {
     "timestamp": "2022-10-16T11:51:25+05:30", 
     "status": "success", 
-    "app": "ingress", 
+    "app": "not-an-app", 
     "env": "insights-prod"
 }

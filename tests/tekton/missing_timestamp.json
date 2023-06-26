@@ -1,5 +1,5 @@
 {
     "status": "success", 
-    "app": "ingress-prod", 
+    "app": "ingress", 
     "env": "insights-prod"
 }
