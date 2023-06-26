@@ -4,34 +4,59 @@ services:
     tenant: Insights
     gh_repo: https://github.com/RedHatInsights/insights-rbac
     branch: master
-    namespace: rbac-prod
+    namespace: rbac-stage
   entitlements:
     display_name: Entitlements
     tenant: Insights
     gh_repo: https://github.com/RedHatInsights/entitlements-api-go
     branch: master
-    namespace: entitlements-prod
+    namespace: entitlements-stage
   ingress:
     display_name: Ingress
     tenant: Insights
     gh_repo: https://github.com/RedHatInsights/insights-ingress-go
     branch: master
-    namespace: ingress-prod
+    namespace: ingress-stage
   insights-engine:
     display_name: Insights Engine
     tenant: Insights
     gl_repo: https://gitlab.cee.redhat.com/insights-platform/insights-engine
     branch: master 
-    namespace: engine-prod
+    namespace: engine-stage
   cloud-connector:
     display_name: Cloud Connector
     tenant: Insights
     gh_repo: https://github.com/RedHatInsights/cloud-connector
     branch: master 
     namespace: cloud-connector-stage
-  cloud-connector-stage:
-    display_name: Cloud Connector Stage
+  export-service:
+    display_name: Export Service
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/cloud-connector
-    branch: master 
-    namespace: cloud-connector-stage
+    gh_repo: https://github.com/RedHatInsights/export-service-go
+    branch: main
+    namespace: export-service-stage
+  3scale:
+    display_name: 3scale
+    tenant: Insights
+    gh_repo: https://github.com/RedHatInsights/insights-3scale
+    branch: master
+    namespace: 3scale-stage
+  playbook-dispatcher:
+    display_name: Playbook Dispatcher
+    tenant: Insights
+    gh_repo: https://github.com/RedHatInsights/playbook-dispatcher
+    branch: master
+    namespace: playbook-dispatcher-stage
+  notifications:
+    display_name: Notifications
+    tenant: Insights
+    gh_repo: https://github.com/RedHatInsights/notifications-backend
+    branch: master
+    namespace: notifications-stage
+  xjoin:
+    display_name: xjoin api gateway
+    tenant: Insights
+    gh_repo: https://github.com/RedHatInsights/xjoin-api-gateway
+    branch: master
+    namespace: xjoin-stage
+  
