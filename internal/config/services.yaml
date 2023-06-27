@@ -77,3 +77,27 @@ services:
     gl_repo: https://gitlab.cee.redhat.com/insights-platform/advisor-backend
     branch: master
     namespace: advisor-stage
+  edge:
+    display_name: Edge
+    tenant: Insights
+    gh_repo: https://github.com/RedHatInsights/edge-api
+    branch: main
+    namespace: edge-stage
+  chrome-service:
+    display_name: Chrome Service
+    tenant: Insights
+    gh_repo: https://github.com/RedHatInsights/insights-chrome
+    branch: master
+    namespace: chrome-service-stage
+  hac:
+    display_name: HAC
+    tenant: Insights
+    gh_repo: https://github.com/RedHatInsights/hac-core-frontend
+    branch: master
+    namespace: hac-stage
+  content-sources:
+    display_name: Content Sources
+    tenant: Insights
+    gh_repo: https://github.com/content-services/content-sources-backend
+    branch: main
+    namespace: content-sources-stage
