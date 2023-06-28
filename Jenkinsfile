@@ -33,25 +33,21 @@ pipeline {
         CICD_URL='https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd'
     }
     stages {
-        stage('Build the PR commit image') {
-            steps {
-                withVault([configuration: configuration, vaultSecrets: secrets]) {
-                    sh './build_deploy.sh'
+        parrallel {
+            stage('Build the PR commit image') {
+                steps {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
+                        sh './build_deploy.sh'
+                    }
+                    
+                    sh 'mkdir -p artifacts'
                 }
-                
-                sh 'mkdir -p artifacts'
             }
-        }
-
-        stage('Run Tests') {
-            parallel {
-                stage('Run unit tests') {
-                    steps {
-                        withVault([configuration: configuration, vaultSecrets: secrets]) {
-                            sh '''
-                                ginkgo -r
-                            '''
-                        }
+            
+            stage('Run Tests') {
+                steps {
+                    withVault([configuration: configuration, vaultSecrets: secrets]) {
+                        sh './unit_test.sh'
                     }
                 }
             }

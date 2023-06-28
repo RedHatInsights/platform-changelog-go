@@ -15,6 +15,12 @@ GITLAB_WEBHOOK_KEY = "0987654321"
 
 build: platform-changelog-api platform-changelog-migration
 
+install:
+	echo "Installing dependencies"
+	go get ./...
+	go install github.com/onsi/ginkgo/v2/ginkgo
+	go get github.com/onsi/gomega/...
+
 platform-changelog-api:
 	go build -o $@ cmd/api/main.go
 
@@ -25,10 +31,6 @@ lint:
 
 	gofmt -l .
 	gofmt -s -w .
-
-test:
-
-	go test -p 1 -v ./...
 
 run-migration: platform-changelog-migration
 
@@ -49,6 +51,9 @@ run-db:
 check-db:
 
 	psql -h ${POSTGRES_HOST} --user ${POSTGRES_USER} --db ${POSTGRES_DB}
+
+test:
+	ginkgo -r
 
 test-github:
 
