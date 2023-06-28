@@ -1,0 +1,8 @@
+FROM registry.access.redhat.com/ubi8/go-toolset:latest
+
+# FROM registry.redhat.io/ubi8/ubi-minimal:latest
+
+WORKDIR "$HOME/platform-changelog-go"
+
+USER 0
+COPY . /workdir
