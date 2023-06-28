@@ -34,7 +34,7 @@ pipeline {
     }
     stages {
         stage('Pipeline') {
-            parrallel {
+            parallel {
                 stage('Build the PR commit image') {
                     steps {
                         withVault([configuration: configuration, vaultSecrets: secrets]) {
