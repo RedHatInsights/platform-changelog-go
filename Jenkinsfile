@@ -21,33 +21,35 @@ pipeline {
         // --------------------------------------------
         // Options that must be configured by app owner
         // --------------------------------------------
-        export APP_NAME="platform-changelog"  // name of app-sre "application" folder this component lives in
-        export COMPONENT_NAME="platform-changelog-go"  // name of app-sre "resourceTemplate" in deploy.yaml for this component
-        export IMAGE="quay.io/cloudservices/platform-changelog-go"  
+        APP_NAME="platform-changelog"  // name of app-sre "application" folder this component lives in
+        COMPONENT_NAME="platform-changelog-go"  // name of app-sre "resourceTemplate" in deploy.yaml for this component
+        IMAGE="quay.io/cloudservices/platform-changelog-go"  
 
-        export IQE_PLUGINS="platform-changelog"
-        export IQE_MARKER_EXPRESSION="smoke"
-        export IQE_FILTER_EXPRESSION=""
-        export IQE_CJI_TIMEOUT="30m"
+        IQE_PLUGINS="platform-changelog"
+        IQE_MARKER_EXPRESSION="smoke"
+        IQE_FILTER_EXPRESSION=""
+        IQE_CJI_TIMEOUT="30m"
 
         CICD_URL='https://raw.githubusercontent.com/RedHatInsights/bonfire/master/cicd'
     }
     stages {
-        parrallel {
-            stage('Build the PR commit image') {
-                steps {
-                    withVault([configuration: configuration, vaultSecrets: secrets]) {
-                        sh './build_deploy.sh'
+        stage('Pipeline') {
+            parrallel {
+                stage('Build the PR commit image') {
+                    steps {
+                        withVault([configuration: configuration, vaultSecrets: secrets]) {
+                            sh './build_deploy.sh'
+                        }
+                        
+                        sh 'mkdir -p artifacts'
                     }
-                    
-                    sh 'mkdir -p artifacts'
                 }
-            }
-            
-            stage('Run Tests') {
-                steps {
-                    withVault([configuration: configuration, vaultSecrets: secrets]) {
-                        sh './unit_test.sh'
+                
+                stage('Run Tests') {
+                    steps {
+                        withVault([configuration: configuration, vaultSecrets: secrets]) {
+                            sh './unit_test.sh'
+                        }
                     }
                 }
             }
