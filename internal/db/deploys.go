@@ -11,9 +11,7 @@ func (conn *DBConnectorImpl) CreateDeployEntry(deploy models.Timelines) error {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlCreateCommitEntry)
 	defer callDurationTimer.ObserveDuration()
 
-	conn.db = conn.db.Create(&deploy)
-
-	return conn.db.Error
+	return conn.db.Create(&deploy).Error
 }
 
 func (conn *DBConnectorImpl) GetDeploysAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
