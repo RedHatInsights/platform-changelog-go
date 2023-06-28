@@ -31,7 +31,6 @@ TEST_CONTAINER_NAME="changelog-$(get_N_chars_commit_hash 7)"
 docker run -d --name "$TEST_CONTAINER_NAME" \
     "$GO_TOOLSET_IMAGE" sleep infinity
 
-docker exec "$TEST_CONTAINER_NAME" mkdir -p /workdir
 docker cp -a . "$TEST_CONTAINER_NAME:/workdir"
 
 docker exec --workdir /workdir "$TEST_CONTAINER_NAME" make install > 'artifacts/install_logs.txt'
