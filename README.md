@@ -2,33 +2,77 @@
 
 ## Overview
 
-The Platform Changelog is a system for keeping track of changes as they occur
-across the platform by leveraging different types of notification events, such as
-Github and Gitlab webhooks, as well as Tekton Pipeline tasks.
+[Platform Changelog](changelog.stage.devshift.net) is a system for tracking changes as they occur
+across the platform through different types of events, such as
+webhooks, Tekton task runs, and Jenkins jobs.
 
 This API provides JSON responses to the requesting entity, mainly the [Platform
 Changelog Frontend](https://www.github.com/redhatinsights/platform-changelog).
 
-Github and Gitlab webhooks authenticated via secret token as described in the Git api.
+Github and Gitlab webhooks are authenticated via secret token as described in the Git api.
 
 ## Architecture
 
-Platform Changelog is a backend API that connects to a backend database for storing
-supported incoming events. The current implementation supports a Postgres database
-and respondes to incoming requests with JSON responses.
+Platform Changelog is a backend API that uses a database for storing
+incoming events. The current implementation supports a Postgres database
+and responds to incoming requests with JSON responses.
 
-Also, we are integrating with App-SRE tooling to better capture information from RedHat tooling.
+This app is intended to be used behind authentication such as OAuth Proxy. This allows the app to be publicly accessible on changelog.devshift.net, while also being authenticated. The setup for this is in the frontend repo.
 
-A frontend application has also been developed for displaying this information in
-an easy to read, and searchable manner.
+Our App-SRE has created tooling for connecting to commit and deployment events 
+(as designated in changelog as timelines).
+
+On each commit merged to a monitored branch, we recieve a request from the corresponding Jenkins job.
+
+On every deployment, we use a Tekton task to recieve informatin on the app including:
+- App
+- Namespace
+- Environment
+- Timestamp of completetd deployment
+- Commit ref (in the future)
 
 ## REST API Endpoint
 
-TODO: API Spec
+Refer to the [OpenAPI](https://github.com/RedHatInsights/platform-changelog-go/blob/main/schema/openapi.yaml) for parameter details.
 
-## Adding A Service
+### Services
+`/api/v1/services/`
+Gets a list of services with their most recent commit and deployment
+`/api/v1/services/{name}`
+Gets all of a services fields
+`/api/v1/services/{name}/timelines`; `/api/v1/services/{name}/commits`; `/api/v1/services/{name}/deploys`
+Gets all of a service's timelines (commits and deployments) or commits or deployments only
 
-To add a service to be supported by platform-changelog, follow these steps:
+### Timelines
+`/api/v1/commits/`
+Gets all commits
+`/api/v1/deploys/`
+Gets all deploys
+`/api/v1/timelines/`
+Gets all timelines (commits and deployments)
+
+
+### Posting Timelines
+`/api/v1/github`
+Sends commit information. Follow `make test-github` for an example request.
+`/api/v1/tekton`
+Sends deployment information. Follow `make test-tekton-task` for an example request.
+
+`/api/v1/github-webhook`
+Sends github commits from a webhook; authentication needed (as per Github api).
+Follow the Makefile's `make test-github-webhook` for usage.
+`/api/v1/gitlab-webhook`
+Sends gitlab commits from a webhook; authentication needed (as per Github api)
+Follow the Makefile's `make test-gitlab-webhook` for usage.
+
+### Deleting data
+The app has no DELETE requests; instead, we use a [cron-job](https://github.com/RedHatInsights/platform-changelog-go/blob/main/tools/cron-job.sh) to remove old timelines.
+
+## Onboarding a Service
+
+If your service is deployed through App-sre, it will be onboarded automatically as information is recieved. If it is not, then manual onboarding with Github or Gitlab webhooks is required
+
+For manual onboarding, follow these steps:
 
 1. Add your tenant to `internal/config/tenant.yaml` if it is not included.
   ```yaml
@@ -97,9 +141,11 @@ To send the requests, you can use curl the following makefile commands:
 
 From there, you should be able to open a browser and see the results populated at: http://localhost:8000/api/v1/commits. There will be commits matching the webhook data that was sent.
 
-## Running Tests
+## Running Unit Tests
 
-TODO: Get some tests in here
+Aside from the endpoint tests in the Makefile, our unit tests use the Ginkgo testing framework. The service is still in development, so there are not many tests available.
+
+Use `make test` to run all unit tests.
 
 # Get Help
 
