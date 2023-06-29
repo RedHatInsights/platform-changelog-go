@@ -2,7 +2,7 @@
 
 ## Overview
 
-[Platform Changelog](changelog.stage.devshift.net) is a system for tracking changes as they occur
+[Platform Changelog](https://changelog.stage.devshift.net) is a system for tracking changes as they occur
 across the platform through different types of events, such as
 webhooks, Tekton task runs, and Jenkins jobs.
 
