@@ -26,7 +26,7 @@ const (
 
 type Timelines struct {
 	ID              int          `gorm:"primary_key;autoincrement" json:"id"`
-	ServiceID       int          `gorm:"not null;foreign_key:services.id" json:"service_id"`
+	ServiceID       int          `gorm:"not null" json:"service_id"`
 	Timestamp       time.Time    `gorm:"not null" json:"timestamp"`
 	Type            timelineType `gorm:"not null" json:"type" sql:"type:timeline_type"`
 	Repo            string       `gorm:"not null" json:"repo"`

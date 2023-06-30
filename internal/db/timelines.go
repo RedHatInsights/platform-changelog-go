@@ -55,7 +55,7 @@ func (conn *DBConnectorImpl) GetTimelinesByService(service structs.ServicesData,
 	db = FilterTimelineByDate(db, q.StartDate, q.EndDate)
 
 	db.Model(&timelines).Count(&count)
-	result := conn.db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&timelines)
+	result := db.Order("Timestamp desc").Limit(limit).Offset(offset).Find(&timelines)
 
 	return timelines, count, result.Error
 }
