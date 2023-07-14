@@ -44,7 +44,8 @@ func (conn *DBConnectorImpl) GetServicesAll(offset int, limit int, q structs.Que
 	// Uses the Services model here to reflect the proper db relation
 	db.Model(models.Services{}).Count(&count)
 
-	result := db.Limit(limit).Offset(offset).Find(&services)
+	// TODO: add a sort_by field to the query struct
+	result := db.Order("ID desc").Limit(limit).Offset(offset).Find(&services)
 
 	var servicesWithTimelines []structs.ExpandedServicesData
 	for i := 0; i < len(services); i++ {
