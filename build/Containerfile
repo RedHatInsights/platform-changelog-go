@@ -6,7 +6,7 @@ COPY . .
 USER 0
 
 RUN go get -d ./... && \
-    go build -o platform-changelog cmd/main.go
+    go build -o platform-changelog cmd/*.go
 
 
 FROM registry.access.redhat.com/ubi8-minimal:latest

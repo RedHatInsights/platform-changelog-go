@@ -12,7 +12,7 @@ services:
            DB_HOST: "localhost"
            DB_NAME: "gumbaroo"
        command:
-           - /platform-changelog-api
+           - /platform-changelog
        depends_on:
            - platform-changelog-db
    platform-changelog-db:
