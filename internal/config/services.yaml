@@ -45,7 +45,7 @@ services:
     display_name: 3scale
     tenant: Insights
     gh_repo: https://github.com/RedHatInsights/insights-3scale
-    branch: main
+    branch: master
     namespace: 3scale-stage
   playbook-dispatcher:
     display_name: Playbook Dispatcher
