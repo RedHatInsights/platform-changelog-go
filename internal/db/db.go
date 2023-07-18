@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 
@@ -17,6 +18,41 @@ type DBConnectorImpl struct {
 }
 
 func NewDBConnector(cfg *config.Config) *DBConnectorImpl {
+	dsn, err := buildPostgresDSN(cfg)
+	if err != nil {
+		l.Log.Fatal("Error building postgres DSN: ", err)
+		return nil
+	}
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		l.Log.Fatal(err)
+	}
+
+	l.Log.Info("DB initialization complete")
+
+	return &DBConnectorImpl{db: db}
+}
+
+func OpenPostgresDB(cfg *config.Config) (*sql.DB, error) {
+	dsn, err := buildPostgresDSN(cfg)
+	if err != nil {
+		l.Log.Fatal("Error building postgres DSN: ", err)
+		return nil, err
+	}
+
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		l.Log.Fatal("Error opening DB: ", err)
+		return nil, err
+	}
+
+	l.Log.Info("DB initialization complete")
+
+	return db, nil
+}
+
+func buildPostgresDSN(cfg *config.Config) (string, error) {
 	var (
 		user     = cfg.DatabaseConfig.DBUser
 		password = cfg.DatabaseConfig.DBPassword
@@ -27,20 +63,10 @@ func NewDBConnector(cfg *config.Config) *DBConnectorImpl {
 
 	sslConfigString, err := buildPostgresSslConfigString(cfg)
 	if err != nil {
-		l.Log.Fatal("Error building postgres ssl config string: ", err)
-		return nil
+		return "", err
 	}
 
-	dsn := fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s %s", user, password, dbname, host, port, sslConfigString)
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		l.Log.Fatal(err)
-	}
-
-	l.Log.Info("DB initialization complete")
-
-	return &DBConnectorImpl{db: db}
+	return fmt.Sprintf("user=%s password=%s dbname=%s host=%s port=%s %s", user, password, dbname, host, port, sslConfigString), nil
 }
 
 func buildPostgresSslConfigString(cfg *config.Config) (string, error) {

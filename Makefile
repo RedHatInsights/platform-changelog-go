@@ -13,7 +13,10 @@ GITLAB_WEBHOOK_KEY = "0987654321"
 
 .PHONY: build
 
-build: platform-changelog-api platform-changelog-migration
+build: platform-changelog
+
+platform-changelog:
+	go build -o $@ cmd/main.go
 
 install:
 	echo "Installing dependencies"
@@ -21,26 +24,24 @@ install:
 	go install github.com/onsi/ginkgo/v2/ginkgo
 	go get github.com/onsi/gomega/...
 
-platform-changelog-api:
-	go build -o $@ cmd/api/main.go
-
-platform-changelog-migration:
-	go build -o $@ internal/migration/main.go
-
 lint:
-
 	gofmt -l .
 	gofmt -s -w .
 
-run-migration: platform-changelog-migration
+run-migration:
+	./platform-changelog migrate up
 
-	./platform-changelog-migration
+run-migration-down:
+	./platform-changelog migrate down
 
-run-api: platform-changelog-api
+run-seed:
+	./platform-changelog seed
+
+run-api: platform-changelog
 
 	GITHUB_WEBHOOK_SECRET_TOKEN=$(GITHUB_WEBHOOK_KEY) GITLAB_WEBHOOK_SECRET_TOKEN=$(GITLAB_WEBHOOK_KEY) ./platform-changelog-api
 
-run-api-mock: platform-changelog-api
+run-api-mock: platform-changelog
 
 	GITHUB_WEBHOOK_SECRET_TOKEN=$(GITHUB_WEBHOOK_KEY) GITLAB_WEBHOOK_SECRET_TOKEN=$(GITLAB_WEBHOOK_KEY) DB_IMPL=mock ./platform-changelog-api
 
