@@ -18,6 +18,7 @@
 go.work
 
 # built executables
+platform-changelog
 platform-changelog-api
 platform-changelog-migration
 main

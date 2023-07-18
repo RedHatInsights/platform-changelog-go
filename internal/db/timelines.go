@@ -70,3 +70,9 @@ func (conn *DBConnectorImpl) GetTimelineByRef(ref string) (models.Timelines, int
 
 	return timeline, result.RowsAffected, result.Error
 }
+
+func (conn *DBConnectorImpl) DeleteTimelinesByService(service structs.ServicesData) error {
+	result := conn.db.Model(models.Timelines{}).Where("service_id = ?", service.ID).Delete(&models.Timelines{})
+
+	return result.Error
+}

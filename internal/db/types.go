@@ -8,6 +8,8 @@ import (
 
 type DBConnector interface {
 	CreateServiceTableEntry(name string, s config.Service) (models.Services, error)
+	UpdateServiceTableEntry(name string, s config.Service) (service models.Services, err error)
+	DeleteServiceTableEntry(name string) (structs.ServicesData, error)
 	GetServicesAll(offset int, limit int, q structs.Query) ([]structs.ExpandedServicesData, int64, error)
 	GetLatest(service structs.ExpandedServicesData) (structs.ExpandedServicesData, error, error)
 	GetServiceByName(name string) (structs.ServicesData, int64, error)
@@ -16,6 +18,7 @@ type DBConnector interface {
 	GetTimelinesAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
 	GetTimelinesByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
 	GetTimelineByRef(ref string) (models.Timelines, int64, error)
+	DeleteTimelinesByService(service structs.ServicesData) error
 
 	CreateCommitEntry(timeline []models.Timelines) error
 	GetCommitsAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)

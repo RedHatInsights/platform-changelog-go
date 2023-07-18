@@ -16,7 +16,7 @@ GITLAB_WEBHOOK_KEY = "0987654321"
 build: platform-changelog
 
 platform-changelog:
-	go build -o $@ cmd/main.go
+	go build -o $@ cmd/*.go
 
 install:
 	echo "Installing dependencies"

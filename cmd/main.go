@@ -53,9 +53,9 @@ func createCommands(cfg *config.Config) *cobra.Command {
 	var seedCmd = &cobra.Command{
 		Use:   "seed",
 		Short: "Seeds the DB with the services from the config",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("Seeding DB")
-			return seedDB(cfg)
+			seedDB(cfg)
 		},
 	}
 

@@ -199,6 +199,14 @@ func (conn *MockDBConnector) CreateServiceTableEntry(name string, s config.Servi
 	return newService, nil
 }
 
+func (conn *MockDBConnector) UpdateServiceTableEntry(name string, s config.Service) (models.Services, error) {
+	return models.Services{}, nil
+}
+
+func (conn *MockDBConnector) DeleteServiceTableEntry(name string) (structs.ServicesData, error) {
+	return structs.ServicesData{}, nil
+}
+
 func (conn *MockDBConnector) GetServicesAll(offset int, limit int, q structs.Query) ([]structs.ExpandedServicesData, int64, error) {
 	servicesWithTimelines := []structs.ExpandedServicesData{}
 
@@ -348,6 +356,11 @@ func filterTimeline(timeline models.Timelines, q structs.Query) bool {
 	}
 
 	return true
+}
+
+func (conn *MockDBConnector) DeleteTimelinesByService(services structs.ServicesData) error {
+	// no need to implement now
+	return nil
 }
 
 func (conn *MockDBConnector) CreateDeployEntry(timeline models.Timelines) error {

@@ -23,6 +23,24 @@ func (conn *DBConnectorImpl) UpdateServiceTableEntry(name string, s config.Servi
 	return newService, results.Error
 }
 
+func (conn *DBConnectorImpl) DeleteServiceTableEntry(name string) (structs.ServicesData, error) {
+	// save the service to delete the timelines
+	service, _, _ := conn.GetServiceByName(name)
+
+	results := conn.db.Model(models.Services{}).Where("name = ?", name).Delete(&models.Services{})
+	if results.Error != nil {
+		return structs.ServicesData{}, results.Error
+	}
+
+	// delete the timelines for the service
+	err := conn.DeleteTimelinesByService(service)
+	if err != nil {
+		return structs.ServicesData{}, err
+	}
+
+	return service, results.Error
+}
+
 func (conn *DBConnectorImpl) GetServicesAll(offset int, limit int, q structs.Query) ([]structs.ExpandedServicesData, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServicesAll)
 	defer callDurationTimer.ObserveDuration()
@@ -73,6 +91,12 @@ func (conn *DBConnectorImpl) GetLatest(service structs.ExpandedServicesData) (st
 	depResult := conn.db.Model(models.Timelines{}).Select("*").Joins("JOIN services ON timelines.service_id = services.id").Where("services.name = ?", service.Name).Where("timelines.type = ?", "deploy").Order("Timestamp desc").Limit(1).Find(&service.Deploy)
 
 	return service, comResult.Error, depResult.Error
+}
+
+func (conn *DBConnectorImpl) GetServiceNames() ([]string, error) {
+	var names []string
+	result := conn.db.Model(models.Services{}).Pluck("name", &names)
+	return names, result.Error
 }
 
 func (conn *DBConnectorImpl) GetServiceByName(name string) (structs.ServicesData, int64, error) {

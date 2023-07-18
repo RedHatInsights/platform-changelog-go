@@ -4,27 +4,37 @@ import (
 	"errors"
 
 	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/logging"
+	"github.com/sirupsen/logrus"
 )
 
 var (
 	migrationsPath = "file://migrations"
 )
 
+type loggerWrapper struct {
+	*logrus.Logger
+}
+
+func (lw loggerWrapper) Verbose() bool {
+	return true
+}
+
 func migrateDB(cfg *config.Config, direction string) error {
 	logging.Log.Info("Migrating DB")
 
-	postgres, err := db.OpenPostgresDB(cfg)
+	gres, err := db.OpenPostgresDB(cfg)
 	if err != nil {
 		logging.Log.Error(err)
 		return err
 	}
 
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	driver, err := postgres.WithInstance(gres, &postgres.Config{})
 	if err != nil {
 		logging.Log.Error("Error creating postgres driver: ", err)
 		return err
@@ -36,7 +46,7 @@ func migrateDB(cfg *config.Config, direction string) error {
 		return err
 	}
 
-	m.Log = logging.Log
+	m.Log = loggerWrapper{logging.Log}
 
 	if direction == "up" {
 		err = m.Up()
@@ -44,7 +54,7 @@ func migrateDB(cfg *config.Config, direction string) error {
 		err = m.Steps(-1)
 	} else {
 		logging.Log.Fatal("Invalid migration direction: ", direction)
-		return
+		return errors.New("Invalid migration direction")
 	}
 
 	if errors.Is(err, migrate.ErrNoChange) {
