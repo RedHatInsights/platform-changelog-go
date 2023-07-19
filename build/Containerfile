@@ -32,4 +32,4 @@ RUN microdnf module enable postgresql:12 && \
 
 USER 1001
 
-CMD ["/platform-changelog"]
+CMD ["/platform-changelog api"]

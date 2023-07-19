@@ -28,6 +28,8 @@ lint:
 	gofmt -l .
 	gofmt -s -w .
 
+run: run-db-detached run-migration run-seed run-api
+
 run-migration:
 	./platform-changelog migrate up
 
@@ -38,50 +40,48 @@ run-seed:
 	./platform-changelog seed
 
 run-api: platform-changelog
-
-	GITHUB_WEBHOOK_SECRET_TOKEN=$(GITHUB_WEBHOOK_KEY) GITLAB_WEBHOOK_SECRET_TOKEN=$(GITLAB_WEBHOOK_KEY) ./platform-changelog
+	GITHUB_WEBHOOK_SECRET_TOKEN=$(GITHUB_WEBHOOK_KEY) GITLAB_WEBHOOK_SECRET_TOKEN=$(GITLAB_WEBHOOK_KEY) ./platform-changelog api
 
 run-api-mock: platform-changelog
-
-	GITHUB_WEBHOOK_SECRET_TOKEN=$(GITHUB_WEBHOOK_KEY) GITLAB_WEBHOOK_SECRET_TOKEN=$(GITLAB_WEBHOOK_KEY) DB_IMPL=mock ./platform-changelog
+	GITHUB_WEBHOOK_SECRET_TOKEN=$(GITHUB_WEBHOOK_KEY) GITLAB_WEBHOOK_SECRET_TOKEN=$(GITLAB_WEBHOOK_KEY) DB_IMPL=mock ./platform-changelog api
 
 run-db:
-
 	podman run --rm -it -p ${POSTGRES_PORT} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_DB=${POSTGRES_DB} --name postgres postgres:12.4
 
-check-db:
+run-db-detached:
+	podman run --detach -p ${POSTGRES_PORT} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_DB=${POSTGRES_DB} --name postgres postgres:12.4
 
+	sleep 5
+
+remove-db:
+	podman stop postgres
+	podman rm postgres
+
+check-db:
 	psql -h ${POSTGRES_HOST} --user ${POSTGRES_USER} --db ${POSTGRES_DB}
 
 test:
 	ginkgo -r
 
 test-github:
-
 	curl -X POST http://localhost:8000/api/v1/github --data "@tests/jenkins/github_dump.json" -H "Content-Type: application/json"
 
 test-github-webhook:
-
 	curl -X POST -H "X-Hub-Signature-256: sha256=$(GITHUB_WEBHOOK_SIGNATURE)" -H "X-Github-Event: push"   -H "Content-Type: application/json" --data-binary "@tests/github_webhook.json" http://localhost:8000/api/v1/github-webhook
 
 test-gitlab-webhook:
-
 	curl -X POST -H "X-Gitlab-Token: $(GITLAB_WEBHOOK_KEY)" -H "X-Gitlab-Event: Push Hook" -H "Content-Type: application/json" --data "@tests/gitlab_webhook.json" http://localhost:8000/api/v1/gitlab-webhook
 
 test-tekton-task:
-
 	curl -X POST http://localhost:8000/api/v1/tekton --data "@tests/tekton/valid.json" -H "Content-Type: application/json"
 
 compose:
-
 	podman-compose -f development/compose.yml up
 
 compose-quiet:
-
 	podman-compose -f development/compose.yml up -d
 
 compose-down:
-
 	podman-compose -f development/compose.yml down
 
 clean:

@@ -11,7 +11,8 @@ import (
 
 func createCommands(cfg *config.Config) *cobra.Command {
 	var rootCmd = &cobra.Command{
-		Use: "changelog",
+		Use:  "changelog",
+		Long: `Platform Changelog tracks commit and deployment events.`,
 	}
 
 	var serverCmd = &cobra.Command{

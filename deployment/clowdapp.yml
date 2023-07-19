@@ -38,6 +38,7 @@ objects:
         image: ${IMAGE}:${IMAGE_TAG}
         command:
           - platform-changelog
+          - api
         livenessProbe:
           failureThreshold: 3
           httpGet:
