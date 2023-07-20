@@ -35,8 +35,9 @@ type GithubCommit struct {
 }
 
 func decodeGithubJSONBody(w http.ResponseWriter, r *http.Request) (GithubPayload, error) {
+	fmt.Println(r.Header)
 	if !strings.Contains(r.Header.Get("Content-Type"), "application/json") {
-		return nil, fmt.Errorf("invalid Content-Type header")
+		return nil, fmt.Errorf("invalid Content-Type header: '%s' should contain 'application/json'", r.Header.Get("Content-Type"))
 	}
 
 	if r.Body == nil {
