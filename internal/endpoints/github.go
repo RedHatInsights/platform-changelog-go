@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+	"strings"
 
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
@@ -34,7 +35,7 @@ type GithubCommit struct {
 }
 
 func decodeGithubJSONBody(w http.ResponseWriter, r *http.Request) (GithubPayload, error) {
-	if !r.Header.Get("Content-Type").contains("application/json") {
+	if !strings.Contains(r.Header.Get("Content-Type"), "application/json") {
 		return nil, fmt.Errorf("invalid Content-Type header")
 	}
 
