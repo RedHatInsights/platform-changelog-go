@@ -28,12 +28,12 @@ lint:
 	gofmt -l .
 	gofmt -s -w .
 
-run: run-db-detached run-migration run-seed run-api
+run: build run-db-detached run-migrate-up run-seed run-api
 
-run-migration:
+run-migrate-up:
 	./platform-changelog migrate up
 
-run-migration-down:
+run-migrate-down:
 	./platform-changelog migrate down
 
 run-seed:
@@ -50,7 +50,6 @@ run-db:
 
 run-db-detached:
 	podman run --detach -p ${POSTGRES_PORT} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_DB=${POSTGRES_DB} --name postgres postgres:12.4
-
 	sleep 5
 
 remove-db:
