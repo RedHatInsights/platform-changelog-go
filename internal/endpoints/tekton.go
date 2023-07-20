@@ -25,7 +25,7 @@ type TektonPayload *struct {
 
 func decodeTektonJSONBody(w http.ResponseWriter, r *http.Request) (TektonPayload, error) {
 	if !strings.Contains(r.Header.Get("Content-Type"), "application/json") {
-		return nil, fmt.Errorf("invalid Content-Type header")
+		return nil, fmt.Errorf("invalid Content-Type header: '%s' should contain 'application/json'", r.Header.Get("Content-Type"))
 	}
 
 	if r.Body == nil {

@@ -259,7 +259,7 @@ paths:
         description: Simple JSON Data from commit Jenkins job
         required: true
         content:
-          appplication/json:
+          application/json:
             schema:
               $ref: '#/components/schemas/GithubPayload'
       responses:
@@ -283,7 +283,7 @@ paths:
         description: Simple JSON Data from the Tekton task
         required: true
         content:
-          appplication/json:
+          application/json:
             schema:
               $ref: '#/components/schemas/TektonPayload'
       responses:
