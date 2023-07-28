@@ -22,15 +22,8 @@ objects:
       minReplicas: ${{API_REPLICAS}}
       podSpec:
         initContainers:
-        # will this cause a race condition?
           - command:
-            - platform-changelog
-            - migrate
-            image: ${IMAGE}:${IMAGE_TAG}
-            inheritEnv: True
-          - command:
-            - platform-changelog
-            - seed
+            - platform-changelog migrate && platform-changelog seed
             image: ${IMAGE}:${IMAGE_TAG}
             inheritEnv: True
         minReadySeconds: 15
