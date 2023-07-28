@@ -59,16 +59,19 @@ func reconcileServices(cfg *config.Config, conn *db.DBConnectorImpl) {
 			logging.Log.Info("Service already exists: ", service.DisplayName)
 		}
 
-		// update the service if fields have changed
 		if (serviceData == structs.ServicesData{}) {
 			logging.Log.Error("Failed to retrieve service data")
 			continue
 		}
 
-		err = compareService(key, serviceData, service, conn)
-		if err != nil {
-			logging.Log.Error("Error comparing and updating service: ", err)
-			continue
+		// update the service
+		if compareService(serviceData, service) { 
+			// if the service in the config and db are different
+			err := updateService(key, service, conn)
+			if err != nil {
+				logging.Log.Error("Error updating service: ", err)
+				continue
+			}
 		}
 	}
 }
@@ -82,8 +85,9 @@ func validateTenant(tenant string, cfg *config.Config) bool {
 	return false
 }
 
-func compareService(name string, fromDB structs.ServicesData, fromCfg config.Service, conn *db.DBConnectorImpl) error {
-	// compare the fields
+// Compare the services in the DB to the services in the config
+// Returns false is they are the same, true if they are different
+func compareService(fromDB structs.ServicesData, fromCfg config.Service) bool {
 	if fromDB.DisplayName != fromCfg.DisplayName ||
 		fromDB.Tenant != fromCfg.Tenant ||
 		fromDB.GHRepo != fromCfg.GHRepo ||
@@ -91,15 +95,21 @@ func compareService(name string, fromDB structs.ServicesData, fromCfg config.Ser
 		fromDB.Branch != fromCfg.Branch ||
 		fromDB.Namespace != fromCfg.Namespace ||
 		fromDB.DeployFile != fromCfg.DeployFile {
-		// update the service
-		_, err := conn.UpdateServiceTableEntry(name, fromCfg)
-		if err != nil {
-			logging.Log.Error("Error updating service: ", err)
-			return err
-		}
-
-		logging.Log.Info("Updated service: ", fromCfg.DisplayName)
+			// TODO: bulk update services
+			// logging.Log.Info("Queued service for update: ", fromCfg.DisplayName)
+			return true
 	}
 
+	return false
+}
+
+func updateService(name string, fromCfg config.Service, conn *db.DBConnectorImpl) error {
+	_, err := conn.UpdateServiceTableEntry(name, fromCfg)
+	if err != nil {
+		logging.Log.Error("Error updating service: ", err)
+		return err
+	}
+
+	logging.Log.Info("Updated service: ", fromCfg.DisplayName)
 	return nil
 }
