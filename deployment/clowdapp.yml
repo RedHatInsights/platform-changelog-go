@@ -22,12 +22,12 @@ objects:
       minReplicas: ${{API_REPLICAS}}
       podSpec:
         initContainers:
-          - command:
-            - ./platform-changelog
-            - migrate
-            - && 
-            - ./platform-changelog 
-            - seed
+          - command: ["/bin/sh"]
+            args:
+              - -c
+              - >-
+                  ./platform-changelog migrate up &&
+                  ./platform-changelog seed
             image: ${IMAGE}:${IMAGE_TAG}
             inheritEnv: True
         minReadySeconds: 15
