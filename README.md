@@ -66,7 +66,7 @@ Sends gitlab commits from a webhook; authentication needed (as per Github api)
 Follow the Makefile's `make test-gitlab-webhook` for usage.
 
 ### Deleting data
-The app has no DELETE requests; instead, we use a [cron-job](https://github.com/RedHatInsights/platform-changelog-go/blob/main/tools/cron-job.sh) to remove old timelines.
+The app has no DELETE requests; instead, we use a [cron-job](https://github.com/RedHatInsights/platform-changelog-go/blob/main/tools/cron-job.sh) to remove old timelines, and, on a merge to `main`, the services are updated to match information in `services.yaml` as discussed below.
 
 ## Onboarding a Service
 
