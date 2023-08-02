@@ -13,6 +13,7 @@ require (
 	github.com/lib/pq v1.10.2
 	github.com/onsi/ginkgo/v2 v2.11.0 // indirect
 	github.com/prometheus/client_golang v1.16.0
+	github.com/prometheus/common v0.42.0 // indirect
 	github.com/redhatinsights/app-common-go v1.6.0
 	github.com/redhatinsights/platform-go-middlewares v0.12.0
 	github.com/sirupsen/logrus v1.9.2
