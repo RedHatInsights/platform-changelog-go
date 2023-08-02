@@ -6,17 +6,16 @@ COPY . .
 USER 0
 
 RUN go get -d ./... && \
-    go build -o platform-changelog-api cmd/api/main.go && \
-    go build -o platform-changelog-migration internal/migration/main.go
+    go build -o platform-changelog cmd/*.go
 
 
 FROM registry.access.redhat.com/ubi8-minimal:latest
 
 WORKDIR /
 
-COPY --from=builder /go/src/app/platform-changelog-api ./platform-changelog-api
-COPY --from=builder /go/src/app/platform-changelog-migration ./platform-changelog-migration
+COPY --from=builder /go/src/app/platform-changelog ./platform-changelog
 COPY --from=builder /go/src/app/schema/openapi.yaml ./schema/openapi.yaml
+COPY --from=builder /go/src/app/migrations ./migrations
 
 # install postgresql from centos if not building on RHSM system
 RUN FULL_RHEL=$(microdnf repolist --enabled | grep rhel-8) ; \
@@ -33,4 +32,4 @@ RUN microdnf module enable postgresql:12 && \
 
 USER 1001
 
-CMD ["/platform-changelog-api"]
+CMD ["/platform-changelog api"]

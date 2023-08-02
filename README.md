@@ -107,13 +107,16 @@ Docker can be substituted for podman if needed.
     Golang >= 1.16
 
 ### Launching
+First, build the app with `make build -B`. This creates a single executable `platform-changelog`.
 
-    $> make -B build
+To run the app, try `make run`, which uses the following make commands:
+
     $> make run-db
-    $> make run-migration
-    $> make run-api DEBUG=1
+    $> make run-migrate-up
+    $> make run-seed
+    $> make run-api
 
-Note: The `DEBUG` argument allows us to send webhooks without needing the secret token.
+To rebuild the app, the `-B` above is required.
 
 ### Launching with a Mock Database
 
@@ -130,6 +133,8 @@ see the API in action by visiting `http://localhost:8000/api/v1/services`.
 Launch the API as instructed above, then we can send test requests to the API.
 
 The app is designed to take in commit and deployment data through `/api/v1/github` and `/api/v1/tekton` respectively. Using webhooks is also included, but they will not be used to track our platform.
+
+Note: The `DEBUG=1` argument allows us to send webhooks without needing a secret token.
 
 Test json is provided in the `tests` directory in this repo.
 

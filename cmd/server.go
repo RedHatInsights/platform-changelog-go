@@ -6,19 +6,13 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/endpoints"
-	"github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 )
 
-func main() {
-	logging.InitLogger()
-
-	cfg := config.Get()
-
+func startAPI(cfg *config.Config) {
 	var dbConnector db.DBConnector
 	switch cfg.DBImpl {
 	case "mock":
