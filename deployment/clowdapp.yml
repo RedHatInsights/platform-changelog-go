@@ -23,14 +23,18 @@ objects:
       podSpec:
         initContainers:
           - command:
-            - platform-changelog migrate && platform-changelog seed
+            - ./platform-changelog
+            - migrate
+            - && 
+            - ./platform-changelog 
+            - seed
             image: ${IMAGE}:${IMAGE_TAG}
             inheritEnv: True
         minReadySeconds: 15
         progressDeadlineSeconds: 600
         image: ${IMAGE}:${IMAGE_TAG}
         command:
-          - platform-changelog
+          - ./platform-changelog
           - api
         livenessProbe:
           failureThreshold: 3
