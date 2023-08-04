@@ -71,6 +71,12 @@ services:
     gh_repo: https://github.com/RedHatInsights/insights-host-inventory
     branch: master
     namespace: host-inventory-stage
+  host-inventory-frontend:
+    display_name: Host Inventory Frontend
+    tenant: Insights
+    gh_repo: https://github.com/RedHatInsights/insights-inventory-frontend
+    branch: master
+    namespace: host-inventory-stage
   advisor:
     display_name: Advisor
     tenant: Insights
@@ -87,6 +93,12 @@ services:
     display_name: Chrome Service
     tenant: Insights
     gh_repo: https://github.com/RedHatInsights/insights-chrome
+    branch: master
+    namespace: chrome-service-stage
+  chrome-service-backend:
+    display_name: Chrome Service Backend
+    tenant: Insights
+    gh_repo: https://github.com/RedHatInsights/chrome-service-backend
     branch: master
     namespace: chrome-service-stage
   hac:
