@@ -189,10 +189,7 @@ func (conn *MockDBConnector) CreateServiceTableEntry(name string, s config.Servi
 		ID:          len(conn.Services) + 1,
 		Name:        name,
 		DisplayName: s.DisplayName,
-		GHRepo:      s.GHRepo,
-		GLRepo:      s.GLRepo, Branch: s.Branch,
-		Namespace:  s.Namespace,
-		DeployFile: s.DeployFile,
+		Tenant:      s.Tenant,
 	}
 
 	conn.Services = append(conn.Services, newService)
@@ -219,11 +216,7 @@ func (conn *MockDBConnector) GetServicesAll(offset int, limit int, q structs.Que
 				ID:          service.ID,
 				Name:        service.Name,
 				DisplayName: service.DisplayName,
-				GHRepo:      service.GHRepo,
-				GLRepo:      service.GLRepo,
-				DeployFile:  service.DeployFile,
-				Namespace:   service.Namespace,
-				Branch:      service.Branch,
+				Tenant:      service.Tenant,
 			},
 		})
 		servicesWithTimelines = append(servicesWithTimelines, serviceWithTimeline)
@@ -256,11 +249,7 @@ func (conn *MockDBConnector) GetServiceByName(name string) (structs.ServicesData
 				ID:          service.ID,
 				Name:        service.Name,
 				DisplayName: service.DisplayName,
-				GHRepo:      service.GHRepo,
-				GLRepo:      service.GLRepo,
-				DeployFile:  service.DeployFile,
-				Namespace:   service.Namespace,
-				Branch:      service.Branch,
+				Tenant:      service.Tenant,
 			}, 1, nil
 		}
 	}
@@ -269,18 +258,18 @@ func (conn *MockDBConnector) GetServiceByName(name string) (structs.ServicesData
 
 func (conn *MockDBConnector) GetServiceByGHRepo(repo string) (structs.ServicesData, error) {
 	for _, service := range conn.Services {
-		if service.GHRepo == repo {
-			return structs.ServicesData{
-				ID:          service.ID,
-				Name:        service.Name,
-				DisplayName: service.DisplayName,
-				GHRepo:      service.GHRepo,
-				GLRepo:      service.GLRepo,
-				DeployFile:  service.DeployFile,
-				Namespace:   service.Namespace,
-				Branch:      service.Branch,
-			}, nil
-		}
+		// if service.Repo == repo {
+		// 	return structs.ServicesData{
+		// 		ID:          service.ID,
+		// 		Name:        service.Name,
+		// 		DisplayName: service.DisplayName,
+		// 		GHRepo:      service.GHRepo,
+		// 		GLRepo:      service.GLRepo,
+		// 		DeployFile:  service.DeployFile,
+		// 		Namespace:   service.Namespace,
+		// 		Branch:      service.Branch,
+		// 	}, nil
+		// }
 	}
 	return structs.ServicesData{}, nil
 }

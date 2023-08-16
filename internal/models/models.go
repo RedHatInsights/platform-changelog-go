@@ -5,16 +5,22 @@ import (
 )
 
 type Services struct {
-	ID          int    `gorm:"primary_key;autoincremement"`
-	Name        string `gorm:"not null"`
-	DisplayName string `gorm:"not null;unique"`
-	Tenant      string `gorm:"not null"`
-	GHRepo      string
-	GLRepo      string
-	DeployFile  string
-	Namespace   string
-	Branch      string      `gorm:"default:'master'"`
-	Timelines   []Timelines `gorm:"foreignkey:ServiceID"`
+	ID          int        `gorm:"primary_key;autoincremement"`
+	Name        string     `gorm:"not null"`
+	DisplayName string     `gorm:"not null;unique"`
+	Tenant      string     `gorm:"not null"`
+	Projects    []Projects `gorm:"foreignkey:ServiceID"`
+}
+
+type Projects struct {
+	ID         int    `gorm:"primary_key;autoincremement"`
+	ServiceID  int    `gorm:"not null" json:"service_id"`
+	Name       string `gorm:"not null"`
+	Repo       string `gorm:"not null"`
+	DeployFile string
+	Namespaces []string
+	Branches   []string
+	Timelines  []Timelines `gorm:"foreignkey:ProjectID"`
 }
 
 type timelineType string
@@ -27,6 +33,7 @@ const (
 type Timelines struct {
 	ID              int          `gorm:"primary_key;autoincrement" json:"id"`
 	ServiceID       int          `gorm:"not null" json:"service_id"`
+	ProjectID       int          `gorm:"not null" json:"project_id"`
 	Timestamp       time.Time    `gorm:"not null" json:"timestamp"`
 	Type            timelineType `gorm:"not null" json:"type" sql:"type:timeline_type"`
 	Repo            string       `gorm:"not null" json:"repo"`
