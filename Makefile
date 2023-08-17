@@ -42,9 +42,6 @@ run-seed:
 run-api: platform-changelog
 	GITHUB_WEBHOOK_SECRET_TOKEN=$(GITHUB_WEBHOOK_KEY) GITLAB_WEBHOOK_SECRET_TOKEN=$(GITLAB_WEBHOOK_KEY) ./platform-changelog api
 
-run-api-mock: platform-changelog
-	GITHUB_WEBHOOK_SECRET_TOKEN=$(GITHUB_WEBHOOK_KEY) GITLAB_WEBHOOK_SECRET_TOKEN=$(GITLAB_WEBHOOK_KEY) DB_IMPL=mock ./platform-changelog api
-
 run-db:
 	podman run --rm -it -p ${POSTGRES_PORT} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_DB=${POSTGRES_DB} --name postgres postgres:12.4
 

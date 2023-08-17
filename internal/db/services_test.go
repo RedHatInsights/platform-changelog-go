@@ -13,7 +13,6 @@ var _ = Describe("Handler", func() {
 
 	Describe("Create and modify a service", func() {
 		It("", func() {
-			// create a mock db connection & endpoint handler
 			db := testDBImpl
 
 			db.CreateServiceTableEntry("test-service", config.Service{
