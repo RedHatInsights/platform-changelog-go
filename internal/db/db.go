@@ -34,6 +34,10 @@ func NewDBConnector(cfg *config.Config) *DBConnectorImpl {
 	return &DBConnectorImpl{db: db}
 }
 
+func SetDBConnector(db *gorm.DB) *DBConnectorImpl {
+	return &DBConnectorImpl{db: db}
+}
+
 func OpenPostgresDB(cfg *config.Config) (*sql.DB, error) {
 	dsn, err := buildPostgresDSN(cfg)
 	if err != nil {

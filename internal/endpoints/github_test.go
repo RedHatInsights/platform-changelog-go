@@ -22,12 +22,7 @@ var _ = Describe("Handler", func() {
 
 	Describe("Github Jenkins Run with empty body", func() {
 		It("should return 400", func() {
-			// create a mock db connection & endpoint handler
-
-			var cfg config.Config = config.Config{
-				DBImpl: "mock",
-			}
-			dbConnector := db.NewMockDBConnector(&cfg)
+			dbConnector := testDBImpl
 			handler := endpoints.NewHandler(dbConnector)
 
 			// create a request
@@ -56,23 +51,8 @@ var _ = Describe("Handler", func() {
 
 		defer f.Close()
 
-		// create a mock db connection & endpoint handler
-		var cfg config.Config = config.Config{
-			DBImpl: "mock",
-		}
-		dbConnector := db.NewMockDBConnector(&cfg)
+		dbConnector := testDBImpl
 		handler := endpoints.NewHandler(dbConnector)
-
-		// add rbac and cloud-connector services
-		s := CreateService(dbConnector, "rbac", config.Service{
-			DisplayName: "rbac",
-			Tenant:      "insights",
-			GHRepo:      "https://github.com/RedHatInsights/insights-rbac",
-			Branch:      "master",
-			Namespace:   "rbac-prod",
-		})
-
-		Expect(s.Name).To(Equal("rbac"))
 
 		// create a request
 		req, err := http.NewRequest("POST", "/api/v1/github", f)
@@ -92,7 +72,7 @@ var _ = Describe("Handler", func() {
 	},
 		Entry("Valid", http.StatusOK, "Commit info received", "../../tests/jenkins/github_dump.json"),
 		Entry("Empty", http.StatusBadRequest, "empty json body provided", "../../tests/empty.json"),
-		Entry("Not onboarded", http.StatusBadRequest, "app platform-changelog is not onboarded", "../../tests/jenkins/not_onboarded.json"),
+		Entry("Not onboarded", http.StatusBadRequest, "app fake-service is not onboarded", "../../tests/jenkins/not_onboarded.json"),
 		Entry("Missing timestamp", http.StatusBadRequest, "timestamp is required", "../../tests/jenkins/missing_timestamp.json"),
 		Entry("Missing app", http.StatusBadRequest, "app is required", "../../tests/jenkins/missing_app.json"),
 		Entry("Missing commits", http.StatusBadRequest, "commits is required", "../../tests/jenkins/missing_commits.json"),

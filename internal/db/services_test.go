@@ -1,13 +1,9 @@
-//go:build sql
-// +build sql
-
 package db_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
-	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/logging"
 )
 
@@ -18,7 +14,7 @@ var _ = Describe("Handler", func() {
 	Describe("Create and modify a service", func() {
 		It("", func() {
 			// create a mock db connection & endpoint handler
-			db := setup()
+			db := testDBImpl
 
 			db.CreateServiceTableEntry("test-service", config.Service{
 				DisplayName: "Test Service",
@@ -67,27 +63,10 @@ var _ = Describe("Handler", func() {
 			Expect(deleted_service_struct.Name).To(Equal("test-service"))
 
 			// make sure the service is gone
-			deleted_service, rowsAffected, err := db.GetServiceByName("test-service")
+			deleted_service, rowsAffected, _ := db.GetServiceByName("test-service")
 			// Expect(err).To(BeNil())
 			Expect(rowsAffected).To(Equal(int64(0)))
 			Expect(deleted_service.Name).To(Equal(""))
 		})
 	})
 })
-
-func setup() db.DBConnector {
-	// create a mock db connection & endpoint handler
-	var cfg config.Config = config.Config{
-		DatabaseConfig: config.DatabaseCfg{
-			DBUser:     "crc",
-			DBPassword: "crc",
-			DBName:     "gumbaroo",
-			DBHost:     "localhost",
-			DBPort:     "5432",
-			DBSSLMode:  "disable",
-		},
-	}
-	dbConnector := db.NewDBConnector(&cfg)
-
-	return dbConnector
-}

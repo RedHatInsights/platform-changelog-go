@@ -8,8 +8,6 @@ import (
 	chi "github.com/go-chi/chi/v5"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/redhatinsights/platform-changelog-go/internal/config"
-	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/endpoints"
 	"github.com/redhatinsights/platform-changelog-go/internal/logging"
 )
@@ -20,12 +18,7 @@ var _ = Describe("Handler", func() {
 
 	Describe("Tekton Run with empty body", func() {
 		It("should return 400", func() {
-			// create a mock db connection & endpoint handler
-
-			var cfg config.Config = config.Config{
-				DBImpl: "mock",
-			}
-			dbConnector := db.NewMockDBConnector(&cfg)
+			dbConnector := testDBImpl
 			handler := endpoints.NewHandler(dbConnector)
 
 			// create a request
@@ -54,11 +47,7 @@ var _ = Describe("Handler", func() {
 
 		defer f.Close()
 
-		// create a mock db connection & endpoint handler
-		var cfg config.Config = config.Config{
-			DBImpl: "mock",
-		}
-		dbConnector := db.NewMockDBConnector(&cfg)
+		dbConnector := testDBImpl
 		handler := endpoints.NewHandler(dbConnector)
 
 		// create a request
