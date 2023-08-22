@@ -57,7 +57,7 @@ check-db:
 	psql -h ${POSTGRES_HOST} --user ${POSTGRES_USER} --db ${POSTGRES_DB}
 
 test:
-	ginkgo -r
+	ginkgo -r --race --randomize-all --randomize-suites
 
 test-github:
 	curl -X POST http://localhost:8000/api/v1/github --data "@tests/jenkins/github_dump.json" -H "Content-Type: application/json"
