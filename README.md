@@ -118,16 +118,6 @@ To run the app, try `make run`, which uses the following make commands:
 
 To rebuild the app, the `-B` above is required.
 
-### Launching with a Mock Database
-
-    $> make -B build
-    $> make run-api-mock DEBUG=1
-
-Note: This is useful to avoid having to run the database locally, but this will not persist data between runs.
-
-The API should now be up and available on `localhost:8000`. You should be able to
-see the API in action by visiting `http://localhost:8000/api/v1/services`.
-
 ### Testing POST Requests to the API Manually
 
 Launch the API as instructed above, then we can send test requests to the API.
