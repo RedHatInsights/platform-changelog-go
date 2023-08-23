@@ -42,9 +42,6 @@ run-seed:
 run-api: platform-changelog
 	GITHUB_WEBHOOK_SECRET_TOKEN=$(GITHUB_WEBHOOK_KEY) GITLAB_WEBHOOK_SECRET_TOKEN=$(GITLAB_WEBHOOK_KEY) ./platform-changelog api
 
-run-api-mock: platform-changelog
-	GITHUB_WEBHOOK_SECRET_TOKEN=$(GITHUB_WEBHOOK_KEY) GITLAB_WEBHOOK_SECRET_TOKEN=$(GITLAB_WEBHOOK_KEY) DB_IMPL=mock ./platform-changelog api
-
 run-db:
 	podman run --rm -it -p ${POSTGRES_PORT} -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD} -e POSTGRES_USER=${POSTGRES_USER} -e POSTGRES_DB=${POSTGRES_DB} --name postgres postgres:12.4
 
@@ -60,7 +57,7 @@ check-db:
 	psql -h ${POSTGRES_HOST} --user ${POSTGRES_USER} --db ${POSTGRES_DB}
 
 test:
-	ginkgo -r
+	ginkgo -r --race --randomize-all --randomize-suites
 
 test-github:
 	curl -X POST http://localhost:8000/api/v1/github --data "@tests/jenkins/github_dump.json" -H "Content-Type: application/json"

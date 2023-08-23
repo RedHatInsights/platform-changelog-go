@@ -1,6 +1,6 @@
 {
-    "app": "platform-changelog",
-    "repo": "https://github.com/RedHatInsights/platform-changelog-go",
+    "app": "fake-service",
+    "repo": "https://github.com/RedHatInsights/fake-service-go",
     "merged_by": "Jane Doe",
     "timestamp": "2019-08-01T00:00:00Z",
     "commits": [
