@@ -5,13 +5,9 @@ import (
 	"net/http/httptest"
 	"os"
 
-	"github.com/redhatinsights/platform-changelog-go/internal/models"
-
 	chi "github.com/go-chi/chi/v5"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/redhatinsights/platform-changelog-go/internal/config"
-	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/endpoints"
 	"github.com/redhatinsights/platform-changelog-go/internal/logging"
 )
@@ -72,7 +68,6 @@ var _ = Describe("Handler", func() {
 	},
 		Entry("Valid", http.StatusOK, "Commit info received", "../../tests/jenkins/github_dump.json"),
 		Entry("Empty", http.StatusBadRequest, "empty json body provided", "../../tests/empty.json"),
-		Entry("Not onboarded", http.StatusBadRequest, "app fake-service is not onboarded", "../../tests/jenkins/not_onboarded.json"),
 		Entry("Missing timestamp", http.StatusBadRequest, "timestamp is required", "../../tests/jenkins/missing_timestamp.json"),
 		Entry("Missing app", http.StatusBadRequest, "app is required", "../../tests/jenkins/missing_app.json"),
 		Entry("Missing commits", http.StatusBadRequest, "commits is required", "../../tests/jenkins/missing_commits.json"),
@@ -81,11 +76,3 @@ var _ = Describe("Handler", func() {
 		Entry("Commit missing ref", http.StatusBadRequest, "all commits need a ref", "../../tests/jenkins/commit_missing_ref.json"),
 	)
 })
-
-func CreateService(conn db.DBConnector, name string, s config.Service) (service models.Services) {
-	service, err := conn.CreateServiceTableEntry(name, s)
-
-	Expect(err).To(BeNil())
-
-	return service
-}

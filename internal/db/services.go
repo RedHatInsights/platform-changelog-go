@@ -9,15 +9,14 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
-func (conn *DBConnectorImpl) CreateServiceTableEntry(name string, s config.Service) (service models.Services, err error) {
-	newService := models.Services{Name: name, DisplayName: s.DisplayName, Tenant: s.Tenant, GHRepo: s.GHRepo, GLRepo: s.GLRepo, Branch: s.Branch, Namespace: s.Namespace, DeployFile: s.DeployFile}
-	results := conn.db.Create(&newService)
+func (conn *DBConnectorImpl) CreateServiceTableEntry(s models.Services) (service models.Services, err error) {
+	results := conn.db.Create(&s)
 
-	return newService, results.Error
+	return s, results.Error
 }
 
 func (conn *DBConnectorImpl) UpdateServiceTableEntry(name string, s config.Service) (service models.Services, err error) {
-	newService := models.Services{Name: name, DisplayName: s.DisplayName, Tenant: s.Tenant, GHRepo: s.GHRepo, GLRepo: s.GLRepo, Branch: s.Branch, Namespace: s.Namespace, DeployFile: s.DeployFile}
+	newService := models.Services{Name: name, DisplayName: s.DisplayName, Tenant: s.Tenant}
 	results := conn.db.Model(models.Services{}).Where("name = ?", name).Updates(&newService)
 
 	return newService, results.Error
@@ -50,20 +49,14 @@ func (conn *DBConnectorImpl) GetServicesAll(offset int, limit int, q structs.Que
 
 	db := conn.db.Model(models.Services{})
 
-	if len(q.ServiceName) > 0 {
-		db = db.Where("services.name IN ?", q.ServiceName)
+	if len(q.Name) > 0 {
+		db = db.Where("services.name IN ?", q.Name)
 	}
-	if len(q.ServiceDisplayName) > 0 {
-		db = db.Where("services.display_name IN ?", q.ServiceDisplayName)
+	if len(q.DisplayName) > 0 {
+		db = db.Where("services.display_name IN ?", q.DisplayName)
 	}
-	if len(q.ServiceTenant) > 0 {
-		db = db.Where("services.tenant IN ?", q.ServiceTenant)
-	}
-	if len(q.ServiceNamespace) > 0 {
-		db = db.Where("services.namespace IN ?", q.ServiceNamespace)
-	}
-	if len(q.ServiceBranch) > 0 {
-		db = db.Where("services.branch IN ?", q.ServiceBranch)
+	if len(q.Tenant) > 0 {
+		db = db.Where("services.tenant IN ?", q.Tenant)
 	}
 
 	// Uses the Services model here to reflect the proper db relation
@@ -107,9 +100,9 @@ func (conn *DBConnectorImpl) GetServiceByName(name string) (structs.ServicesData
 	return service, result.RowsAffected, result.Error
 }
 
-func (conn *DBConnectorImpl) GetServiceByGHRepo(service_url string) (structs.ServicesData, error) {
+func (conn *DBConnectorImpl) GetServiceByRepo(repo string) (structs.ServicesData, error) {
 	var service structs.ServicesData
-	result := conn.db.Model(models.Services{}).Where("gh_repo = ?", service_url).First(&service)
+	result := conn.db.Model(models.Services{}).Joins("JOIN services on projects.service_id = services.id").Where("repo = ?", repo).First(&service)
 
 	return service, result.Error
 }

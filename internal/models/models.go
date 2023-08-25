@@ -5,11 +5,12 @@ import (
 )
 
 type Services struct {
-	ID          int        `gorm:"primary_key;autoincremement"`
-	Name        string     `gorm:"not null"`
-	DisplayName string     `gorm:"not null;unique"`
-	Tenant      string     `gorm:"not null"`
-	Projects    []Projects `gorm:"foreignkey:ServiceID"`
+	ID          int         `gorm:"primary_key;autoincremement"`
+	Name        string      `gorm:"not null"`
+	DisplayName string      `gorm:"not null;unique"`
+	Tenant      string      `gorm:"not null"`
+	Projects    []Projects  `gorm:"foreignkey:ServiceID"`
+	Timelines   []Timelines `gorm:"foreignkey:ServiceID"`
 }
 
 type Projects struct {
@@ -18,8 +19,8 @@ type Projects struct {
 	Name       string `gorm:"not null"`
 	Repo       string `gorm:"not null"`
 	DeployFile string
-	Namespaces []string
-	Branches   []string
+	Namespaces []string    `gorm:"type:text[]"`
+	Branches   []string    `gorm:"type:text[]"`
 	Timelines  []Timelines `gorm:"foreignkey:ProjectID"`
 }
 

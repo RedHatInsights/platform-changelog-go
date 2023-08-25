@@ -60,6 +60,26 @@ func (conn *DBConnectorImpl) GetTimelinesByService(service structs.ServicesData,
 	return timelines, count, result.Error
 }
 
+func (conn *DBConnectorImpl) GetTimelinesByProject(project structs.ProjectsData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimelinesByProject)
+	defer callDurationTimer.ObserveDuration()
+
+	var count int64
+	var timelines []models.Timelines
+
+	// Concatanate the timeline fields
+	fields := fmt.Sprintf("%s,%s,%s", strings.Join(timelinesFields, ","), strings.Join(commitsFields, ","), strings.Join(deploysFields, ","))
+
+	db := conn.db.Model(models.Timelines{}).Select(fields).Where("project_id = ?", project.ID)
+
+	db = FilterTimelineByDate(db, q.StartDate, q.EndDate)
+
+	db.Model(&timelines).Count(&count)
+	result := db.Order("Timestamp desc").Order("ID desc").Limit(limit).Offset(offset).Find(&timelines)
+
+	return timelines, count, result.Error
+}
+
 func (conn *DBConnectorImpl) GetTimelineByRef(ref string) (models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimelineByRef)
 	defer callDurationTimer.ObserveDuration()

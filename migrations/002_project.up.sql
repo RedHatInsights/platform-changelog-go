@@ -25,3 +25,6 @@ ALTER TABLE services
     DROP deploy_file, 
     DROP namespace, 
     DROP branch;
+
+ALTER TABLE timelines
+    ADD project_id bigint NOT NULL;

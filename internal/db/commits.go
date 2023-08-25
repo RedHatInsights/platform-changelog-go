@@ -7,7 +7,16 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
-func (conn *DBConnectorImpl) CreateCommitEntry(t []models.Timelines) error {
+func (conn *DBConnectorImpl) CreateCommitEntry(t models.Timelines) error {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlCreateCommitEntry)
+	defer callDurationTimer.ObserveDuration()
+
+	conn.db.Create(&t)
+
+	return conn.db.Error
+}
+
+func (conn *DBConnectorImpl) BulkCreateCommitEntry(t []models.Timelines) error {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlCreateCommitEntry)
 	defer callDurationTimer.ObserveDuration()
 
@@ -56,6 +65,23 @@ func (conn *DBConnectorImpl) GetCommitsByService(service structs.ServicesData, o
 	var commits []models.Timelines
 
 	db := conn.db.Model(models.Timelines{}).Where("timelines.service_id = ?", service.ID).Where("timelines.type = ?", "commit")
+
+	db = FilterTimelineByDate(db, q.StartDate, q.EndDate)
+
+	db.Model(&commits).Count(&count)
+	result := db.Order("Timestamp desc").Order("ID desc").Limit(limit).Offset(offset).Find(&commits)
+
+	return commits, count, result.Error
+}
+
+func (conn *DBConnectorImpl) GetCommitsByProject(project structs.ProjectsData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsByProject)
+	defer callDurationTimer.ObserveDuration()
+
+	var count int64
+	var commits []models.Timelines
+
+	db := conn.db.Model(models.Timelines{}).Where("timelines.project_id = ?", project.ID).Where("timelines.type = ?", "commit")
 
 	db = FilterTimelineByDate(db, q.StartDate, q.EndDate)
 

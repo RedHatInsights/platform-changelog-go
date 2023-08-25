@@ -61,6 +61,23 @@ func (conn *DBConnectorImpl) GetDeploysByService(service structs.ServicesData, o
 	return deploys, count, result.Error
 }
 
+func (conn *DBConnectorImpl) GetDeploysByProject(project structs.ProjectsData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysByProject)
+	defer callDurationTimer.ObserveDuration()
+
+	var count int64
+	var deploys []models.Timelines
+
+	db := conn.db.Model(models.Timelines{}).Where("timelines.project_id = ?", project.ID).Where("timelines.type = ?", "deploy")
+
+	db = FilterTimelineByDate(db, q.StartDate, q.EndDate)
+
+	db.Model(&deploys).Count(&count)
+	result := db.Order("Timestamp desc").Order("ID desc").Limit(limit).Offset(offset).Find(&deploys)
+
+	return deploys, count, result.Error
+}
+
 func (conn *DBConnectorImpl) GetDeployByRef(ref string) (models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeployByRef)
 	defer callDurationTimer.ObserveDuration()

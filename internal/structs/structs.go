@@ -3,21 +3,21 @@ package structs
 import "github.com/redhatinsights/platform-changelog-go/internal/models"
 
 type Query struct {
-	Offset             int
-	Limit              int
-	Ref                []string
-	Repo               []string
-	Author             []string
-	MergedBy           []string
-	Cluster            []string
-	Image              []string
-	ServiceName        []string
-	ServiceDisplayName []string
-	ServiceTenant      []string
-	ServiceNamespace   []string
-	ServiceBranch      []string
-	StartDate          string
-	EndDate            string
+	Offset      int
+	Limit       int
+	Ref         []string
+	Repo        []string
+	Author      []string
+	MergedBy    []string
+	Cluster     []string
+	Image       []string
+	Name        []string // service and project filters
+	DisplayName []string
+	Tenant      []string
+	Namespace   []string
+	Branch      []string
+	StartDate   string
+	EndDate     string
 }
 
 // Add Link object to these structs for more clear pagination
@@ -40,16 +40,27 @@ type TimelinesList struct {
 	Data  []models.Timelines `json:"data"`
 }
 
+type ProjectsList struct {
+	Count int64          `json:"count"`
+	Data  []ProjectsData `json:"data"`
+}
+
+type ProjectsData struct {
+	ID         int      `json:"id"`
+	ServiceID  int      `json:"service_id"`
+	Name       string   `json:"name"`
+	Repo       string   `json:"repo"`
+	DeployFile string   `json:"deploy_file"`
+	Namespaces []string `json:"namespaces"`
+	Branches   []string `json:"branches"`
+}
+
 type ServicesData struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	DisplayName string `json:"display_name"`
-	Tenant      string `json:"tenant"`
-	GHRepo      string `json:"gh_repo"`
-	GLRepo      string `json:"gl_repo"`
-	DeployFile  string `json:"deploy_file"`
-	Namespace   string `json:"namespace"`
-	Branch      string `json:"branch"`
+	ID          int            `json:"id"`
+	Name        string         `json:"name"`
+	DisplayName string         `json:"display_name"`
+	Tenant      string         `json:"tenant"`
+	Projects    []ProjectsData `json:"projects"`
 }
 
 type ExpandedServicesData struct {

@@ -5,6 +5,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	"github.com/redhatinsights/platform-changelog-go/internal/logging"
+	"github.com/redhatinsights/platform-changelog-go/internal/models"
 )
 
 var _ = Describe("Handler", func() {
@@ -15,12 +16,11 @@ var _ = Describe("Handler", func() {
 		It("", func() {
 			db := testDBImpl
 
-			db.CreateServiceTableEntry("test-service", config.Service{
+			db.CreateServiceTableEntry(models.Services{
+				ID:          1,
+				Name:        "test-service",
 				DisplayName: "Test Service",
 				Tenant:      "test-tenant",
-				GHRepo:      "https://github.com/testOrg/test-repo",
-				Branch:      "test-branch",
-				Namespace:   "test-namespace",
 			})
 
 			// Get service by name
@@ -31,30 +31,21 @@ var _ = Describe("Handler", func() {
 			Expect(service.Name).To(Equal("test-service"))
 			Expect(service.DisplayName).To(Equal("Test Service"))
 			Expect(service.Tenant).To(Equal("test-tenant"))
-			Expect(service.GHRepo).To(Equal("https://github.com/testOrg/test-repo"))
-			Expect(service.Branch).To(Equal("test-branch"))
-			Expect(service.Namespace).To(Equal("test-namespace"))
-			Expect(service.DeployFile).To(Equal(""))
-			Expect(service.GLRepo).To(Equal(""))
 
 			// update the service
 			updated_service, err := db.UpdateServiceTableEntry("test-service", config.Service{
 				DisplayName: "Test Service",
-				Tenant:      "test-tenant",
-				GHRepo:      "https://github.com/testOrg/test-repo",
-				Branch:      "test-branch",
-				Namespace:   "test-namespace",
-				DeployFile:  "test-deploy-file", // new
+				Tenant:      "test-tenant-new",
 			})
 
 			Expect(err).To(BeNil())
-			Expect(updated_service.DeployFile).To(Equal("test-deploy-file"))
+			Expect(updated_service.Tenant).To(Equal("test-tenant-new"))
 
 			// just going to make sure the change persisted
 			updated_service_1, rowsAffected, err := db.GetServiceByName("test-service")
 			Expect(err).To(BeNil())
 			Expect(rowsAffected).To(Equal(int64(1)))
-			Expect(updated_service_1.DeployFile).To(Equal("test-deploy-file"))
+			Expect(updated_service_1.Tenant).To(Equal("test-tenant-new"))
 
 			// delete the service
 			deleted_service_struct, err := db.DeleteServiceTableEntry("test-service")
@@ -63,7 +54,7 @@ var _ = Describe("Handler", func() {
 
 			// make sure the service is gone
 			deleted_service, rowsAffected, _ := db.GetServiceByName("test-service")
-			// Expect(err).To(BeNil())
+			Expect(err).NotTo(BeNil())
 			Expect(rowsAffected).To(Equal(int64(0)))
 			Expect(deleted_service.Name).To(Equal(""))
 		})

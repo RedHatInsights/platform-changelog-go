@@ -7,26 +7,36 @@ import (
 )
 
 type DBConnector interface {
-	CreateServiceTableEntry(name string, s config.Service) (models.Services, error)
+	CreateServiceTableEntry(s models.Services) (models.Services, error)
 	UpdateServiceTableEntry(name string, s config.Service) (service models.Services, err error)
 	DeleteServiceTableEntry(name string) (structs.ServicesData, error)
 	GetServicesAll(offset int, limit int, q structs.Query) ([]structs.ExpandedServicesData, int64, error)
 	GetLatest(service structs.ExpandedServicesData) (structs.ExpandedServicesData, error, error)
 	GetServiceByName(name string) (structs.ServicesData, int64, error)
-	GetServiceByGHRepo(repo string) (structs.ServicesData, error)
+	GetServiceByRepo(repo string) (structs.ServicesData, error)
+
+	CreateProjectTableEntry(p models.Projects) (err error)
+	GetProjectsAll(offset int, limit int, q structs.Query) ([]structs.ProjectsData, int64, error)
+	GetProjectsByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]structs.ProjectsData, int64, error)
+	GetProjectByName(name string) (structs.ProjectsData, int64, error)
+	GetProjectByRepo(repo string) (structs.ProjectsData, error)
 
 	GetTimelinesAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
 	GetTimelinesByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
+	GetTimelinesByProject(project structs.ProjectsData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
 	GetTimelineByRef(ref string) (models.Timelines, int64, error)
 	DeleteTimelinesByService(service structs.ServicesData) error
 
-	CreateCommitEntry(timeline []models.Timelines) error
+	CreateCommitEntry(timeline models.Timelines) error
+	BulkCreateCommitEntry(timeline []models.Timelines) error
 	GetCommitsAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
 	GetCommitsByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
+	GetCommitsByProject(project structs.ProjectsData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
 	GetCommitByRef(ref string) (models.Timelines, int64, error)
 
 	CreateDeployEntry(timeline models.Timelines) error
 	GetDeploysAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
 	GetDeploysByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
+	GetDeploysByProject(project structs.ProjectsData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error)
 	GetDeployByRef(ref string) (models.Timelines, int64, error)
 }

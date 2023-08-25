@@ -6,3 +6,5 @@ ALTER TABLE services ADD COLUMN gl_repo text;
 ALTER TABLE services ADD COLUMN deploy_file text;
 ALTER TABLE services ADD COLUMN namespace text;
 ALTER TABLE services ADD COLUMN branch text;
+
+ALTER TABLE timelines DROP project_id;

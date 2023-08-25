@@ -41,17 +41,17 @@ func initQuery(r *http.Request) (structs.Query, error) {
 			q.Cluster = v
 		case "image":
 			q.Image = v
-		// service filters
+		// service and project filters
 		case "name":
-			q.ServiceName = v
+			q.Name = v
 		case "display_name":
-			q.ServiceDisplayName = v
+			q.DisplayName = v
 		case "tenant":
-			q.ServiceTenant = v
+			q.Tenant = v
 		case "namespace":
-			q.ServiceNamespace = v
+			q.Namespace = v
 		case "branch":
-			q.ServiceBranch = v
+			q.Branch = v
 		}
 	}
 
