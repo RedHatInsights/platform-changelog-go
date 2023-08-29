@@ -1,6 +1,7 @@
 {
+    "tenant": "insights",
     "app": "rbac",
+    "project": "insights-rbac",
     "repo": "https://github.com/RedHatInsights/insights-rbac",
-    "merged_by": "Jane Doe",
-    "timestamp": "2019-08-01T00:00:00Z"
+    "ref": "ref1234"
 }

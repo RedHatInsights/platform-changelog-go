@@ -54,7 +54,6 @@ var _ = Describe("Handler", func() {
 
 			// make sure the service is gone
 			deleted_service, rowsAffected, _ := db.GetServiceByName("test-service")
-			Expect(err).NotTo(BeNil())
 			Expect(rowsAffected).To(Equal(int64(0)))
 			Expect(deleted_service.Name).To(Equal(""))
 		})

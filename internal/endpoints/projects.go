@@ -58,7 +58,7 @@ func (eh *EndpointHandler) GetProjectsByService(w http.ResponseWriter, r *http.R
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error producing the timeline"))
+		w.Write([]byte("Error producing the projects"))
 		w.Write([]byte(err.Error()))
 	}
 

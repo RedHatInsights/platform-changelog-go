@@ -1,6 +1,10 @@
 package structs
 
-import "github.com/redhatinsights/platform-changelog-go/internal/models"
+import (
+	"fmt"
+
+	"github.com/redhatinsights/platform-changelog-go/internal/models"
+)
 
 type Query struct {
 	Offset      int
@@ -46,13 +50,13 @@ type ProjectsList struct {
 }
 
 type ProjectsData struct {
-	ID         int      `json:"id"`
-	ServiceID  int      `json:"service_id"`
-	Name       string   `json:"name"`
-	Repo       string   `json:"repo"`
-	DeployFile string   `json:"deploy_file"`
-	Namespaces []string `json:"namespaces"`
-	Branches   []string `json:"branches"`
+	ID         int    `json:"id"`
+	ServiceID  int    `json:"service_id"`
+	Name       string `json:"name"`
+	Repo       string `json:"repo"`
+	DeployFile string `json:"deploy_file"`
+	Namespace  string `json:"namespace"`
+	Branch     string `json:"branch"`
 }
 
 type ServicesData struct {
@@ -61,6 +65,58 @@ type ServicesData struct {
 	DisplayName string         `json:"display_name"`
 	Tenant      string         `json:"tenant"`
 	Projects    []ProjectsData `json:"projects"`
+}
+
+// convert from models.Services to structs.ServicesData
+// valuer
+func (s ServicesData) Value() (interface{}, error) {
+	return s, nil
+}
+
+func (s *ServicesData) Scan(value interface{}) error {
+	switch v := value.(type) {
+	case models.Services:
+		s.ID = v.ID
+		s.Name = v.Name
+		s.DisplayName = v.DisplayName
+		s.Tenant = v.Tenant
+		s.Projects = []ProjectsData{}
+		for _, p := range v.Projects {
+			s.Projects = append(s.Projects, ProjectsData{
+				ID:         p.ID,
+				ServiceID:  p.ServiceID,
+				Name:       p.Name,
+				Repo:       p.Repo,
+				DeployFile: p.DeployFile,
+				Namespace:  p.Namespace,
+				Branch:     p.Branch,
+			})
+		}
+		return nil
+	default:
+		return fmt.Errorf("invalid type for ServicesData")
+	}
+}
+
+func (p ProjectsData) Value() (interface{}, error) {
+	return p, nil
+}
+
+func (p *ProjectsData) Scan(value interface{}) error {
+	switch v := value.(type) {
+	case models.Projects:
+		p.ID = v.ID
+		p.ServiceID = v.ServiceID
+		p.Name = v.Name
+		p.Repo = v.Repo
+		p.DeployFile = v.DeployFile
+		p.Namespace = v.Namespace
+		p.Branch = v.Branch
+		fmt.Println(p)
+		return nil
+	default:
+		return fmt.Errorf("invalid type for ProjectsData")
+	}
 }
 
 type ExpandedServicesData struct {

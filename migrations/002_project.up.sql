@@ -5,8 +5,8 @@ CREATE TABLE projects (
     name text NOT NULL,
     repo text,
     deploy_file text,
-    namespaces text[],
-    branches text[]
+    namespace text,
+    branch text
 );
 
 CREATE SEQUENCE projects_id_seq
@@ -26,5 +26,4 @@ ALTER TABLE services
     DROP namespace, 
     DROP branch;
 
-ALTER TABLE timelines
-    ADD project_id bigint NOT NULL;
+ALTER TABLE timelines ADD project_id bigint NOT NULL;

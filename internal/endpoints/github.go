@@ -79,8 +79,8 @@ func (eh *EndpointHandler) Github(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	service, project, err := getServiceAndProject(eh.conn, payload)
-	if err != nil {
+	service, project, err1, err2 := getServiceAndProject(eh.conn, payload)
+	if err1 != nil || err2 != nil {
 		if service.ID == 0 { // how do I compare the structs completely?
 			service, err = createNewService(eh.conn, payload)
 			if err != nil {
@@ -133,8 +133,16 @@ func validateGithubPayload(payload GithubPayload) error {
 		return fmt.Errorf("project is required")
 	}
 
+	if payload.Tenant == "" {
+		return fmt.Errorf("tenant is required")
+	}
+
 	if payload.Repo == "" {
 		return fmt.Errorf("repo is required")
+	}
+
+	if payload.Branch == "" {
+		return fmt.Errorf("branch is required")
 	}
 
 	if payload.Ref == "" {
@@ -144,29 +152,9 @@ func validateGithubPayload(payload GithubPayload) error {
 	return nil
 }
 
-func getServiceAndProject(conn db.DBConnector, payload GithubPayload) (service structs.ServicesData, project structs.ProjectsData, err error) {
-	service, _, err = conn.GetServiceByName(payload.App)
-	if err != nil {
-		// couldn't find service; create it, then handle the project
-		s := models.Services{
-			Name:        payload.App,
-			DisplayName: payload.App,
-			Tenant:      payload.Tenant,
-		}
-
-		_, err := conn.CreateServiceTableEntry(s)
-		if err != nil {
-			return structs.ServicesData{}, structs.ProjectsData{}, fmt.Errorf("problem creating service %s", payload.App)
-		}
-
-		service, _, err = conn.GetServiceByName(payload.App)
-		if err != nil {
-			return structs.ServicesData{}, structs.ProjectsData{}, fmt.Errorf("problem creating service %s", payload.App)
-		}
-	}
-
-	// find the project
-	project, _, err = conn.GetProjectByName(payload.Project)
+func getServiceAndProject(conn db.DBConnector, payload GithubPayload) (service structs.ServicesData, project structs.ProjectsData, err1 error, err2 error) {
+	service, _, err1 = conn.GetServiceByName(payload.App)
+	project, _, err2 = conn.GetProjectByName(payload.Project)
 
 	return
 }
@@ -190,11 +178,10 @@ func createNewService(conn db.DBConnector, payload GithubPayload) (service struc
 
 func createNewProject(conn db.DBConnector, payload GithubPayload, service structs.ServicesData) (project structs.ProjectsData, err error) {
 	p := models.Projects{
-		ServiceID:  service.ID,
-		Name:       payload.Project,
-		Repo:       payload.Repo,
-		Namespaces: []string{},
-		Branches:   []string{payload.Branch},
+		ServiceID: service.ID,
+		Name:      payload.Project,
+		Repo:      payload.Repo,
+		Branch:    payload.Branch,
 	}
 
 	err = conn.CreateProjectTableEntry(p)

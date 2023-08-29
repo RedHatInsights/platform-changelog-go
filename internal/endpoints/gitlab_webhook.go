@@ -174,11 +174,10 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 			}
 
 			newProject := m.Projects{
-				ServiceID:  service.ID,
-				Name:       getRepo(e).Name,
-				Repo:       repo,
-				Namespaces: []string{},
-				Branches:   []string{strings.Split(e.Ref, "/")[2]},
+				ServiceID: service.ID,
+				Name:      getRepo(e).Name,
+				Repo:      repo,
+				Branch:    strings.Split(e.Ref, "/")[2],
 			}
 
 			err = eh.conn.CreateProjectTableEntry(newProject)

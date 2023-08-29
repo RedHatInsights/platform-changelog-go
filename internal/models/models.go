@@ -19,8 +19,8 @@ type Projects struct {
 	Name       string `gorm:"not null"`
 	Repo       string `gorm:"not null"`
 	DeployFile string
-	Namespaces []string    `gorm:"type:text[]"`
-	Branches   []string    `gorm:"type:text[]"`
+	Namespace  string
+	Branch     string
 	Timelines  []Timelines `gorm:"foreignkey:ProjectID"`
 }
 

@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 	"strings"
+	"time"
 
-	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
+	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
 type TektonPayload *struct {
@@ -75,7 +75,15 @@ func (eh *EndpointHandler) TektonTaskRun(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	deploy, err := convertTektonPayloadToTimeline(eh.conn, payload)
+	project, err := getProject(eh.conn, payload)
+	if err != nil {
+		l.Log.Error(err)
+		metrics.IncTekton(r.Method, r.UserAgent(), true)
+		writeResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	deploy := convertTektonPayloadToTimeline(eh.conn, payload, project)
 
 	if err != nil {
 		l.Log.Error(err)
@@ -83,6 +91,8 @@ func (eh *EndpointHandler) TektonTaskRun(w http.ResponseWriter, r *http.Request)
 		writeResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
+
+	err = setProjectNamespace(eh.conn, project, payload.Env)
 
 	err = eh.conn.CreateDeployEntry(deploy)
 
@@ -114,28 +124,33 @@ func validateTektonPayload(payload TektonPayload) error {
 	return nil
 }
 
-// Converting from TektonPayload struct to Timeline model
-func convertTektonPayloadToTimeline(conn db.DBConnector, payload TektonPayload) (models.Timelines, error) {
-	services := config.Get().Services
-
-	var deploy models.Timelines
-	name := payload.App
-	// Validate that the app specified is onboarded
-	if services[name] == (config.Service{}) {
-		return deploy, fmt.Errorf("app %s is not onboarded", name)
-	}
-
-	s, _, err := conn.GetServiceByName(name)
-
+func getProject(conn db.DBConnector, payload TektonPayload) (project structs.ProjectsData, err error) {
+	service, _, err := conn.GetServiceByName(payload.App)
 	if err != nil {
-		return deploy, err
+		return structs.ProjectsData{}, fmt.Errorf("app %s is not onboarded", payload.App)
 	}
+	projects, _, err := conn.GetProjectsByService(service, 0, 1, structs.Query{})
+	// Do we need more granular tekton data on which projects were deployed?
+	// Or should we think of deployments as per service?
+	// Taking the first project for now
+	project = projects[0]
+	return
+}
 
+func setProjectNamespace(conn db.DBConnector, project structs.ProjectsData, namespace string) error {
+	project.Namespace = namespace
+	_, err := conn.UpdateProjectTableEntry(project)
+	return err
+}
+
+// Converting from TektonPayload struct to Timeline model
+func convertTektonPayloadToTimeline(conn db.DBConnector, payload TektonPayload, p structs.ProjectsData) (deploy models.Timelines) {
 	deploy = models.Timelines{
-		ServiceID:       s.ID,
+		ServiceID:       p.ServiceID,
+		ProjectID:       p.ID,
 		Timestamp:       *payload.Timestamp,
 		Type:            "deploy",
-		Repo:            s.Name,
+		Repo:            p.Repo,
 		Ref:             payload.Ref,
 		DeployNamespace: payload.App,
 		Cluster:         payload.Env,
@@ -143,5 +158,5 @@ func convertTektonPayloadToTimeline(conn db.DBConnector, payload TektonPayload) 
 		Status:          payload.Status,
 	}
 
-	return deploy, nil
+	return deploy
 }

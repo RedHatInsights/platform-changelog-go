@@ -89,11 +89,10 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 			}
 
 			newProject := m.Projects{
-				ServiceID:  service.ID,
-				Name:       e.Repo.GetName(),
-				Repo:       repo,
-				Namespaces: []string{},
-				Branches:   []string{strings.Split(utils.DerefString(e.Ref), "/")[2]},
+				ServiceID: service.ID,
+				Name:      e.Repo.GetName(),
+				Repo:      repo,
+				Branch:    strings.Split(utils.DerefString(e.Ref), "/")[2],
 			}
 
 			err = eh.conn.CreateProjectTableEntry(newProject)

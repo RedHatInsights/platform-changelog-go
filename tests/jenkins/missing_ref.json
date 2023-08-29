@@ -1,7 +1,7 @@
 {
+    "app": "rbac",
     "project": "insights-rbac",
     "tenant": "insights",
     "repo": "https://github.com/RedHatInsights/insights-rbac",
-    "branch": "origin/main",
-    "ref":  "3adfljk324"
+    "branch": "origin/main"
 }

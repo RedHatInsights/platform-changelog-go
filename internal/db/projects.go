@@ -14,7 +14,7 @@ func (conn *DBConnectorImpl) CreateProjectTableEntry(p models.Projects) (err err
 }
 
 func (conn *DBConnectorImpl) UpdateProjectTableEntry(p structs.ProjectsData) (project models.Projects, err error) {
-	project = models.Projects{Name: p.Name, Repo: p.Repo, DeployFile: p.DeployFile, Namespaces: p.Namespaces, Branches: p.Branches}
+	project = models.Projects{Name: p.Name, Repo: p.Repo, DeployFile: p.DeployFile, Namespace: p.Namespace, Branch: p.Branch}
 
 	results := conn.db.Model(models.Projects{}).Where("name = ?", p.Name).Updates(&project)
 
@@ -33,13 +33,11 @@ func (conn *DBConnectorImpl) GetProjectsAll(offset int, limit int, q structs.Que
 	if len(q.Name) > 0 {
 		db = db.Where("projects.name IN ?", q.Name)
 	}
-
-	// will these be able to find the namespace/branch in an array properly?
 	if len(q.Namespace) > 0 {
-		db = db.Where("projects.namespaces IN ?", q.Namespace)
+		db = db.Where("projects.namespace IN ?", q.Namespace)
 	}
 	if len(q.Branch) > 0 {
-		db = db.Where("projects.branches IN ?", q.Branch)
+		db = db.Where("projects.branch IN ?", q.Branch)
 	}
 
 	// Uses the Projects model here to reflect the proper db relation
@@ -59,11 +57,8 @@ func (conn *DBConnectorImpl) GetProjectsByService(service structs.ServicesData, 
 	var projects []structs.ProjectsData
 
 	db := conn.db.Model(models.Projects{}).Select("*").Where("service_id = ?", service.ID)
-
-	db = FilterTimelineByDate(db, q.StartDate, q.EndDate)
-
 	db.Model(models.Projects{}).Count(&count)
-	result := db.Order("Timestamp desc").Order("ID desc").Limit(limit).Offset(offset).Find(&projects)
+	result := db.Order("ID desc").Limit(limit).Offset(offset).Find(&projects)
 
 	return projects, count, result.Error
 }

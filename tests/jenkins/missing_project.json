@@ -1,5 +1,5 @@
 {
-    "project": "insights-rbac",
+    "app": "rbac",
     "tenant": "insights",
     "repo": "https://github.com/RedHatInsights/insights-rbac",
     "branch": "origin/main",
