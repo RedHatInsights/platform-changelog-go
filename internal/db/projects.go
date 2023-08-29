@@ -49,7 +49,7 @@ func (conn *DBConnectorImpl) GetProjectsAll(offset int, limit int, q structs.Que
 	return projects, count, result.Error
 }
 
-func (conn *DBConnectorImpl) GetProjectsByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]structs.ProjectsData, int64, error) {
+func (conn *DBConnectorImpl) GetProjectsByService(service models.Services, offset int, limit int, q structs.Query) ([]structs.ProjectsData, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetProjectsByService)
 	defer callDurationTimer.ObserveDuration()
 

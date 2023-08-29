@@ -57,7 +57,7 @@ func (conn *DBConnectorImpl) GetCommitsAll(offset int, limit int, q structs.Quer
 	return commits, count, result.Error
 }
 
-func (conn *DBConnectorImpl) GetCommitsByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
+func (conn *DBConnectorImpl) GetCommitsByService(service models.Services, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsByService)
 	defer callDurationTimer.ObserveDuration()
 

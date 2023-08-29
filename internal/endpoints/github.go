@@ -152,14 +152,14 @@ func validateGithubPayload(payload GithubPayload) error {
 	return nil
 }
 
-func getServiceAndProject(conn db.DBConnector, payload GithubPayload) (service structs.ServicesData, project structs.ProjectsData, err1 error, err2 error) {
+func getServiceAndProject(conn db.DBConnector, payload GithubPayload) (service models.Services, project structs.ProjectsData, err1 error, err2 error) {
 	service, _, err1 = conn.GetServiceByName(payload.App)
 	project, _, err2 = conn.GetProjectByName(payload.Project)
 
 	return
 }
 
-func createNewService(conn db.DBConnector, payload GithubPayload) (service structs.ServicesData, err error) {
+func createNewService(conn db.DBConnector, payload GithubPayload) (service models.Services, err error) {
 	// couldn't find service; create it, then handle the project
 	s := models.Services{
 		Name:        payload.App,
@@ -169,14 +169,14 @@ func createNewService(conn db.DBConnector, payload GithubPayload) (service struc
 
 	_, err = conn.CreateServiceTableEntry(s)
 	if err != nil {
-		return structs.ServicesData{}, fmt.Errorf("problem creating service %s", payload.App)
+		return models.Services{}, fmt.Errorf("problem creating service %s", payload.App)
 	}
 
 	service, _, err = conn.GetServiceByName(payload.App)
 	return
 }
 
-func createNewProject(conn db.DBConnector, payload GithubPayload, service structs.ServicesData) (project structs.ProjectsData, err error) {
+func createNewProject(conn db.DBConnector, payload GithubPayload, service models.Services) (project structs.ProjectsData, err error) {
 	p := models.Projects{
 		ServiceID: service.ID,
 		Name:      payload.Project,
@@ -194,7 +194,7 @@ func createNewProject(conn db.DBConnector, payload GithubPayload, service struct
 }
 
 // Converting from GithubPayload struct to Timeline model
-func convertGithubPayloadToTimelines(conn db.DBConnector, payload GithubPayload, service structs.ServicesData, project structs.ProjectsData) (commit models.Timelines, err error) {
+func convertGithubPayloadToTimelines(conn db.DBConnector, payload GithubPayload, service models.Services, project structs.ProjectsData) (commit models.Timelines, err error) {
 	// author, timestamp, mergedby, and message will be updated with information from github api
 
 	t := models.Timelines{

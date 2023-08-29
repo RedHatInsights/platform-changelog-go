@@ -1,11 +1,10 @@
 package main
 
 import (
-	"github.com/redhatinsights/platform-changelog-go/internal/structs"
-
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/logging"
+	"github.com/redhatinsights/platform-changelog-go/internal/models"
 )
 
 func seedDB(cfg *config.Config) {
@@ -65,7 +64,7 @@ func validateTenant(tenant string, cfg *config.Config) bool {
 
 // Compare the services in the DB to the services in the config
 // Returns false is they are the same, true if they are different
-func compareService(fromDB structs.ServicesData, fromCfg config.Service) bool {
+func compareService(fromDB models.Services, fromCfg config.Service) bool {
 	if fromDB.DisplayName != fromCfg.DisplayName ||
 		fromDB.Tenant != fromCfg.Tenant {
 		// TODO: bulk update services
