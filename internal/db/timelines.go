@@ -40,7 +40,7 @@ func (conn *DBConnectorImpl) GetTimelinesAll(offset int, limit int, q structs.Qu
 	return timelines, count, result.Error
 }
 
-func (conn *DBConnectorImpl) GetTimelinesByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
+func (conn *DBConnectorImpl) GetTimelinesByService(service models.Services, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimelinesByService)
 	defer callDurationTimer.ObserveDuration()
 
@@ -91,7 +91,7 @@ func (conn *DBConnectorImpl) GetTimelineByRef(ref string) (models.Timelines, int
 	return timeline, result.RowsAffected, result.Error
 }
 
-func (conn *DBConnectorImpl) DeleteTimelinesByService(service structs.ServicesData) error {
+func (conn *DBConnectorImpl) DeleteTimelinesByService(service models.Services) error {
 	result := conn.db.Model(models.Timelines{}).Where("service_id = ?", service.ID).Delete(&models.Timelines{})
 
 	return result.Error

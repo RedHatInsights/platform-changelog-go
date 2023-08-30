@@ -22,19 +22,19 @@ func (conn *DBConnectorImpl) UpdateServiceTableEntry(name string, s config.Servi
 	return newService, results.Error
 }
 
-func (conn *DBConnectorImpl) DeleteServiceTableEntry(name string) (structs.ServicesData, error) {
+func (conn *DBConnectorImpl) DeleteServiceTableEntry(name string) (models.Services, error) {
 	// save the service to delete the timelines
 	service, _, _ := conn.GetServiceByName(name)
 
 	results := conn.db.Model(models.Services{}).Where("name = ?", name).Delete(&models.Services{})
 	if results.Error != nil {
-		return structs.ServicesData{}, results.Error
+		return models.Services{}, results.Error
 	}
 
 	// delete the timelines for the service
 	err := conn.DeleteTimelinesByService(service)
 	if err != nil {
-		return structs.ServicesData{}, err
+		return models.Services{}, err
 	}
 
 	return service, results.Error
@@ -126,13 +126,12 @@ func (conn *DBConnectorImpl) GetServiceByNameWorkin(name string) (structs.Servic
 	return s, result.RowsAffected, result.Error
 }
 
-func (conn *DBConnectorImpl) GetServiceByName(name string) (structs.ServicesData, int64, error) {
+func (conn *DBConnectorImpl) GetServiceByName(name string) (models.Services, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServiceByName)
 	defer callDurationTimer.ObserveDuration()
 
-	var service structs.ServicesData
+	var service models.Services
 	result := conn.db.Model(models.Services{}).Preload("Projects").First(&service)
-
 	return service, result.RowsAffected, result.Error
 }
 
