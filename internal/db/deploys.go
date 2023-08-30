@@ -61,7 +61,7 @@ func (conn *DBConnectorImpl) GetDeploysByService(service models.Services, offset
 	return deploys, count, result.Error
 }
 
-func (conn *DBConnectorImpl) GetDeploysByProject(project structs.ProjectsData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
+func (conn *DBConnectorImpl) GetDeploysByProject(project models.Projects, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetDeploysByProject)
 	defer callDurationTimer.ObserveDuration()
 

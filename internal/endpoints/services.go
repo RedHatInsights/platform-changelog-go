@@ -56,8 +56,16 @@ func (eh *EndpointHandler) GetServiceByName(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	serviceData := structs.ServicesData{
+		ID:          service.ID,
+		Name:        service.Name,
+		DisplayName: service.DisplayName,
+		Tenant:      service.Tenant,
+		Projects:    convertProjectsToProjectsData(service.Projects),
+	}
+
 	l.Log.Debugf("URL Param: %s", serviceName)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(service)
+	json.NewEncoder(w).Encode(serviceData)
 }

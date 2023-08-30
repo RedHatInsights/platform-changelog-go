@@ -93,9 +93,14 @@ func (eh *EndpointHandler) TektonTaskRun(w http.ResponseWriter, r *http.Request)
 	}
 
 	err = setProjectNamespace(eh.conn, project, payload.Env)
+	if err != nil {
+		l.Log.Error(err)
+		metrics.IncTekton(r.Method, r.UserAgent(), true)
+		writeResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	err = eh.conn.CreateDeployEntry(deploy)
-
 	if err != nil {
 		l.Log.Error(err)
 		metrics.IncTekton(r.Method, r.UserAgent(), true)
@@ -124,10 +129,10 @@ func validateTektonPayload(payload TektonPayload) error {
 	return nil
 }
 
-func getProject(conn db.DBConnector, payload TektonPayload) (project structs.ProjectsData, err error) {
+func getProject(conn db.DBConnector, payload TektonPayload) (project models.Projects, err error) {
 	service, _, err := conn.GetServiceByName(payload.App)
 	if err != nil {
-		return structs.ProjectsData{}, fmt.Errorf("app %s is not onboarded", payload.App)
+		return models.Projects{}, fmt.Errorf("app %s is not onboarded", payload.App)
 	}
 	projects, _, err := conn.GetProjectsByService(service, 0, 1, structs.Query{})
 	// Do we need more granular tekton data on which projects were deployed?
@@ -137,14 +142,14 @@ func getProject(conn db.DBConnector, payload TektonPayload) (project structs.Pro
 	return
 }
 
-func setProjectNamespace(conn db.DBConnector, project structs.ProjectsData, namespace string) error {
+func setProjectNamespace(conn db.DBConnector, project models.Projects, namespace string) error {
 	project.Namespace = namespace
 	_, err := conn.UpdateProjectTableEntry(project)
 	return err
 }
 
 // Converting from TektonPayload struct to Timeline model
-func convertTektonPayloadToTimeline(conn db.DBConnector, payload TektonPayload, p structs.ProjectsData) (deploy models.Timelines) {
+func convertTektonPayloadToTimeline(conn db.DBConnector, payload TektonPayload, p models.Projects) (deploy models.Timelines) {
 	deploy = models.Timelines{
 		ServiceID:       p.ServiceID,
 		ProjectID:       p.ID,

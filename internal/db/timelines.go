@@ -60,7 +60,7 @@ func (conn *DBConnectorImpl) GetTimelinesByService(service models.Services, offs
 	return timelines, count, result.Error
 }
 
-func (conn *DBConnectorImpl) GetTimelinesByProject(project structs.ProjectsData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
+func (conn *DBConnectorImpl) GetTimelinesByProject(project models.Projects, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimelinesByProject)
 	defer callDurationTimer.ObserveDuration()
 

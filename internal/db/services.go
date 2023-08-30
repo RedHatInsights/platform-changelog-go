@@ -63,7 +63,7 @@ func (conn *DBConnectorImpl) GetServicesAll(offset int, limit int, q structs.Que
 	db.Model(models.Services{}).Count(&count)
 
 	// TODO: add a sort_by field to the query struct
-	result := db.Order("ID desc").Preload("Projects").Limit(limit).Offset(offset).Scan(&services)
+	result := db.Order("ID desc").Limit(limit).Offset(offset).Scan(&services)
 
 	var servicesWithTimelines []structs.ExpandedServicesData
 	for i := 0; i < len(services); i++ {
@@ -92,40 +92,6 @@ func (conn *DBConnectorImpl) GetServiceNames() ([]string, error) {
 	return names, result.Error
 }
 
-func (conn *DBConnectorImpl) GetServiceByNameWorkin(name string) (structs.ServicesData, int64, error) {
-	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServiceByName)
-	defer callDurationTimer.ObserveDuration()
-
-	var service models.Services
-	result := conn.db.Model(models.Services{}).Preload("Projects").First(&service)
-
-	var ps []structs.ProjectsData
-
-	for _, p := range service.Projects {
-
-		ps = append(ps, structs.ProjectsData{
-			ID:         p.ID,
-			ServiceID:  p.ServiceID,
-			Name:       p.Name,
-			Repo:       p.Repo,
-			DeployFile: p.DeployFile,
-			Namespace:  p.Namespace,
-			Branch:     p.Branch,
-		})
-
-	}
-
-	s := structs.ServicesData{
-		ID:          service.ID,
-		Name:        service.Name,
-		DisplayName: service.DisplayName,
-		Tenant:      service.Tenant,
-		Projects:    ps,
-	}
-
-	return s, result.RowsAffected, result.Error
-}
-
 func (conn *DBConnectorImpl) GetServiceByName(name string) (models.Services, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServiceByName)
 	defer callDurationTimer.ObserveDuration()
@@ -135,8 +101,8 @@ func (conn *DBConnectorImpl) GetServiceByName(name string) (models.Services, int
 	return service, result.RowsAffected, result.Error
 }
 
-func (conn *DBConnectorImpl) GetServiceByRepo(repo string) (structs.ServicesData, error) {
-	var service structs.ServicesData
+func (conn *DBConnectorImpl) GetServiceByRepo(repo string) (models.Services, error) {
+	var service models.Services
 	result := conn.db.Model(models.Services{}).Preload("Projects").Where("repo = ?", repo).First(&service)
 
 	return service, result.Error

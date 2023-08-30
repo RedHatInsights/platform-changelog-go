@@ -11,7 +11,6 @@ import (
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
-	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
 // This endpoint is different than the github and gitlab endpoints
@@ -79,8 +78,8 @@ func (eh *EndpointHandler) Github(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	service, project, err1, err2 := getServiceAndProject(eh.conn, payload)
-	if err1 != nil || err2 != nil {
+	service, project, err := getServiceAndProject(eh.conn, payload)
+	if err != nil {
 		if service.ID == 0 { // how do I compare the structs completely?
 			service, err = createNewService(eh.conn, payload)
 			if err != nil {
@@ -152,9 +151,16 @@ func validateGithubPayload(payload GithubPayload) error {
 	return nil
 }
 
-func getServiceAndProject(conn db.DBConnector, payload GithubPayload) (service models.Services, project structs.ProjectsData, err1 error, err2 error) {
-	service, _, err1 = conn.GetServiceByName(payload.App)
-	project, _, err2 = conn.GetProjectByName(payload.Project)
+func getServiceAndProject(conn db.DBConnector, payload GithubPayload) (service models.Services, project models.Projects, err error) {
+	service, _, err = conn.GetServiceByName(payload.App)
+	if err != nil {
+		return models.Services{}, models.Projects{}, err
+	}
+
+	project, _, err = conn.GetProjectByName(payload.Project)
+	if err != nil {
+		return service, models.Projects{}, err
+	}
 
 	return
 }
@@ -176,7 +182,7 @@ func createNewService(conn db.DBConnector, payload GithubPayload) (service model
 	return
 }
 
-func createNewProject(conn db.DBConnector, payload GithubPayload, service models.Services) (project structs.ProjectsData, err error) {
+func createNewProject(conn db.DBConnector, payload GithubPayload, service models.Services) (project models.Projects, err error) {
 	p := models.Projects{
 		ServiceID: service.ID,
 		Name:      payload.Project,
@@ -186,7 +192,7 @@ func createNewProject(conn db.DBConnector, payload GithubPayload, service models
 
 	err = conn.CreateProjectTableEntry(p)
 	if err != nil {
-		return structs.ProjectsData{}, fmt.Errorf("problem creating project %s", payload.Project)
+		return models.Projects{}, fmt.Errorf("problem creating project %s", payload.Project)
 	}
 
 	project, _, err = conn.GetProjectByName(payload.Project)
@@ -194,7 +200,7 @@ func createNewProject(conn db.DBConnector, payload GithubPayload, service models
 }
 
 // Converting from GithubPayload struct to Timeline model
-func convertGithubPayloadToTimelines(conn db.DBConnector, payload GithubPayload, service models.Services, project structs.ProjectsData) (commit models.Timelines, err error) {
+func convertGithubPayloadToTimelines(conn db.DBConnector, payload GithubPayload, service models.Services, project models.Projects) (commit models.Timelines, err error) {
 	// author, timestamp, mergedby, and message will be updated with information from github api
 
 	t := models.Timelines{

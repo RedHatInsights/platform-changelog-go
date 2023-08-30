@@ -11,8 +11,7 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
-	m "github.com/redhatinsights/platform-changelog-go/internal/models"
-	"github.com/redhatinsights/platform-changelog-go/internal/structs"
+	"github.com/redhatinsights/platform-changelog-go/internal/models"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -156,7 +155,7 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 
 			if err != nil { // service not found
 				// create service too
-				newService := m.Services{
+				newService := models.Services{
 					Name:        getRepo(e).Name,
 					DisplayName: getRepo(e).Name,
 					Tenant:      "undefined",
@@ -173,7 +172,7 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 				}
 			}
 
-			newProject := m.Projects{
+			newProject := models.Projects{
 				ServiceID: service.ID,
 				Name:      getRepo(e).Name,
 				Repo:      repo,
@@ -216,10 +215,10 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func getCommitData2(g *gitlab.PushEvent, p structs.ProjectsData) []m.Timelines {
-	var commits []m.Timelines
+func getCommitData2(g *gitlab.PushEvent, p models.Projects) []models.Timelines {
+	var commits []models.Timelines
 	for _, commit := range g.Commits {
-		record := m.Timelines{
+		record := models.Timelines{
 			ServiceID: p.ID,
 			Repo:      getRepo(g).Name,
 			Ref:       getID(commit),

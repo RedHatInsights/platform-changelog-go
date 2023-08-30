@@ -66,7 +66,10 @@ type ServicesData struct {
 }
 
 type ExpandedServicesData struct {
-	ServicesData
-	Commit models.Timelines `json:"latest_commit" gorm:"foreignkey:ID"`
-	Deploy models.Timelines `json:"latest_deploy" gorm:"foreignkey:ID"`
+	ID          int              `json:"id"`
+	Name        string           `json:"name"`
+	DisplayName string           `json:"display_name"`
+	Tenant      string           `json:"tenant"`
+	Commit      models.Timelines `json:"latest_commit" gorm:"foreignkey:ID"`
+	Deploy      models.Timelines `json:"latest_deploy" gorm:"foreignkey:ID"`
 }

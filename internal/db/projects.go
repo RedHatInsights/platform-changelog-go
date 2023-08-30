@@ -13,7 +13,7 @@ func (conn *DBConnectorImpl) CreateProjectTableEntry(p models.Projects) (err err
 	return results.Error
 }
 
-func (conn *DBConnectorImpl) UpdateProjectTableEntry(p structs.ProjectsData) (project models.Projects, err error) {
+func (conn *DBConnectorImpl) UpdateProjectTableEntry(p models.Projects) (project models.Projects, err error) {
 	project = models.Projects{Name: p.Name, Repo: p.Repo, DeployFile: p.DeployFile, Namespace: p.Namespace, Branch: p.Branch}
 
 	results := conn.db.Model(models.Projects{}).Where("name = ?", p.Name).Updates(&project)
@@ -21,12 +21,12 @@ func (conn *DBConnectorImpl) UpdateProjectTableEntry(p structs.ProjectsData) (pr
 	return project, results.Error
 }
 
-func (conn *DBConnectorImpl) GetProjectsAll(offset int, limit int, q structs.Query) ([]structs.ProjectsData, int64, error) {
+func (conn *DBConnectorImpl) GetProjectsAll(offset int, limit int, q structs.Query) ([]models.Projects, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServicesAll)
 	defer callDurationTimer.ObserveDuration()
 
 	var count int64
-	var projects []structs.ProjectsData
+	var projects []models.Projects
 
 	db := conn.db.Model(models.Projects{})
 
@@ -49,12 +49,12 @@ func (conn *DBConnectorImpl) GetProjectsAll(offset int, limit int, q structs.Que
 	return projects, count, result.Error
 }
 
-func (conn *DBConnectorImpl) GetProjectsByService(service models.Services, offset int, limit int, q structs.Query) ([]structs.ProjectsData, int64, error) {
+func (conn *DBConnectorImpl) GetProjectsByService(service models.Services, offset int, limit int, q structs.Query) ([]models.Projects, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetProjectsByService)
 	defer callDurationTimer.ObserveDuration()
 
 	var count int64
-	var projects []structs.ProjectsData
+	var projects []models.Projects
 
 	db := conn.db.Model(models.Projects{}).Select("*").Where("service_id = ?", service.ID)
 	db.Model(models.Projects{}).Count(&count)
@@ -63,16 +63,16 @@ func (conn *DBConnectorImpl) GetProjectsByService(service models.Services, offse
 	return projects, count, result.Error
 }
 
-func (conn *DBConnectorImpl) GetProjectByName(name string) (structs.ProjectsData, int64, error) {
+func (conn *DBConnectorImpl) GetProjectByName(name string) (models.Projects, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetProjectByName)
 	defer callDurationTimer.ObserveDuration()
-	var project structs.ProjectsData
+	var project models.Projects
 	result := conn.db.Model(models.Projects{}).Where("name = ?", name).First(&project)
 	return project, result.RowsAffected, result.Error
 }
 
-func (conn *DBConnectorImpl) GetProjectByRepo(repo string) (structs.ProjectsData, error) {
-	var project structs.ProjectsData
+func (conn *DBConnectorImpl) GetProjectByRepo(repo string) (models.Projects, error) {
+	var project models.Projects
 	result := conn.db.Model(models.Projects{}).Where("repo = ?", repo).First(&project)
 
 	return project, result.Error

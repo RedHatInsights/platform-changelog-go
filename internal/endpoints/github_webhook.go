@@ -10,8 +10,7 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
-	m "github.com/redhatinsights/platform-changelog-go/internal/models"
-	"github.com/redhatinsights/platform-changelog-go/internal/structs"
+	"github.com/redhatinsights/platform-changelog-go/internal/models"
 	"github.com/redhatinsights/platform-changelog-go/internal/utils"
 )
 
@@ -71,7 +70,7 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 
 			if err != nil { // service not found
 				// create service too
-				newService := m.Services{
+				newService := models.Services{
 					Name:        e.Repo.GetName(),
 					DisplayName: e.Repo.GetName(),
 					Tenant:      "undefined",
@@ -88,7 +87,7 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 				}
 			}
 
-			newProject := m.Projects{
+			newProject := models.Projects{
 				ServiceID: service.ID,
 				Name:      e.Repo.GetName(),
 				Repo:      repo,
@@ -132,10 +131,10 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func getCommitData(g *github.PushEvent, p structs.ProjectsData) []m.Timelines {
-	var commits []m.Timelines
+func getCommitData(g *github.PushEvent, p models.Projects) []models.Timelines {
+	var commits []models.Timelines
 	for _, commit := range g.Commits {
-		record := m.Timelines{
+		record := models.Timelines{
 			ServiceID: p.ServiceID,
 			ProjectID: p.ID,
 			Repo:      utils.DerefString(g.GetRepo().Name),

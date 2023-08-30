@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
+	"github.com/redhatinsights/platform-changelog-go/internal/models"
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
@@ -26,7 +27,7 @@ func (eh *EndpointHandler) GetProjectsAll(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	projectsList := structs.ProjectsList{Count: count, Data: projects}
+	projectsList := structs.ProjectsList{Count: count, Data: convertProjectsToProjectsData(projects)}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
@@ -62,9 +63,26 @@ func (eh *EndpointHandler) GetProjectsByService(w http.ResponseWriter, r *http.R
 		w.Write([]byte(err.Error()))
 	}
 
-	projectsList := structs.ProjectsList{Count: count, Data: projects}
+	projectsList := structs.ProjectsList{Count: count, Data: convertProjectsToProjectsData(projects)}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(projectsList)
+}
+
+func convertProjectsToProjectsData(projects []models.Projects) []structs.ProjectsData {
+	var projectsData []structs.ProjectsData
+
+	for _, project := range projects {
+		projectsData = append(projectsData, structs.ProjectsData{
+			ID:         project.ID,
+			ServiceID:  project.ServiceID,
+			Name:       project.Name,
+			DeployFile: project.DeployFile,
+			Namespace:  project.Namespace,
+			Branch:     project.Branch,
+		})
+	}
+
+	return projectsData
 }
