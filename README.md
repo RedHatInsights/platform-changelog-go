@@ -113,7 +113,6 @@ To run the app, try `make run`, which uses the following make commands:
 
     $> make run-db
     $> make run-migrate-up
-    $> make run-seed
     $> make run-api
 
 To rebuild the app, the `-B` above is required.
