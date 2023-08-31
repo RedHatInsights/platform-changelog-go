@@ -175,7 +175,7 @@ func createNewService(conn db.DBConnector, payload GithubPayload) (service model
 
 	_, err = conn.CreateServiceTableEntry(s)
 	if err != nil {
-		return models.Services{}, fmt.Errorf("problem creating service %s", payload.App)
+		return models.Services{}, fmt.Errorf("error creating service %s: %s", payload.App, err.Error())
 	}
 
 	service, _, err = conn.GetServiceByName(payload.App)
@@ -192,7 +192,7 @@ func createNewProject(conn db.DBConnector, payload GithubPayload, service models
 
 	err = conn.CreateProjectTableEntry(p)
 	if err != nil {
-		return models.Projects{}, fmt.Errorf("problem creating project %s", payload.Project)
+		return models.Projects{}, fmt.Errorf("error creating project %s: %s; %d", payload.Project, err.Error(), p.ID)
 	}
 
 	project, _, err = conn.GetProjectByName(payload.Project)

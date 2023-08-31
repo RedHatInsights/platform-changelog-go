@@ -10,9 +10,10 @@ import (
 )
 
 func (conn *DBConnectorImpl) CreateServiceTableEntry(s models.Services) (service models.Services, err error) {
-	results := conn.db.Create(&s)
+	service = models.Services{Name: s.Name, DisplayName: s.DisplayName, Tenant: s.Tenant}
+	results := conn.db.Create(&service)
 
-	return s, results.Error
+	return service, results.Error
 }
 
 func (conn *DBConnectorImpl) UpdateServiceTableEntry(name string, s config.Service) (service models.Services, err error) {
@@ -63,7 +64,7 @@ func (conn *DBConnectorImpl) GetServicesAll(offset int, limit int, q structs.Que
 	db.Model(models.Services{}).Count(&count)
 
 	// TODO: add a sort_by field to the query struct
-	result := db.Order("ID desc").Limit(limit).Offset(offset).Scan(&services)
+	result := db.Order("ID desc").Preload("Projects").Limit(limit).Offset(offset).Scan(&services)
 
 	var servicesWithTimelines []structs.ExpandedServicesData
 	for i := 0; i < len(services); i++ {

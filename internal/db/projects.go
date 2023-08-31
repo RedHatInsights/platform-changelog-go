@@ -8,14 +8,13 @@ import (
 )
 
 func (conn *DBConnectorImpl) CreateProjectTableEntry(p models.Projects) (err error) {
-	results := conn.db.Create(&p)
+	project := models.Projects{Name: p.Name, Namespace: p.Namespace, Branch: p.Branch, Repo: p.Repo, ServiceID: p.ServiceID}
+	results := conn.db.Create(&project)
 
 	return results.Error
 }
 
 func (conn *DBConnectorImpl) UpdateProjectTableEntry(p models.Projects) (project models.Projects, err error) {
-	project = models.Projects{Name: p.Name, Repo: p.Repo, DeployFile: p.DeployFile, Namespace: p.Namespace, Branch: p.Branch}
-
 	results := conn.db.Model(models.Projects{}).Where("name = ?", p.Name).Updates(&project)
 
 	return project, results.Error
