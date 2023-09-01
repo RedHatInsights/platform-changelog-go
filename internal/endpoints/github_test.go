@@ -81,10 +81,11 @@ var _ = Describe("Handler", func() {
 	)
 })
 
-func CreateService(conn db.DBConnector, name string, s models.Services) (service models.Services) {
-	service, err := conn.CreateServiceTableEntry(s)
+func CreateService(conn db.DBConnector, s *models.Services) (service models.Services) {
+	err := conn.CreateServiceTableEntry(s)
 
 	Expect(err).To(BeNil())
+	Expect(s.ID).NotTo(Equal(0))
 
 	return service
 }

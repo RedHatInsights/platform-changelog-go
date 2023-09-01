@@ -9,11 +9,10 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
-func (conn *DBConnectorImpl) CreateServiceTableEntry(s models.Services) (service models.Services, err error) {
-	service = models.Services{Name: s.Name, DisplayName: s.DisplayName, Tenant: s.Tenant}
-	results := conn.db.Create(&service)
+func (conn *DBConnectorImpl) CreateServiceTableEntry(s *models.Services) error {
+	results := conn.db.Create(s)
 
-	return service, results.Error
+	return results.Error
 }
 
 func (conn *DBConnectorImpl) UpdateServiceTableEntry(name string, s config.Service) (service models.Services, err error) {

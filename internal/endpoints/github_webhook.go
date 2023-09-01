@@ -70,12 +70,12 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 
 			if err != nil { // service not found
 				// create service too
-				newService := models.Services{
+				service = models.Services{
 					Name:        e.Repo.GetName(),
 					DisplayName: e.Repo.GetName(),
 					Tenant:      "undefined",
 				}
-				eh.conn.CreateServiceTableEntry(newService)
+				eh.conn.CreateServiceTableEntry(&service)
 
 				service, _, err = eh.conn.GetServiceByName(e.Repo.GetName())
 				if err != nil {
@@ -87,26 +87,19 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 				}
 			}
 
-			newProject := models.Projects{
+			project = models.Projects{
 				ServiceID: service.ID,
 				Name:      e.Repo.GetName(),
 				Repo:      repo,
 				Branch:    strings.Split(utils.DerefString(e.Ref), "/")[2],
 			}
 
-			err = eh.conn.CreateProjectTableEntry(newProject)
+			err = eh.conn.CreateProjectTableEntry(&project)
 
 			if err != nil {
-				l.Log.Info("Failed to create project: ", newProject)
-			}
-
-			// retry to get the project (for the id)
-			project, err = eh.conn.GetProjectByRepo(repo)
-			if err != nil {
-				l.Log.Errorf("Failed to insert new project: %v", err)
+				l.Log.Info("Failed to insert project: ", project)
 				metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
 				writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert new project"}`)
-				return
 			}
 		}
 

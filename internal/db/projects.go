@@ -7,9 +7,8 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
-func (conn *DBConnectorImpl) CreateProjectTableEntry(p models.Projects) (err error) {
-	project := models.Projects{Name: p.Name, Namespace: p.Namespace, Branch: p.Branch, Repo: p.Repo, ServiceID: p.ServiceID}
-	results := conn.db.Create(&project)
+func (conn *DBConnectorImpl) CreateProjectTableEntry(p *models.Projects) error {
+	results := conn.db.Create(p)
 
 	return results.Error
 }

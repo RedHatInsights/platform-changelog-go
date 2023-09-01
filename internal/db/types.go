@@ -7,7 +7,7 @@ import (
 )
 
 type DBConnector interface {
-	CreateServiceTableEntry(s models.Services) (models.Services, error)
+	CreateServiceTableEntry(s *models.Services) error
 	UpdateServiceTableEntry(name string, s config.Service) (service models.Services, err error)
 	DeleteServiceTableEntry(name string) (models.Services, error)
 	GetServicesAll(offset int, limit int, q structs.Query) ([]structs.ExpandedServicesData, int64, error)
@@ -15,7 +15,7 @@ type DBConnector interface {
 	GetServiceByName(name string) (models.Services, int64, error)
 	GetServiceByRepo(repo string) (models.Services, error)
 
-	CreateProjectTableEntry(p models.Projects) (err error)
+	CreateProjectTableEntry(p *models.Projects) error
 	UpdateProjectTableEntry(p models.Projects) (project models.Projects, err error)
 	GetProjectsAll(offset int, limit int, q structs.Query) ([]models.Projects, int64, error)
 	GetProjectsByService(service models.Services, offset int, limit int, q structs.Query) ([]models.Projects, int64, error)

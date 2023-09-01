@@ -155,14 +155,12 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 
 			if err != nil { // service not found
 				// create service too
-				newService := models.Services{
+				service := models.Services{
 					Name:        getRepo(e).Name,
 					DisplayName: getRepo(e).Name,
 					Tenant:      "undefined",
 				}
-				eh.conn.CreateServiceTableEntry(newService)
-
-				service, _, err = eh.conn.GetServiceByName(getRepo(e).Name)
+				err = eh.conn.CreateServiceTableEntry(&service)
 				if err != nil {
 					// Failed to create service entry, something must be wrong with db
 					l.Log.Errorf("Failed to insert new service: %v", err)
@@ -172,23 +170,17 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 				}
 			}
 
-			newProject := models.Projects{
+			project = models.Projects{
 				ServiceID: service.ID,
 				Name:      getRepo(e).Name,
 				Repo:      repo,
 				Branch:    strings.Split(e.Ref, "/")[2],
 			}
 
-			err = eh.conn.CreateProjectTableEntry(newProject)
+			err = eh.conn.CreateProjectTableEntry(&project)
 
 			if err != nil {
-				l.Log.Info("Failed to create project: ", newProject)
-			}
-
-			// retry to get the project (for the id)
-			project, err = eh.conn.GetProjectByRepo(repo)
-			if err != nil {
-				l.Log.Errorf("Failed to insert new project: %v", err)
+				l.Log.Info("Failed to insert project: ", project)
 				metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), true)
 				writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert new project"}`)
 				return

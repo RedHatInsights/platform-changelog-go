@@ -49,33 +49,29 @@ var _ = AfterSuite(func() {
 
 func seedServicesAndProjects(db *db.DBConnectorImpl) {
 	ms := []models.Services{
-		{ID: 1, Name: "platform-changelog", DisplayName: "Platform Changelog", Tenant: "Insights"},
-		{ID: 2, Name: "insights-ingress", DisplayName: "Insights Ingress", Tenant: "Insights"},
-		{ID: 3, Name: "rbac", DisplayName: "Insights RBAC", Tenant: "Insights"},
-		{ID: 4, Name: "chrome-service", DisplayName: "Chrome Service", Tenant: "Insights"},
+		{Name: "platform-changelog", DisplayName: "Platform Changelog", Tenant: "Insights"},
+		{Name: "insights-ingress", DisplayName: "Insights Ingress", Tenant: "Insights"},
+		{Name: "rbac", DisplayName: "Insights RBAC", Tenant: "Insights"},
+		{Name: "chrome-service", DisplayName: "Chrome Service", Tenant: "Insights"},
 	}
 
 	mp := []models.Projects{
 		{
-			ID:        1,
 			ServiceID: 1,
 			Name:      "platform-changelog-go",
 			Repo:      "https://github.com/RedhatInsights/platform-changelog-go",
 		},
 		{
-			ID:        2,
 			ServiceID: 1,
 			Name:      "platform-changelog-ui",
 			Repo:      "https://github.com/RedhatInsights/platform-changelog-ui",
 		},
 		{
-			ID:        3,
 			ServiceID: 2,
 			Name:      "insights-ingress-go",
 			Repo:      "https://github.com/RedhatInsights/insights-ingress-go",
 		},
 		{
-			ID:        4,
 			ServiceID: 3,
 			Name:      "insights-rbac",
 			Repo:      "https://github.com/RedhatInsights/insights-rbac",
@@ -89,14 +85,16 @@ func seedServicesAndProjects(db *db.DBConnectorImpl) {
 func CreateServices(conn db.DBConnector, services []models.Services) {
 	for _, s := range services {
 		fmt.Printf(s.Name)
-		_, err := conn.CreateServiceTableEntry(s)
+		err := conn.CreateServiceTableEntry(&s)
+		Expect(s.ID).NotTo(Equal(0))
 		Expect(err).To(BeNil())
 	}
 }
 
 func CreateProjects(conn db.DBConnector, projects []models.Projects) {
 	for _, p := range projects {
-		err := conn.CreateProjectTableEntry(p)
+		err := conn.CreateProjectTableEntry(&p)
+		Expect(p.ID).NotTo(Equal(0))
 		Expect(err).To(BeNil())
 	}
 }

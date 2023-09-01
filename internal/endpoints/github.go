@@ -167,35 +167,27 @@ func getServiceAndProject(conn db.DBConnector, payload GithubPayload) (service m
 
 func createNewService(conn db.DBConnector, payload GithubPayload) (service models.Services, err error) {
 	// couldn't find service; create it, then handle the project
-	s := models.Services{
+	service = models.Services{
 		Name:        payload.App,
 		DisplayName: payload.App,
 		Tenant:      payload.Tenant,
 	}
 
-	_, err = conn.CreateServiceTableEntry(s)
-	if err != nil {
-		return models.Services{}, fmt.Errorf("error creating service %s: %s", payload.App, err.Error())
-	}
+	err = conn.CreateServiceTableEntry(&service)
 
-	service, _, err = conn.GetServiceByName(payload.App)
 	return
 }
 
 func createNewProject(conn db.DBConnector, payload GithubPayload, service models.Services) (project models.Projects, err error) {
-	p := models.Projects{
+	project = models.Projects{
 		ServiceID: service.ID,
 		Name:      payload.Project,
 		Repo:      payload.Repo,
 		Branch:    payload.Branch,
 	}
 
-	err = conn.CreateProjectTableEntry(p)
-	if err != nil {
-		return models.Projects{}, fmt.Errorf("error creating project %s: %s; %d", payload.Project, err.Error(), p.ID)
-	}
+	err = conn.CreateProjectTableEntry(&project)
 
-	project, _, err = conn.GetProjectByName(payload.Project)
 	return
 }
 

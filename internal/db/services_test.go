@@ -16,12 +16,16 @@ var _ = Describe("Handler", func() {
 		It("", func() {
 			db := testDBImpl
 
-			db.CreateServiceTableEntry(models.Services{
-				ID:          1,
+			s := models.Services{
 				Name:        "test-service",
 				DisplayName: "Test Service",
 				Tenant:      "test-tenant",
-			})
+			}
+
+			err := db.CreateServiceTableEntry(&s)
+
+			Expect(s.ID).NotTo(Equal(0))
+			Expect(err).To(BeNil())
 
 			// Get service by name
 			service, rowsAffected, err := db.GetServiceByName("test-service")
