@@ -13,10 +13,10 @@ func (conn *DBConnectorImpl) CreateProjectTableEntry(p *models.Projects) error {
 	return results.Error
 }
 
-func (conn *DBConnectorImpl) UpdateProjectTableEntry(p models.Projects) (project models.Projects, err error) {
-	results := conn.db.Model(models.Projects{}).Where("name = ?", p.Name).Updates(&project)
+func (conn *DBConnectorImpl) UpdateProjectTableEntry(p *models.Projects) error {
+	results := conn.db.Model(models.Projects{}).Where("name = ?", p.Name).Updates(p)
 
-	return project, results.Error
+	return results.Error
 }
 
 func (conn *DBConnectorImpl) GetProjectsAll(offset int, limit int, q structs.Query) ([]models.Projects, int64, error) {
@@ -65,7 +65,7 @@ func (conn *DBConnectorImpl) GetProjectByName(name string) (models.Projects, int
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetProjectByName)
 	defer callDurationTimer.ObserveDuration()
 	var project models.Projects
-	result := conn.db.Model(models.Projects{}).Where("name = ?", name).First(&project)
+	result := conn.db.Model(models.Projects{}).Order("ID desc").Where("name = ?", name).First(&project)
 	return project, result.RowsAffected, result.Error
 }
 

@@ -97,7 +97,7 @@ func (conn *DBConnectorImpl) GetServiceByName(name string) (models.Services, int
 	defer callDurationTimer.ObserveDuration()
 
 	var service models.Services
-	result := conn.db.Model(models.Services{}).Preload("Projects").First(&service)
+	result := conn.db.Model(models.Services{}).Preload("Projects").Where("services.name = ?", name).First(&service)
 	return service, result.RowsAffected, result.Error
 }
 

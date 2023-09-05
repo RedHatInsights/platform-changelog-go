@@ -10,11 +10,37 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/redhatinsights/platform-changelog-go/internal/endpoints"
 	"github.com/redhatinsights/platform-changelog-go/internal/logging"
+	"github.com/redhatinsights/platform-changelog-go/internal/models"
 )
 
-var _ = Describe("Handler", func() {
+var _ = Describe("Handler", Ordered, func() {
 
 	logging.InitLogger()
+
+	BeforeAll(func() {
+		// create service and project entries
+		db := testDBImpl
+
+		s := models.Services{
+			Name:        "ingress",
+			DisplayName: "Ingress",
+			Tenant:      "insights",
+		}
+
+		err := db.CreateServiceTableEntry(&s)
+		Expect(err).ShouldNot(HaveOccurred())
+
+		p := models.Projects{
+			ServiceID: s.ID,
+			Name:      "ingress-go",
+			Repo:      "github.com/RedHatInsights/insights-ingress-go",
+			Namespace: "",
+			Branch:    "origin/main",
+		}
+
+		err = db.CreateProjectTableEntry(&p)
+		Expect(err).ShouldNot(HaveOccurred())
+	})
 
 	Describe("Tekton Run with empty body", func() {
 		It("should return 400", func() {

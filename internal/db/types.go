@@ -16,7 +16,7 @@ type DBConnector interface {
 	GetServiceByRepo(repo string) (models.Services, error)
 
 	CreateProjectTableEntry(p *models.Projects) error
-	UpdateProjectTableEntry(p models.Projects) (project models.Projects, err error)
+	UpdateProjectTableEntry(p *models.Projects) error
 	GetProjectsAll(offset int, limit int, q structs.Query) ([]models.Projects, int64, error)
 	GetProjectsByService(service models.Services, offset int, limit int, q structs.Query) ([]models.Projects, int64, error)
 	GetProjectByName(name string) (models.Projects, int64, error)

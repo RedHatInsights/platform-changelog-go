@@ -92,7 +92,7 @@ func (eh *EndpointHandler) TektonTaskRun(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	err = setProjectNamespace(eh.conn, project, payload.Env)
+	err = setProjectNamespace(eh.conn, &project, payload.Env)
 	if err != nil {
 		l.Log.Error(err)
 		metrics.IncTekton(r.Method, r.UserAgent(), true)
@@ -142,9 +142,9 @@ func getProject(conn db.DBConnector, payload TektonPayload) (project models.Proj
 	return
 }
 
-func setProjectNamespace(conn db.DBConnector, project models.Projects, namespace string) error {
+func setProjectNamespace(conn db.DBConnector, project *models.Projects, namespace string) error {
 	project.Namespace = namespace
-	_, err := conn.UpdateProjectTableEntry(project)
+	err := conn.UpdateProjectTableEntry(project)
 	return err
 }
 
