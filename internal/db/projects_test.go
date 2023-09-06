@@ -7,6 +7,8 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	db_package "github.com/redhatinsights/platform-changelog-go/internal/db"
 )
 
 var (
@@ -175,6 +177,22 @@ var _ = Describe("Handler", Ordered, func() {
 
 			Expect(project.ID).To(Equal(duplicate.ID))
 			Expect(project.ServiceID).To(Equal(s.ID))
+		})
+	})
+
+	Describe("Negative project tests", func() {
+		It("Getting non-existent projects", func() {
+			db := testDBImpl
+
+			project, rowsAffected, err := db.GetProjectByName("non-existent-project")
+			Expect(err).To(Equal(db_package.ErrNotFound))
+			Expect(rowsAffected).To(Equal(int64(0)))
+			Expect(project.ID).To(Equal(0))
+
+			project, err = db.GetProjectByRepo("github.com/org/non-existent-project")
+			Expect(err).To(Equal(db_package.ErrNotFound))
+			Expect(rowsAffected).To(Equal(int64(0)))
+			Expect(project.ID).To(Equal(0))
 		})
 	})
 })

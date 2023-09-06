@@ -13,7 +13,7 @@ func (conn *DBConnectorImpl) CreateCommitEntry(t models.Timelines) error {
 
 	conn.db.Create(&t)
 
-	return conn.db.Error
+	return evaluateError(conn.db.Error)
 }
 
 func (conn *DBConnectorImpl) BulkCreateCommitEntry(t []models.Timelines) error {
@@ -24,7 +24,7 @@ func (conn *DBConnectorImpl) BulkCreateCommitEntry(t []models.Timelines) error {
 		conn.db.Create(&timeline)
 	}
 
-	return conn.db.Error
+	return evaluateError(conn.db.Error)
 }
 
 func (conn *DBConnectorImpl) GetCommitsAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
@@ -54,7 +54,7 @@ func (conn *DBConnectorImpl) GetCommitsAll(offset int, limit int, q structs.Quer
 	db.Model(&commits).Count(&count)
 	result := db.Order("Timestamp desc").Order("ID desc").Limit(limit).Offset(offset).Find(&commits)
 
-	return commits, count, result.Error
+	return commits, count, evaluateError(result.Error)
 }
 
 func (conn *DBConnectorImpl) GetCommitsByService(service models.Services, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
@@ -71,7 +71,7 @@ func (conn *DBConnectorImpl) GetCommitsByService(service models.Services, offset
 	db.Model(&commits).Count(&count)
 	result := db.Order("Timestamp desc").Order("ID desc").Limit(limit).Offset(offset).Find(&commits)
 
-	return commits, count, result.Error
+	return commits, count, evaluateError(result.Error)
 }
 
 func (conn *DBConnectorImpl) GetCommitsByProject(project models.Projects, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
@@ -88,7 +88,7 @@ func (conn *DBConnectorImpl) GetCommitsByProject(project models.Projects, offset
 	db.Model(&commits).Count(&count)
 	result := db.Order("Timestamp desc").Order("ID desc").Limit(limit).Offset(offset).Find(&commits)
 
-	return commits, count, result.Error
+	return commits, count, evaluateError(result.Error)
 }
 
 func (conn *DBConnectorImpl) GetCommitByRef(ref string) (models.Timelines, int64, error) {
@@ -97,5 +97,5 @@ func (conn *DBConnectorImpl) GetCommitByRef(ref string) (models.Timelines, int64
 	var commit models.Timelines
 	result := conn.db.Model(models.Timelines{}).Where("timelines.ref = ?", ref).Where("timelines.type = ?", "commit").Scan(&commit)
 
-	return commit, result.RowsAffected, result.Error
+	return commit, result.RowsAffected, evaluateError(result.Error)
 }

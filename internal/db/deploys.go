@@ -11,7 +11,7 @@ func (conn *DBConnectorImpl) CreateDeployEntry(deploy models.Timelines) error {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlCreateCommitEntry)
 	defer callDurationTimer.ObserveDuration()
 
-	return conn.db.Create(&deploy).Error
+	return evaluateError(conn.db.Create(&deploy).Error)
 }
 
 func (conn *DBConnectorImpl) GetDeploysAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
@@ -41,7 +41,7 @@ func (conn *DBConnectorImpl) GetDeploysAll(offset int, limit int, q structs.Quer
 	db.Model(&deploys).Count(&count)
 	result := db.Order("Timestamp desc").Order("ID desc").Limit(limit).Offset(offset).Find(&deploys)
 
-	return deploys, count, result.Error
+	return deploys, count, evaluateError(result.Error)
 }
 
 func (conn *DBConnectorImpl) GetDeploysByService(service models.Services, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
@@ -58,7 +58,7 @@ func (conn *DBConnectorImpl) GetDeploysByService(service models.Services, offset
 	db.Model(&deploys).Count(&count)
 	result := db.Order("Timestamp desc").Order("ID desc").Limit(limit).Offset(offset).Find(&deploys)
 
-	return deploys, count, result.Error
+	return deploys, count, evaluateError(result.Error)
 }
 
 func (conn *DBConnectorImpl) GetDeploysByProject(project models.Projects, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
@@ -75,7 +75,7 @@ func (conn *DBConnectorImpl) GetDeploysByProject(project models.Projects, offset
 	db.Model(&deploys).Count(&count)
 	result := db.Order("Timestamp desc").Order("ID desc").Limit(limit).Offset(offset).Find(&deploys)
 
-	return deploys, count, result.Error
+	return deploys, count, evaluateError(result.Error)
 }
 
 func (conn *DBConnectorImpl) GetDeployByRef(ref string) (models.Timelines, int64, error) {
@@ -85,5 +85,5 @@ func (conn *DBConnectorImpl) GetDeployByRef(ref string) (models.Timelines, int64
 	result := conn.db.Model(models.Timelines{}).Where("timelines.ref = ?", ref).Where("timelines.type = ?", "deploy").Scan(&deploy)
 	rowsAffected := result.RowsAffected
 
-	return deploy, rowsAffected, result.Error
+	return deploy, rowsAffected, evaluateError(result.Error)
 }

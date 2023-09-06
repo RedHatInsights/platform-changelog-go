@@ -4,6 +4,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
+	db_package "github.com/redhatinsights/platform-changelog-go/internal/db"
 	"github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
 )
@@ -57,9 +58,10 @@ var _ = Describe("Handler", func() {
 			Expect(deleted_service_struct.Name).To(Equal("test-service"))
 
 			// make sure the service is gone
-			deleted_service, rowsAffected, _ := db.GetServiceByName("test-service")
+			deleted_service, rowsAffected, err := db.GetServiceByName("test-service")
 			Expect(rowsAffected).To(Equal(int64(0)))
 			Expect(deleted_service.Name).To(Equal(""))
+			Expect(err).To(Equal(db_package.ErrNotFound)) // should return custom error db.ErrNotFound
 		})
 	})
 })

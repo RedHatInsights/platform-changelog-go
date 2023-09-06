@@ -12,14 +12,14 @@ import (
 func (conn *DBConnectorImpl) CreateServiceTableEntry(s *models.Services) error {
 	results := conn.db.Create(s)
 
-	return results.Error
+	return evaluateError(results.Error)
 }
 
 func (conn *DBConnectorImpl) UpdateServiceTableEntry(name string, s config.Service) (service models.Services, err error) {
 	newService := models.Services{Name: name, DisplayName: s.DisplayName, Tenant: s.Tenant}
 	results := conn.db.Model(models.Services{}).Where("name = ?", name).Updates(&newService)
 
-	return newService, results.Error
+	return newService, evaluateError(results.Error)
 }
 
 func (conn *DBConnectorImpl) DeleteServiceTableEntry(name string) (models.Services, error) {
@@ -28,16 +28,16 @@ func (conn *DBConnectorImpl) DeleteServiceTableEntry(name string) (models.Servic
 
 	results := conn.db.Model(models.Services{}).Where("name = ?", name).Delete(&models.Services{})
 	if results.Error != nil {
-		return models.Services{}, results.Error
+		return models.Services{}, evaluateError(results.Error)
 	}
 
 	// delete the timelines for the service
 	err := conn.DeleteTimelinesByService(service)
 	if err != nil {
-		return models.Services{}, err
+		return models.Services{}, evaluateError(err)
 	}
 
-	return service, results.Error
+	return service, nil
 }
 
 func (conn *DBConnectorImpl) GetServicesAll(offset int, limit int, q structs.Query) ([]structs.ExpandedServicesData, int64, error) {
@@ -72,7 +72,7 @@ func (conn *DBConnectorImpl) GetServicesAll(offset int, limit int, q structs.Que
 		servicesWithTimelines = append(servicesWithTimelines, s)
 	}
 
-	return servicesWithTimelines, count, result.Error
+	return servicesWithTimelines, count, evaluateError(result.Error)
 }
 
 func (conn *DBConnectorImpl) GetLatest(service structs.ExpandedServicesData) (structs.ExpandedServicesData, error, error) {
@@ -83,13 +83,13 @@ func (conn *DBConnectorImpl) GetLatest(service structs.ExpandedServicesData) (st
 
 	depResult := conn.db.Model(models.Timelines{}).Select("*").Joins("JOIN services ON timelines.service_id = services.id").Where("services.name = ?", service.Name).Where("timelines.type = ?", "deploy").Order("Timestamp desc").Limit(1).Find(&service.Deploy)
 
-	return service, comResult.Error, depResult.Error
+	return service, evaluateError(comResult.Error), evaluateError(depResult.Error)
 }
 
 func (conn *DBConnectorImpl) GetServiceNames() ([]string, error) {
 	var names []string
 	result := conn.db.Model(models.Services{}).Pluck("name", &names)
-	return names, result.Error
+	return names, evaluateError(result.Error)
 }
 
 func (conn *DBConnectorImpl) GetServiceByName(name string) (models.Services, int64, error) {
@@ -98,12 +98,12 @@ func (conn *DBConnectorImpl) GetServiceByName(name string) (models.Services, int
 
 	var service models.Services
 	result := conn.db.Model(models.Services{}).Preload("Projects").Where("services.name = ?", name).First(&service)
-	return service, result.RowsAffected, result.Error
+	return service, result.RowsAffected, evaluateError(result.Error)
 }
 
 func (conn *DBConnectorImpl) GetServiceByRepo(repo string) (models.Services, error) {
 	var service models.Services
 	result := conn.db.Model(models.Services{}).Preload("Projects").Where("repo = ?", repo).First(&service)
 
-	return service, result.Error
+	return service, evaluateError(result.Error)
 }
