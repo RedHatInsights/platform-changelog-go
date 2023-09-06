@@ -78,25 +78,38 @@ func (eh *EndpointHandler) Github(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	service, project, err := getServiceAndProject(eh.conn, payload)
+	service, err := getService(eh.conn, payload)
 	if err != nil {
-		if service.ID == 0 { // how do I compare the structs completely?
-			service, err = createNewService(eh.conn, payload)
-			if err != nil {
-				l.Log.Error(err)
-				metrics.IncJenkins("github", r.Method, r.UserAgent(), true)
-				writeResponse(w, http.StatusInternalServerError, err.Error())
-				return
-			}
+		if err != db.ErrNotFound {
+			l.Log.Error(err)
+			metrics.IncJenkins("github", r.Method, r.UserAgent(), true)
+			writeResponse(w, http.StatusInternalServerError, err.Error())
+			return
 		}
-		if project.ID == 0 {
-			project, err = createNewProject(eh.conn, payload, service)
-			if err != nil {
-				l.Log.Error(err)
-				metrics.IncJenkins("github", r.Method, r.UserAgent(), true)
-				writeResponse(w, http.StatusInternalServerError, err.Error())
-				return
-			}
+
+		service, err = createNewService(eh.conn, payload)
+		if err != nil {
+			l.Log.Error(err)
+			metrics.IncJenkins("github", r.Method, r.UserAgent(), true)
+			writeResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	project, err := getProject(eh.conn, payload)
+	if err != nil {
+		if err != db.ErrNotFound {
+			l.Log.Error(err)
+			metrics.IncJenkins("github", r.Method, r.UserAgent(), true)
+			writeResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		project, err = createNewProject(eh.conn, payload, service)
+		if err != nil {
+			l.Log.Error(err)
+			metrics.IncJenkins("github", r.Method, r.UserAgent(), true)
+			writeResponse(w, http.StatusInternalServerError, err.Error())
+			return
 		}
 	}
 
@@ -151,15 +164,19 @@ func validateGithubPayload(payload GithubPayload) error {
 	return nil
 }
 
-func getServiceAndProject(conn db.DBConnector, payload GithubPayload) (service models.Services, project models.Projects, err error) {
+func getService(conn db.DBConnector, payload GithubPayload) (service models.Services, err error) {
 	service, _, err = conn.GetServiceByName(payload.App)
 	if err != nil {
-		return models.Services{}, models.Projects{}, err
+		return models.Services{}, err
 	}
 
+	return
+}
+
+func getProject(conn db.DBConnector, payload GithubPayload) (project models.Projects, err error) {
 	project, _, err = conn.GetProjectByName(payload.Project)
 	if err != nil {
-		return service, models.Projects{}, err
+		return models.Projects{}, err
 	}
 
 	return

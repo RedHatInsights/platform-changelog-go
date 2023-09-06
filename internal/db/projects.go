@@ -10,13 +10,13 @@ import (
 func (conn *DBConnectorImpl) CreateProjectTableEntry(p *models.Projects) error {
 	results := conn.db.Create(p)
 
-	return results.Error
+	return evaluateError(results.Error)
 }
 
 func (conn *DBConnectorImpl) UpdateProjectTableEntry(p *models.Projects) error {
 	results := conn.db.Model(models.Projects{}).Where("name = ?", p.Name).Updates(p)
 
-	return results.Error
+	return evaluateError(results.Error)
 }
 
 func (conn *DBConnectorImpl) GetProjectsAll(offset int, limit int, q structs.Query) ([]models.Projects, int64, error) {
@@ -44,7 +44,7 @@ func (conn *DBConnectorImpl) GetProjectsAll(offset int, limit int, q structs.Que
 	// TODO: add a sort_by field to the query struct
 	result := db.Order("ID desc").Limit(limit).Offset(offset).Find(&projects)
 
-	return projects, count, result.Error
+	return projects, count, evaluateError(result.Error)
 }
 
 func (conn *DBConnectorImpl) GetProjectsByService(service models.Services, offset int, limit int, q structs.Query) ([]models.Projects, int64, error) {
@@ -58,7 +58,7 @@ func (conn *DBConnectorImpl) GetProjectsByService(service models.Services, offse
 	db.Model(models.Projects{}).Count(&count)
 	result := db.Order("ID desc").Limit(limit).Offset(offset).Find(&projects)
 
-	return projects, count, result.Error
+	return projects, count, evaluateError(result.Error)
 }
 
 func (conn *DBConnectorImpl) GetProjectByName(name string) (models.Projects, int64, error) {
@@ -66,12 +66,12 @@ func (conn *DBConnectorImpl) GetProjectByName(name string) (models.Projects, int
 	defer callDurationTimer.ObserveDuration()
 	var project models.Projects
 	result := conn.db.Model(models.Projects{}).Order("ID desc").Where("name = ?", name).First(&project)
-	return project, result.RowsAffected, result.Error
+	return project, result.RowsAffected, evaluateError(result.Error)
 }
 
 func (conn *DBConnectorImpl) GetProjectByRepo(repo string) (models.Projects, error) {
 	var project models.Projects
 	result := conn.db.Model(models.Projects{}).Where("repo = ?", repo).First(&project)
 
-	return project, result.Error
+	return project, evaluateError(result.Error)
 }

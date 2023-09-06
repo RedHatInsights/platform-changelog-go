@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
+	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
@@ -145,6 +146,13 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 		repo := getURL(e)
 		project, err := eh.conn.GetProjectByRepo(repo)
 		if err != nil {
+			if err != db.ErrNotFound {
+				l.Log.Errorf("Failed to get project: %v", err)
+				metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), true)
+				writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to get project"}`)
+				return
+			}
+
 			// project not onboarded; build project and find service if available
 
 			// Due to the webhook events not being connected to app-interface,
@@ -153,7 +161,14 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 			// A user could override these by modifying the service.yml.
 			service, _, err := eh.conn.GetServiceByName(getRepo(e).Name)
 
-			if err != nil { // service not found
+			if err != nil {
+				if err != db.ErrNotFound {
+					l.Log.Errorf("Failed to insert new service: %v", err)
+					metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), true)
+					writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert new service"}`)
+					return
+				}
+
 				// create service too
 				service := models.Services{
 					Name:        getRepo(e).Name,

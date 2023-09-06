@@ -75,7 +75,7 @@ func (eh *EndpointHandler) TektonTaskRun(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	project, err := getProject(eh.conn, payload)
+	project, err := getProjectForTekton(eh.conn, payload)
 	if err != nil {
 		l.Log.Error(err)
 		metrics.IncTekton(r.Method, r.UserAgent(), true)
@@ -129,12 +129,13 @@ func validateTektonPayload(payload TektonPayload) error {
 	return nil
 }
 
-func getProject(conn db.DBConnector, payload TektonPayload) (project models.Projects, err error) {
+func getProjectForTekton(conn db.DBConnector, payload TektonPayload) (project models.Projects, err error) {
 	service, _, err := conn.GetServiceByName(payload.App)
 	if err != nil {
 		return models.Projects{}, fmt.Errorf("app %s is not onboarded", payload.App)
 	}
 	projects, _, err := conn.GetProjectsByService(service, 0, 1, structs.Query{})
+
 	// Do we need more granular tekton data on which projects were deployed?
 	// Or should we think of deployments as per service?
 	// Taking the first project for now
