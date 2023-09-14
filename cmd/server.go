@@ -45,6 +45,7 @@ func startAPI(cfg *config.Config) {
 	sub.Get("/services/{service}/commits", handler.GetCommitsByService)
 	sub.Get("/services/{service}/deploys", handler.GetDeploysByService)
 
+	sub.Get("/projects/{project}", handler.GetProjectByName)
 	sub.Get("/projects/{project}/timelines", handler.GetTimelinesByProject)
 	sub.Get("/projects/{project}/commits", handler.GetCommitsByProject)
 	sub.Get("/projects/{project}/deploys", handler.GetDeploysByProject)
