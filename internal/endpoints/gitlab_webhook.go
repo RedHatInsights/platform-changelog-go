@@ -202,7 +202,7 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 			}
 		}
 
-		commitData := getCommitData2(e, project)
+		commitData := getCommitsAsTimelines(e, project)
 
 		err = eh.conn.BulkCreateCommitEntry(commitData)
 		if err != nil {
@@ -222,7 +222,7 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func getCommitData2(g *gitlab.PushEvent, p models.Projects) []models.Timelines {
+func getCommitsAsTimelines(g *gitlab.PushEvent, p models.Projects) []models.Timelines {
 	var commits []models.Timelines
 	for _, commit := range g.Commits {
 		record := models.Timelines{
