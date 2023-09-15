@@ -24,7 +24,7 @@ objects:
         initContainers:
           - command: ["/bin/sh", "-c"]
             args:
-              - ./platform-changelog migrate up
+              - ./platform-changelog migrate drop
             image: ${IMAGE}:${IMAGE_TAG}
             inheritEnv: True
         minReadySeconds: 15
@@ -90,7 +90,6 @@ objects:
           requests:
             cpu: 200m
             memory: 256Mi
-
 - apiVersion: v1
   kind: Secret
   metadata:

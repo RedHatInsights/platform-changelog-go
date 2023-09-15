@@ -50,9 +50,20 @@ func createCommands(cfg *config.Config) *cobra.Command {
 		},
 	}
 
+	// drop all migration
+	var dropCmd = &cobra.Command{
+		Use:   "drop",
+		Short: "Drops the DB",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Println("Dropping DB")
+			return migrateDB(cfg, "drop")
+		},
+	}
+
 	rootCmd.AddCommand(migrateCmd)
 	migrateCmd.AddCommand(upCmd)
 	migrateCmd.AddCommand(downCmd)
+	migrateCmd.AddCommand(dropCmd)
 
 	return rootCmd
 }
