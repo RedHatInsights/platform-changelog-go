@@ -28,16 +28,13 @@ lint:
 	gofmt -l .
 	gofmt -s -w .
 
-run: build run-db-detached run-migrate-up run-seed run-api
+run: build run-db-detached run-migrate-up run-api
 
 run-migrate-up:
 	./platform-changelog migrate up
 
 run-migrate-down:
 	./platform-changelog migrate down
-
-run-seed:
-	./platform-changelog seed
 
 run-api: platform-changelog
 	GITHUB_WEBHOOK_SECRET_TOKEN=$(GITHUB_WEBHOOK_KEY) GITLAB_WEBHOOK_SECRET_TOKEN=$(GITLAB_WEBHOOK_KEY) ./platform-changelog api

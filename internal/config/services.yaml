@@ -2,114 +2,57 @@ services:
   platform-changelog:
     display_name: Platform Changelog
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/platform-changelog-go
-    branch: master
-    namespace: platform-changelog-stage
   rbac:
     display_name: RBAC
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/insights-rbac
-    branch: master
-    namespace: rbac-stage
   entitlements:
     display_name: Entitlements
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/entitlements-api-go
-    branch: master
-    namespace: entitlements-stage
   ingress:
     display_name: Ingress
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/insights-ingress-go
-    branch: master
-    namespace: ingress-stage
   insights-engine:
     display_name: Insights Engine
     tenant: Insights
-    gl_repo: https://gitlab.cee.redhat.com/insights-platform/insights-engine
-    branch: master 
-    namespace: engine-stage
   cloud-connector:
     display_name: Cloud Connector
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/cloud-connector
-    branch: master 
-    namespace: cloud-connector-stage
   export-service:
     display_name: Export Service
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/export-service-go
-    branch: main
-    namespace: export-service-stage
   3scale:
     display_name: 3scale
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/insights-3scale
-    branch: master
-    namespace: 3scale-stage
   playbook-dispatcher:
     display_name: Playbook Dispatcher
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/playbook-dispatcher
-    branch: master
-    namespace: playbook-dispatcher-stage
   notifications:
     display_name: Notifications
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/notifications-backend
-    branch: master
-    namespace: notifications-stage
   xjoin:
     display_name: xjoin api gateway
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/xjoin-api-gateway
-    branch: master
-    namespace: xjoin-stage
   host-inventory:
     display_name: Host Inventory
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/insights-host-inventory
-    branch: master
-    namespace: host-inventory-stage
   host-inventory-frontend:
     display_name: Host Inventory Frontend
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/insights-inventory-frontend
-    branch: master
-    namespace: host-inventory-stage
   advisor:
     display_name: Advisor
     tenant: Insights
-    gl_repo: https://gitlab.cee.redhat.com/insights-platform/advisor-backend
-    branch: master
-    namespace: advisor-stage
   edge:
     display_name: Edge
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/edge-api
-    branch: main
-    namespace: edge-stage
   chrome-service:
     display_name: Chrome Service
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/insights-chrome
-    branch: master
-    namespace: chrome-service-stage
   chrome-service-backend:
     display_name: Chrome Service Backend
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/chrome-service-backend
-    branch: master
-    namespace: chrome-service-stage
   hac:
     display_name: HAC
     tenant: Insights
-    gh_repo: https://github.com/RedHatInsights/hac-core-frontend
-    branch: master
-    namespace: hac-stage
   content-sources:
     display_name: Content Sources
     tenant: Insights
-    gh_repo: https://github.com/content-services/content-sources-backend
-    branch: main
-    namespace: content-sources-stage

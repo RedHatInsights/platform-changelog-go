@@ -54,11 +54,6 @@ type CloudwatchCfg struct {
 type Service struct {
 	DisplayName string `yaml:"display_name"`
 	Tenant      string `yaml:"tenant"`
-	GHRepo      string `yaml:"gh_repo,omitempty"`
-	GLRepo      string `yaml:"gl_repo,omitempty"`
-	Branch      string `yaml:"branch"`
-	Namespace   string `yaml:"namespace,omitempty"`
-	DeployFile  string `yaml:"deploy_file,omitempty"`
 }
 
 type Tenant struct {

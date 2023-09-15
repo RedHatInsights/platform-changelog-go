@@ -7,7 +7,16 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
-func (conn *DBConnectorImpl) CreateCommitEntry(t []models.Timelines) error {
+func (conn *DBConnectorImpl) CreateCommitEntry(t models.Timelines) error {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlCreateCommitEntry)
+	defer callDurationTimer.ObserveDuration()
+
+	conn.db.Create(&t)
+
+	return evaluateError(conn.db.Error)
+}
+
+func (conn *DBConnectorImpl) BulkCreateCommitEntry(t []models.Timelines) error {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlCreateCommitEntry)
 	defer callDurationTimer.ObserveDuration()
 
@@ -15,7 +24,7 @@ func (conn *DBConnectorImpl) CreateCommitEntry(t []models.Timelines) error {
 		conn.db.Create(&timeline)
 	}
 
-	return conn.db.Error
+	return evaluateError(conn.db.Error)
 }
 
 func (conn *DBConnectorImpl) GetCommitsAll(offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
@@ -45,10 +54,10 @@ func (conn *DBConnectorImpl) GetCommitsAll(offset int, limit int, q structs.Quer
 	db.Model(&commits).Count(&count)
 	result := db.Order("Timestamp desc").Order("ID desc").Limit(limit).Offset(offset).Find(&commits)
 
-	return commits, count, result.Error
+	return commits, count, evaluateError(result.Error)
 }
 
-func (conn *DBConnectorImpl) GetCommitsByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
+func (conn *DBConnectorImpl) GetCommitsByService(service models.Services, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsByService)
 	defer callDurationTimer.ObserveDuration()
 
@@ -62,7 +71,24 @@ func (conn *DBConnectorImpl) GetCommitsByService(service structs.ServicesData, o
 	db.Model(&commits).Count(&count)
 	result := db.Order("Timestamp desc").Order("ID desc").Limit(limit).Offset(offset).Find(&commits)
 
-	return commits, count, result.Error
+	return commits, count, evaluateError(result.Error)
+}
+
+func (conn *DBConnectorImpl) GetCommitsByProject(project models.Projects, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetCommitsByProject)
+	defer callDurationTimer.ObserveDuration()
+
+	var count int64
+	var commits []models.Timelines
+
+	db := conn.db.Model(models.Timelines{}).Where("timelines.project_id = ?", project.ID).Where("timelines.type = ?", "commit")
+
+	db = FilterTimelineByDate(db, q.StartDate, q.EndDate)
+
+	db.Model(&commits).Count(&count)
+	result := db.Order("Timestamp desc").Order("ID desc").Limit(limit).Offset(offset).Find(&commits)
+
+	return commits, count, evaluateError(result.Error)
 }
 
 func (conn *DBConnectorImpl) GetCommitByRef(ref string) (models.Timelines, int64, error) {
@@ -71,5 +97,5 @@ func (conn *DBConnectorImpl) GetCommitByRef(ref string) (models.Timelines, int64
 	var commit models.Timelines
 	result := conn.db.Model(models.Timelines{}).Where("timelines.ref = ?", ref).Where("timelines.type = ?", "commit").Scan(&commit)
 
-	return commit, result.RowsAffected, result.Error
+	return commit, result.RowsAffected, evaluateError(result.Error)
 }

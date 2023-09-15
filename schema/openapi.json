@@ -51,6 +51,51 @@
         }
       }
     },
+    "/projects": {
+      "get": {
+        "summary": "Returns list of registered projects",
+        "description": "Returns a list of projects that have been registered with the changelog",
+        "operationId": "get.projects",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/offsetParam"
+          },
+          {
+            "$ref": "#/components/parameters/limitParam"
+          },
+          {
+            "$ref": "#/components/parameters/nameParam"
+          },
+          {
+            "$ref": "#/components/parameters/displayNameParam"
+          },
+          {
+            "$ref": "#/components/parameters/tenantParam"
+          },
+          {
+            "$ref": "#/components/parameters/namespaceParam"
+          },
+          {
+            "$ref": "#/components/parameters/branchParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectsData"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
     "/timelines": {
       "get": {
         "summary": "Returns an array of timelines",
@@ -216,6 +261,39 @@
         }
       }
     },
+    "/services/{service}/projects": {
+      "get": {
+        "summary": "Returns all projects for a specific service",
+        "description": "Returns an array containing projects for a specific service",
+        "operationId": "get.services.service.project",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/service"
+          },
+          {
+            "$ref": "#/components/parameters/offsetParam"
+          },
+          {
+            "$ref": "#/components/parameters/limitParam"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectsData"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
     "/services/{service}/timelines": {
       "get": {
         "summary": "Returns all the commits and deploys for a specific service",
@@ -323,6 +401,150 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TimelinesData"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/projects/{project}": {
+      "get": {
+        "summary": "Returns an individual project",
+        "description": "returns an individual project",
+        "operationId": "get.projects.project",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/project"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/projects/{project}/timelines": {
+      "get": {
+        "summary": "Returns all the commits and deploys for a specific project",
+        "description": "Returns an array containing timelines for a specific project",
+        "operationId": "get.projects.project.timelines",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/project"
+          },
+          {
+            "$ref": "#/components/parameters/offsetParam"
+          },
+          {
+            "$ref": "#/components/parameters/limitParam"
+          },
+          {
+            "$ref": "#/components/parameters/startDate"
+          },
+          {
+            "$ref": "#/components/parameters/endDate"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectsData"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/projects/{project}/commits": {
+      "get": {
+        "summary": "Returns all the commits for a specific project",
+        "description": "Returns an array containing commits for a specific project",
+        "operationId": "get.projects.project.commits",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/project"
+          },
+          {
+            "$ref": "#/components/parameters/offsetParam"
+          },
+          {
+            "$ref": "#/components/parameters/limitParam"
+          },
+          {
+            "$ref": "#/components/parameters/startDate"
+          },
+          {
+            "$ref": "#/components/parameters/endDate"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectsData"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/projects/{project}/deploys": {
+      "get": {
+        "summary": "Returns all the deploys for a specific project",
+        "description": "Returns an array containing deploys for a specific project",
+        "operationId": "get.projects.project.deploys",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/project"
+          },
+          {
+            "$ref": "#/components/parameters/offsetParam"
+          },
+          {
+            "$ref": "#/components/parameters/limitParam"
+          },
+          {
+            "$ref": "#/components/parameters/startDate"
+          },
+          {
+            "$ref": "#/components/parameters/endDate"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectsData"
                 }
               }
             }
@@ -565,6 +787,20 @@
           }
         }
       },
+      "ProjectsData": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Project"
+            }
+          }
+        }
+      },
       "TimelinesData": {
         "type": "object",
         "properties": {
@@ -675,6 +911,34 @@
           }
         }
       },
+      "Project": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the service"
+          },
+          "repo": {
+            "type": "string",
+            "description": "Repo url"
+          },
+          "deploy_file": {
+            "type": "string",
+            "description": "Link to app interface deploy resource"
+          },
+          "namespace": {
+            "type": "string",
+            "description": "Namespace the app is deployed in openshift"
+          },
+          "branch": {
+            "type": "string",
+            "description": "monitored branch"
+          }
+        }
+      },
       "Error": {
         "type": "object",
         "properties": {
@@ -772,6 +1036,15 @@
           "type": "string"
         },
         "description": "The service name"
+      },
+      "project": {
+        "in": "path",
+        "name": "project",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "The project name"
       },
       "ref": {
         "in": "path",

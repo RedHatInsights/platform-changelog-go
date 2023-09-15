@@ -34,14 +34,21 @@ func startAPI(cfg *config.Config) {
 	sub.Post("/tekton", handler.TektonTaskRun)
 
 	sub.Get("/services", handler.GetServicesAll)
+	sub.Get("/projects", handler.GetProjectsAll)
 	sub.Get("/timelines", handler.GetTimelinesAll)
 	sub.Get("/commits", handler.GetCommitsAll)
 	sub.Get("/deploys", handler.GetDeploysAll)
 
 	sub.Get("/services/{service}", handler.GetServiceByName)
+	sub.Get("/services/{service}/projects", handler.GetProjectsByService)
 	sub.Get("/services/{service}/timelines", handler.GetTimelinesByService)
 	sub.Get("/services/{service}/commits", handler.GetCommitsByService)
 	sub.Get("/services/{service}/deploys", handler.GetDeploysByService)
+
+	sub.Get("/projects/{project}", handler.GetProjectByName)
+	sub.Get("/projects/{project}/timelines", handler.GetTimelinesByProject)
+	sub.Get("/projects/{project}/commits", handler.GetCommitsByProject)
+	sub.Get("/projects/{project}/deploys", handler.GetDeploysByProject)
 
 	sub.Get("/timelines/{ref}", handler.GetTimelineByRef)
 	sub.Get("/commits/{ref}", handler.GetCommitByRef)

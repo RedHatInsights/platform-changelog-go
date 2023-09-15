@@ -4,15 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 	"strings"
+	"time"
 
-	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
-	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
 // This endpoint is different than the github and gitlab endpoints
@@ -20,18 +18,12 @@ import (
 // on each push to a monitored branch (configured in app-interface)
 
 type GithubPayload *struct {
-	Timestamp time.Time      `json:"timestamp"`
-	App       string         `json:"app"`
-	Repo      string         `json:"repo,omitempty"`
-	MergedBy  string         `json:"merged_by,omitempty"`
-	Commits   []GithubCommit `json:"commits"`
-}
-
-type GithubCommit struct {
-	Timestamp time.Time `json:"timestamp"`
-	Ref       string    `json:"ref"`
-	Author    string    `json:"author,omitempty"`
-	Message   string    `json:"message,omitempty"`
+	App     string `json:"app"`
+	Project string `json:"project"`
+	Tenant  string `json:"tenant"`
+	Repo    string `json:"repo,omitempty"`
+	Branch  string `json:"branch"`
+	Ref     string `json:"ref"`
 }
 
 func decodeGithubJSONBody(w http.ResponseWriter, r *http.Request) (GithubPayload, error) {
@@ -86,8 +78,42 @@ func (eh *EndpointHandler) Github(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	commits, err := convertGithubPayloadToTimelines(eh.conn, payload)
+	service, err := getService(eh.conn, payload)
+	if err != nil {
+		if err != db.ErrNotFound {
+			l.Log.Error(err)
+			metrics.IncJenkins("github", r.Method, r.UserAgent(), true)
+			writeResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
 
+		service, err = createNewService(eh.conn, payload)
+		if err != nil {
+			l.Log.Error(err)
+			metrics.IncJenkins("github", r.Method, r.UserAgent(), true)
+			writeResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	project, err := getProject(eh.conn, payload)
+	if err != nil {
+		if err != db.ErrNotFound {
+			l.Log.Error(err)
+			metrics.IncJenkins("github", r.Method, r.UserAgent(), true)
+			writeResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		project, err = createNewProject(eh.conn, payload, service)
+		if err != nil {
+			l.Log.Error(err)
+			metrics.IncJenkins("github", r.Method, r.UserAgent(), true)
+			writeResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+	}
+
+	commit, err := convertGithubPayloadToTimelines(eh.conn, payload, service, project)
 	if err != nil {
 		l.Log.Error(err)
 		metrics.IncJenkins("github", r.Method, r.UserAgent(), true)
@@ -95,7 +121,7 @@ func (eh *EndpointHandler) Github(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = eh.conn.CreateCommitEntry(commits)
+	err = eh.conn.CreateCommitEntry(commit)
 
 	if err != nil {
 		l.Log.Error(err)
@@ -109,69 +135,91 @@ func (eh *EndpointHandler) Github(w http.ResponseWriter, r *http.Request) {
 
 // Validate the payload contains necessary data
 func validateGithubPayload(payload GithubPayload) error {
-	if payload.Timestamp.IsZero() {
-		return fmt.Errorf("timestamp is required")
-	}
+	// timestamp no longer required since we will be getting it from the github api soon
 
 	if payload.App == "" {
 		return fmt.Errorf("app is required")
 	}
 
-	if payload.Commits == nil {
-		return fmt.Errorf("commits is required")
+	if payload.Project == "" {
+		return fmt.Errorf("project is required")
 	}
 
-	if len(payload.Commits) == 0 {
-		return fmt.Errorf("commits should not be empty")
+	if payload.Tenant == "" {
+		return fmt.Errorf("tenant is required")
 	}
 
-	for _, commit := range payload.Commits {
-		if commit.Timestamp.IsZero() {
-			return fmt.Errorf("all commits need a timestamp")
-		}
+	if payload.Repo == "" {
+		return fmt.Errorf("repo is required")
+	}
 
-		if commit.Ref == "" {
-			return fmt.Errorf("all commits need a ref")
-		}
+	if payload.Branch == "" {
+		return fmt.Errorf("branch is required")
+	}
+
+	if payload.Ref == "" {
+		return fmt.Errorf("ref is required")
 	}
 
 	return nil
 }
 
+func getService(conn db.DBConnector, payload GithubPayload) (service models.Services, err error) {
+	service, _, err = conn.GetServiceByName(payload.App)
+	if err != nil {
+		return models.Services{}, err
+	}
+
+	return
+}
+
+func getProject(conn db.DBConnector, payload GithubPayload) (project models.Projects, err error) {
+	project, _, err = conn.GetProjectByName(payload.Project)
+	if err != nil {
+		return models.Projects{}, err
+	}
+
+	return
+}
+
+func createNewService(conn db.DBConnector, payload GithubPayload) (service models.Services, err error) {
+	// couldn't find service; create it, then handle the project
+	service = models.Services{
+		Name:        payload.App,
+		DisplayName: payload.App,
+		Tenant:      payload.Tenant,
+	}
+
+	err = conn.CreateServiceTableEntry(&service)
+
+	return
+}
+
+func createNewProject(conn db.DBConnector, payload GithubPayload, service models.Services) (project models.Projects, err error) {
+	project = models.Projects{
+		ServiceID: service.ID,
+		Name:      payload.Project,
+		Repo:      payload.Repo,
+		Branch:    payload.Branch,
+	}
+
+	err = conn.CreateProjectTableEntry(&project)
+
+	return
+}
+
 // Converting from GithubPayload struct to Timeline model
-func convertGithubPayloadToTimelines(conn db.DBConnector, payload GithubPayload) (commits []models.Timelines, err error) {
-	services := config.Get().Services
+func convertGithubPayloadToTimelines(conn db.DBConnector, payload GithubPayload, service models.Services, project models.Projects) (commit models.Timelines, err error) {
+	// author, timestamp, mergedby, and message will be updated with information from github api
 
-	// find the service
-	var service structs.ServicesData
-
-	for key, s := range services {
-		if s.GHRepo == payload.Repo { // match on the github repo, unlike tekton
-			service, _, err = conn.GetServiceByName(key)
-
-			if err != nil {
-				return commits, err
-			}
-		}
+	t := models.Timelines{
+		ServiceID: service.ID,
+		ProjectID: project.ID,
+		Timestamp: time.Now(),
+		Type:      "commit",
+		Repo:      payload.Repo,
+		Ref:       payload.Ref,
 	}
 
-	if service == (structs.ServicesData{}) {
-		// create the service?
-		return commits, fmt.Errorf("app %s is not onboarded", payload.App)
-	}
-
-	for _, commit := range payload.Commits {
-		commits = append(commits, models.Timelines{
-			ServiceID: service.ID,
-			Timestamp: commit.Timestamp,
-			Type:      "commit",
-			Repo:      service.Name,
-			Ref:       commit.Ref,
-			Author:    commit.Author,
-			MergedBy:  payload.MergedBy,
-			Message:   commit.Message,
-		})
-	}
-
-	return commits, nil
+	return t, nil
 }

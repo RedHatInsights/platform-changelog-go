@@ -50,17 +50,6 @@ func createCommands(cfg *config.Config) *cobra.Command {
 		},
 	}
 
-	// seed the DB
-	var seedCmd = &cobra.Command{
-		Use:   "seed",
-		Short: "Seeds the DB with the services from the config",
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Seeding DB")
-			seedDB(cfg)
-		},
-	}
-
-	rootCmd.AddCommand(seedCmd)
 	rootCmd.AddCommand(migrateCmd)
 	migrateCmd.AddCommand(upCmd)
 	migrateCmd.AddCommand(downCmd)

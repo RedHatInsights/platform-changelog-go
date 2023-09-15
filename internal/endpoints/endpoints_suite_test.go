@@ -9,6 +9,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
+	"github.com/redhatinsights/platform-changelog-go/internal/models"
 	"github.com/redhatinsights/platform-changelog-go/internal/utils"
 	"gorm.io/gorm"
 )
@@ -37,7 +38,7 @@ var _ = BeforeSuite(func() {
 
 	testDBImpl = db.SetDBConnector(testGormDB)
 
-	seed(cfg, testDBImpl)
+	seedServicesAndProjects(testDBImpl)
 })
 
 var _ = AfterSuite(func() {
@@ -46,10 +47,54 @@ var _ = AfterSuite(func() {
 	fmt.Println("TEST DB STOPPED")
 })
 
-func seed(cfg *config.Config, db *db.DBConnectorImpl) {
-	// Add all services in the services config
-	for key, service := range cfg.Services {
-		_, err := db.CreateServiceTableEntry(key, service)
+func seedServicesAndProjects(db *db.DBConnectorImpl) {
+	ms := []models.Services{
+		{Name: "platform-changelog", DisplayName: "Platform Changelog", Tenant: "Insights"},
+		{Name: "insights-ingress", DisplayName: "Insights Ingress", Tenant: "Insights"},
+		{Name: "rbac", DisplayName: "Insights RBAC", Tenant: "Insights"},
+		{Name: "chrome-service", DisplayName: "Chrome Service", Tenant: "Insights"},
+	}
+
+	mp := []models.Projects{
+		{
+			ServiceID: 1,
+			Name:      "platform-changelog-go",
+			Repo:      "https://github.com/RedhatInsights/platform-changelog-go",
+		},
+		{
+			ServiceID: 1,
+			Name:      "platform-changelog-ui",
+			Repo:      "https://github.com/RedhatInsights/platform-changelog-ui",
+		},
+		{
+			ServiceID: 2,
+			Name:      "insights-ingress-go",
+			Repo:      "https://github.com/RedhatInsights/insights-ingress-go",
+		},
+		{
+			ServiceID: 3,
+			Name:      "insights-rbac",
+			Repo:      "https://github.com/RedhatInsights/insights-rbac",
+		},
+	}
+
+	CreateServices(db, ms)
+	CreateProjects(db, mp)
+}
+
+func CreateServices(conn db.DBConnector, services []models.Services) {
+	for _, s := range services {
+		fmt.Printf(s.Name)
+		err := conn.CreateServiceTableEntry(&s)
+		Expect(s.ID).NotTo(Equal(0))
+		Expect(err).To(BeNil())
+	}
+}
+
+func CreateProjects(conn db.DBConnector, projects []models.Projects) {
+	for _, p := range projects {
+		err := conn.CreateProjectTableEntry(&p)
+		Expect(p.ID).NotTo(Equal(0))
 		Expect(err).To(BeNil())
 	}
 }

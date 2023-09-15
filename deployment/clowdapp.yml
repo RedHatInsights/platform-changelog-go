@@ -24,7 +24,7 @@ objects:
         initContainers:
           - command: ["/bin/sh", "-c"]
             args:
-              - ./platform-changelog migrate up && ./platform-changelog seed
+              - ./platform-changelog migrate up
             image: ${IMAGE}:${IMAGE_TAG}
             inheritEnv: True
         minReadySeconds: 15

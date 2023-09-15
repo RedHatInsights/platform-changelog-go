@@ -66,32 +66,7 @@ Sends gitlab commits from a webhook; authentication needed (as per Github api)
 Follow the Makefile's `make test-gitlab-webhook` for usage.
 
 ### Deleting data
-The app has no DELETE requests; instead, we use a [cron-job](https://github.com/RedHatInsights/platform-changelog-go/blob/main/tools/cron-job.sh) to remove old timelines, and, on a merge to `main`, the services are updated to match information in `services.yaml` as discussed below.
-
-## Onboarding a Service
-
-If your service is deployed through App-sre, it will be onboarded automatically as information is recieved. If it is not, then manual onboarding with Github or Gitlab webhooks is required
-
-For manual onboarding, follow these steps:
-
-1. Add your tenant to `internal/config/tenant.yaml` if it is not included.
-  ```yaml
-  tenant-name:
-    name: Tenant Name
-```
-
-2. Add the service to `internal/config/services.yaml`.
-  
-  ```yaml
-  service-name:
-    display_name: "Service Name"
-    tenant: <tenant>
-    gh_repo: <https://github.com/org/repo>
-    branch: master # branch to be monitored
-    namespace: <namespace of the project>
-```
-
-3. Submit an MR to this repo. It will be approved by an owner.
+The app has no DELETE requests; instead, we use a [cron-job](https://github.com/RedHatInsights/platform-changelog-go/blob/main/tools/cron-job.sh) to remove old timelines, and, on a merge to `main`.
 
 ## Development
 
@@ -113,7 +88,6 @@ To run the app, try `make run`, which uses the following make commands:
 
     $> make run-db
     $> make run-migrate-up
-    $> make run-seed
     $> make run-api
 
 To rebuild the app, the `-B` above is required.

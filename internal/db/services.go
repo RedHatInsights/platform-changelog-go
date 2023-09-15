@@ -9,36 +9,35 @@ import (
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
-func (conn *DBConnectorImpl) CreateServiceTableEntry(name string, s config.Service) (service models.Services, err error) {
-	newService := models.Services{Name: name, DisplayName: s.DisplayName, Tenant: s.Tenant, GHRepo: s.GHRepo, GLRepo: s.GLRepo, Branch: s.Branch, Namespace: s.Namespace, DeployFile: s.DeployFile}
-	results := conn.db.Create(&newService)
+func (conn *DBConnectorImpl) CreateServiceTableEntry(s *models.Services) error {
+	results := conn.db.Create(s)
 
-	return newService, results.Error
+	return evaluateError(results.Error)
 }
 
 func (conn *DBConnectorImpl) UpdateServiceTableEntry(name string, s config.Service) (service models.Services, err error) {
-	newService := models.Services{Name: name, DisplayName: s.DisplayName, Tenant: s.Tenant, GHRepo: s.GHRepo, GLRepo: s.GLRepo, Branch: s.Branch, Namespace: s.Namespace, DeployFile: s.DeployFile}
+	newService := models.Services{Name: name, DisplayName: s.DisplayName, Tenant: s.Tenant}
 	results := conn.db.Model(models.Services{}).Where("name = ?", name).Updates(&newService)
 
-	return newService, results.Error
+	return newService, evaluateError(results.Error)
 }
 
-func (conn *DBConnectorImpl) DeleteServiceTableEntry(name string) (structs.ServicesData, error) {
+func (conn *DBConnectorImpl) DeleteServiceTableEntry(name string) (models.Services, error) {
 	// save the service to delete the timelines
 	service, _, _ := conn.GetServiceByName(name)
 
 	results := conn.db.Model(models.Services{}).Where("name = ?", name).Delete(&models.Services{})
 	if results.Error != nil {
-		return structs.ServicesData{}, results.Error
+		return models.Services{}, evaluateError(results.Error)
 	}
 
 	// delete the timelines for the service
 	err := conn.DeleteTimelinesByService(service)
 	if err != nil {
-		return structs.ServicesData{}, err
+		return models.Services{}, evaluateError(err)
 	}
 
-	return service, results.Error
+	return service, nil
 }
 
 func (conn *DBConnectorImpl) GetServicesAll(offset int, limit int, q structs.Query) ([]structs.ExpandedServicesData, int64, error) {
@@ -50,27 +49,21 @@ func (conn *DBConnectorImpl) GetServicesAll(offset int, limit int, q structs.Que
 
 	db := conn.db.Model(models.Services{})
 
-	if len(q.ServiceName) > 0 {
-		db = db.Where("services.name IN ?", q.ServiceName)
+	if len(q.Name) > 0 {
+		db = db.Where("services.name IN ?", q.Name)
 	}
-	if len(q.ServiceDisplayName) > 0 {
-		db = db.Where("services.display_name IN ?", q.ServiceDisplayName)
+	if len(q.DisplayName) > 0 {
+		db = db.Where("services.display_name IN ?", q.DisplayName)
 	}
-	if len(q.ServiceTenant) > 0 {
-		db = db.Where("services.tenant IN ?", q.ServiceTenant)
-	}
-	if len(q.ServiceNamespace) > 0 {
-		db = db.Where("services.namespace IN ?", q.ServiceNamespace)
-	}
-	if len(q.ServiceBranch) > 0 {
-		db = db.Where("services.branch IN ?", q.ServiceBranch)
+	if len(q.Tenant) > 0 {
+		db = db.Where("services.tenant IN ?", q.Tenant)
 	}
 
 	// Uses the Services model here to reflect the proper db relation
 	db.Model(models.Services{}).Count(&count)
 
 	// TODO: add a sort_by field to the query struct
-	result := db.Order("ID desc").Limit(limit).Offset(offset).Find(&services)
+	result := db.Order("ID desc").Preload("Projects").Limit(limit).Offset(offset).Scan(&services)
 
 	var servicesWithTimelines []structs.ExpandedServicesData
 	for i := 0; i < len(services); i++ {
@@ -79,7 +72,7 @@ func (conn *DBConnectorImpl) GetServicesAll(offset int, limit int, q structs.Que
 		servicesWithTimelines = append(servicesWithTimelines, s)
 	}
 
-	return servicesWithTimelines, count, result.Error
+	return servicesWithTimelines, count, evaluateError(result.Error)
 }
 
 func (conn *DBConnectorImpl) GetLatest(service structs.ExpandedServicesData) (structs.ExpandedServicesData, error, error) {
@@ -90,26 +83,27 @@ func (conn *DBConnectorImpl) GetLatest(service structs.ExpandedServicesData) (st
 
 	depResult := conn.db.Model(models.Timelines{}).Select("*").Joins("JOIN services ON timelines.service_id = services.id").Where("services.name = ?", service.Name).Where("timelines.type = ?", "deploy").Order("Timestamp desc").Limit(1).Find(&service.Deploy)
 
-	return service, comResult.Error, depResult.Error
+	return service, evaluateError(comResult.Error), evaluateError(depResult.Error)
 }
 
 func (conn *DBConnectorImpl) GetServiceNames() ([]string, error) {
 	var names []string
 	result := conn.db.Model(models.Services{}).Pluck("name", &names)
-	return names, result.Error
+	return names, evaluateError(result.Error)
 }
 
-func (conn *DBConnectorImpl) GetServiceByName(name string) (structs.ServicesData, int64, error) {
+func (conn *DBConnectorImpl) GetServiceByName(name string) (models.Services, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServiceByName)
 	defer callDurationTimer.ObserveDuration()
-	var service structs.ServicesData
-	result := conn.db.Model(models.Services{}).Where("name = ?", name).First(&service)
-	return service, result.RowsAffected, result.Error
+
+	var service models.Services
+	result := conn.db.Model(models.Services{}).Preload("Projects").Where("services.name = ?", name).First(&service)
+	return service, result.RowsAffected, evaluateError(result.Error)
 }
 
-func (conn *DBConnectorImpl) GetServiceByGHRepo(service_url string) (structs.ServicesData, error) {
-	var service structs.ServicesData
-	result := conn.db.Model(models.Services{}).Where("gh_repo = ?", service_url).First(&service)
+func (conn *DBConnectorImpl) GetServiceByRepo(repo string) (models.Services, error) {
+	var service models.Services
+	result := conn.db.Model(models.Services{}).Preload("Projects").Where("repo = ?", repo).First(&service)
 
-	return service, result.Error
+	return service, evaluateError(result.Error)
 }

@@ -9,10 +9,10 @@ import (
 	"fmt"
 
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
+	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
-	m "github.com/redhatinsights/platform-changelog-go/internal/models"
-	"github.com/redhatinsights/platform-changelog-go/internal/structs"
+	"github.com/redhatinsights/platform-changelog-go/internal/models"
 	"github.com/xanzy/go-gitlab"
 )
 
@@ -98,8 +98,6 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 
 	metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), false)
 
-	services := config.Get().Services
-
 	if config.Get().SkipWebhookValidation {
 		l.Log.Info("skipping webhook validation")
 	} else {
@@ -145,32 +143,77 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 		return
 
 	case *gitlab.PushEvent:
-		for key, service := range services {
-			if service.GLRepo == getURL(e) {
-				s, _, _ := eh.conn.GetServiceByName(key)
-				if s.Branch != strings.Split((e.Ref), "/")[2] {
-					l.Log.Info("Branch mismatch: ", s.Branch, " != ", strings.Split((e.Ref), "/")[2])
-					writeResponse(w, http.StatusOK, `{"msg": "Not a monitored branch"}`)
-					return
-				}
-				commitData := getCommitData2(e, s)
-				err := eh.conn.CreateCommitEntry(commitData)
-				if err != nil {
-					l.Log.Errorf("Failed to insert webhook data: %v", err)
+		repo := getURL(e)
+		project, err := eh.conn.GetProjectByRepo(repo)
+		if err != nil {
+			if err != db.ErrNotFound {
+				l.Log.Errorf("Failed to get project: %v", err)
+				metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), true)
+				writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to get project"}`)
+				return
+			}
+
+			// project not onboarded; build project and find service if available
+
+			// Due to the webhook events not being connected to app-interface,
+			// The service name and project name will be the same.
+			// Also, the tenant will not be specified.
+			// A user could override these by modifying the service.yml.
+			service, _, err := eh.conn.GetServiceByName(getRepo(e).Name)
+
+			if err != nil {
+				if err != db.ErrNotFound {
+					l.Log.Errorf("Failed to insert new service: %v", err)
 					metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), true)
-					writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert webhook data"}`)
+					writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert new service"}`)
 					return
 				}
-				l.Log.Infof("Created %d commit entries for %s", len(commitData), key)
-				writeResponse(w, http.StatusOK, `{"msg": "ok"}`)
+
+				// create service too
+				service := models.Services{
+					Name:        getRepo(e).Name,
+					DisplayName: getRepo(e).Name,
+					Tenant:      "undefined",
+				}
+				err = eh.conn.CreateServiceTableEntry(&service)
+				if err != nil {
+					// Failed to create service entry, something must be wrong with db
+					l.Log.Errorf("Failed to insert new service: %v", err)
+					metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), true)
+					writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert new service"}`)
+					return
+				}
+			}
+
+			project = models.Projects{
+				ServiceID: service.ID,
+				Name:      getRepo(e).Name,
+				Repo:      repo,
+				Branch:    strings.Split(e.Ref, "/")[2],
+			}
+
+			err = eh.conn.CreateProjectTableEntry(&project)
+
+			if err != nil {
+				l.Log.Info("Failed to insert project: ", project)
+				metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), true)
+				writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert new project"}`)
 				return
 			}
 		}
-		// catch for if the service is not registered
-		l.Log.Infof("Service not found for %s", getURL(e))
-		fmt.Println(getURL(e))
 
-		writeResponse(w, http.StatusOK, `{"msg": "The service is not registered"}`)
+		commitData := getCommitsAsTimelines(e, project)
+
+		err = eh.conn.BulkCreateCommitEntry(commitData)
+		if err != nil {
+			l.Log.Errorf("Failed to insert webhook data: %v", err)
+			metrics.IncWebhooks("gitlab", r.Method, r.UserAgent(), true)
+			writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert webhook data"}`)
+			return
+		}
+
+		l.Log.Infof("Created %d commit entries for %s", len(commitData), project.Name)
+		writeResponse(w, http.StatusOK, `{"msg": "ok"}`)
 		return
 	default:
 		l.Log.Errorf("Event type %T not supported", e)
@@ -179,11 +222,11 @@ func (eh *EndpointHandler) GitlabWebhook(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func getCommitData2(g *gitlab.PushEvent, s structs.ServicesData) []m.Timelines {
-	var commits []m.Timelines
+func getCommitsAsTimelines(g *gitlab.PushEvent, p models.Projects) []models.Timelines {
+	var commits []models.Timelines
 	for _, commit := range g.Commits {
-		record := m.Timelines{
-			ServiceID: s.ID,
+		record := models.Timelines{
+			ServiceID: p.ID,
 			Repo:      getRepo(g).Name,
 			Ref:       getID(commit),
 			Type:      "commit",

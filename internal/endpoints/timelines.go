@@ -70,6 +70,41 @@ func (eh *EndpointHandler) GetTimelinesByService(w http.ResponseWriter, r *http.
 	json.NewEncoder(w).Encode(timelinesList)
 }
 
+func (eh *EndpointHandler) GetTimelinesByProject(w http.ResponseWriter, r *http.Request) {
+	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
+
+	projectName := chi.URLParam(r, "project")
+
+	q, err := initQuery(r)
+
+	if err != nil {
+		writeResponse(w, http.StatusBadRequest, "Invalid query")
+		return
+	}
+
+	project, _, err := eh.conn.GetProjectByName(projectName)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Couldn't find the service"))
+		return
+	}
+
+	timeline, count, err := eh.conn.GetTimelinesByProject(project, q.Offset, q.Limit, q)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error producing the timeline"))
+		w.Write([]byte(err.Error()))
+	}
+
+	timelinesList := structs.TimelinesList{Count: count, Data: timeline}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(timelinesList)
+}
+
 func (eh *EndpointHandler) GetTimelineByRef(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 	ref := chi.URLParam(r, "ref")

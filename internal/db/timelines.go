@@ -37,10 +37,10 @@ func (conn *DBConnectorImpl) GetTimelinesAll(offset int, limit int, q structs.Qu
 	db.Model(&timelines).Count(&count)
 	result := conn.db.Order("Timestamp desc").Order("ID desc").Limit(limit).Offset(offset).Find(&timelines)
 
-	return timelines, count, result.Error
+	return timelines, count, evaluateError(result.Error)
 }
 
-func (conn *DBConnectorImpl) GetTimelinesByService(service structs.ServicesData, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
+func (conn *DBConnectorImpl) GetTimelinesByService(service models.Services, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimelinesByService)
 	defer callDurationTimer.ObserveDuration()
 
@@ -57,7 +57,27 @@ func (conn *DBConnectorImpl) GetTimelinesByService(service structs.ServicesData,
 	db.Model(&timelines).Count(&count)
 	result := db.Order("Timestamp desc").Order("ID desc").Limit(limit).Offset(offset).Find(&timelines)
 
-	return timelines, count, result.Error
+	return timelines, count, evaluateError(result.Error)
+}
+
+func (conn *DBConnectorImpl) GetTimelinesByProject(project models.Projects, offset int, limit int, q structs.Query) ([]models.Timelines, int64, error) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetTimelinesByProject)
+	defer callDurationTimer.ObserveDuration()
+
+	var count int64
+	var timelines []models.Timelines
+
+	// Concatanate the timeline fields
+	fields := fmt.Sprintf("%s,%s,%s", strings.Join(timelinesFields, ","), strings.Join(commitsFields, ","), strings.Join(deploysFields, ","))
+
+	db := conn.db.Model(models.Timelines{}).Select(fields).Where("project_id = ?", project.ID)
+
+	db = FilterTimelineByDate(db, q.StartDate, q.EndDate)
+
+	db.Model(&timelines).Count(&count)
+	result := db.Order("Timestamp desc").Order("ID desc").Limit(limit).Offset(offset).Find(&timelines)
+
+	return timelines, count, evaluateError(result.Error)
 }
 
 func (conn *DBConnectorImpl) GetTimelineByRef(ref string) (models.Timelines, int64, error) {
@@ -68,11 +88,11 @@ func (conn *DBConnectorImpl) GetTimelineByRef(ref string) (models.Timelines, int
 
 	result := conn.db.Model(models.Timelines{}).Select("*").Where("timelines.ref = ?", ref).Find(&timeline)
 
-	return timeline, result.RowsAffected, result.Error
+	return timeline, result.RowsAffected, evaluateError(result.Error)
 }
 
-func (conn *DBConnectorImpl) DeleteTimelinesByService(service structs.ServicesData) error {
+func (conn *DBConnectorImpl) DeleteTimelinesByService(service models.Services) error {
 	result := conn.db.Model(models.Timelines{}).Where("service_id = ?", service.ID).Delete(&models.Timelines{})
 
-	return result.Error
+	return evaluateError(result.Error)
 }

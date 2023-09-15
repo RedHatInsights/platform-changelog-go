@@ -8,10 +8,10 @@ import (
 
 	"github.com/google/go-github/v50/github"
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
+	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
-	m "github.com/redhatinsights/platform-changelog-go/internal/models"
-	"github.com/redhatinsights/platform-changelog-go/internal/structs"
+	"github.com/redhatinsights/platform-changelog-go/internal/models"
 	"github.com/redhatinsights/platform-changelog-go/internal/utils"
 )
 
@@ -22,8 +22,6 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 	var payload []byte
 
 	metrics.IncWebhooks("github", r.Method, r.UserAgent(), false)
-
-	services := config.Get().Services
 
 	if config.Get().SkipWebhookValidation {
 		l.Log.Info("skipping webhook validation")
@@ -60,31 +58,80 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 		writeResponse(w, http.StatusOK, `{"msg": "ok"}`)
 		return
 	case *github.PushEvent:
-		for key, service := range services {
-			if service.GHRepo == e.Repo.GetURL() {
-				s, _, _ := eh.conn.GetServiceByName(key)
-				if s.Branch != strings.Split(utils.DerefString(e.Ref), "/")[2] {
-					l.Log.Info("Branch mismatch: ", s.Branch, " != ", strings.Split(utils.DerefString(e.Ref), "/")[2])
-					writeResponse(w, http.StatusOK, `{"msg": "Not a monitored branch"}`)
-					return
-				}
-				commitData := getCommitData(e, s)
-				err := eh.conn.CreateCommitEntry(commitData)
-				if err != nil {
-					l.Log.Errorf("Failed to insert webhook data: %v", err)
-					metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
-					writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert webhook data"}`)
-					return
-				}
-				l.Log.Infof("Created %d commit entries for %s", len(commitData), key)
-				writeResponse(w, http.StatusOK, `{"msg": "ok"}`)
+		repo := e.Repo.GetURL()
+		project, err := eh.conn.GetProjectByRepo(repo)
+		if err != nil {
+			if err != db.ErrNotFound {
+				l.Log.Errorf("Failed to get project: %v", err)
+				metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
+				writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to get project"}`)
 				return
 			}
+
+			// project not onboarded; build project and find service if available
+
+			// Due to the webhook events not being connected to app-interface,
+			// The service name and project name will be the same.
+			// Also, the tenant will not be specified.
+			// A user could override these by modifying the service.yml.
+			service, _, err := eh.conn.GetServiceByName(e.Repo.GetName())
+
+			if err != nil {
+				if err != db.ErrNotFound {
+					l.Log.Errorf("Failed to insert new service: %v", err)
+					metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
+					writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert new service"}`)
+					return
+				}
+
+				// create service
+				service = models.Services{
+					Name:        e.Repo.GetName(),
+					DisplayName: e.Repo.GetName(),
+					Tenant:      "undefined",
+				}
+				eh.conn.CreateServiceTableEntry(&service)
+
+				service, _, err = eh.conn.GetServiceByName(e.Repo.GetName())
+				if err != nil {
+					// Failed to create service entry, something must be wrong with db
+					l.Log.Errorf("Failed to insert new service: %v", err)
+					metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
+					writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert new service"}`)
+					return
+				}
+			}
+
+			project = models.Projects{
+				ServiceID: service.ID,
+				Name:      e.Repo.GetName(),
+				Repo:      repo,
+				Branch:    strings.Split(utils.DerefString(e.Ref), "/")[2],
+			}
+
+			err = eh.conn.CreateProjectTableEntry(&project)
+
+			if err != nil {
+				l.Log.Info("Failed to insert project: ", project)
+				metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
+				writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert new project"}`)
+			}
 		}
-		// catch for if the service is not registered
-		l.Log.Infof("Service not found for %s", e.Repo.GetURL())
-		writeResponse(w, http.StatusOK, `{"msg": "The service is not registered"}`)
+
+		commitData := getCommitData(e, project)
+
+		err = eh.conn.BulkCreateCommitEntry(commitData)
+		if err != nil {
+			l.Log.Errorf("Failed to insert webhook data: %v", err)
+			metrics.IncWebhooks("github", r.Method, r.UserAgent(), true)
+			writeResponse(w, http.StatusInternalServerError, `{"msg": "Failed to insert webhook data"}`)
+			return
+		}
+
+		l.Log.Infof("Created %d commit entries for %s", len(commitData), project.Name)
+		writeResponse(w, http.StatusOK, `{"msg": "ok"}`)
 		return
+
 	default:
 		l.Log.Errorf("Event type %T not supported", e)
 		writeResponse(w, http.StatusOK, `{"msg": "Event from this repo is not a push event"}`)
@@ -92,11 +139,12 @@ func (eh *EndpointHandler) GithubWebhook(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func getCommitData(g *github.PushEvent, s structs.ServicesData) []m.Timelines {
-	var commits []m.Timelines
+func getCommitData(g *github.PushEvent, p models.Projects) []models.Timelines {
+	var commits []models.Timelines
 	for _, commit := range g.Commits {
-		record := m.Timelines{
-			ServiceID: s.ID,
+		record := models.Timelines{
+			ServiceID: p.ServiceID,
+			ProjectID: p.ID,
 			Repo:      utils.DerefString(g.GetRepo().Name),
 			Ref:       commit.GetID(),
 			Type:      "commit",
