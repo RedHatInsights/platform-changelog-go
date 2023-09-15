@@ -39,6 +39,18 @@ func Migrate(gres *sql.DB, migrationsPath string, direction string) error {
 		err = m.Up()
 	} else if direction == "down" {
 		err = m.Steps(-1)
+	} else if direction == "drop" {
+		logging.Log.Info("Dropping DB")
+		version, _, _ := m.Version()
+		logging.Log.Info("Current DB version: ", version)
+
+		m.Force(2) // resets dirty
+		m.Steps(-1)
+		m.Steps(-1)
+		err = m.Drop() // to drop; version 0; reset dirty
+
+		version, _, _ = m.Version()
+		logging.Log.Info("Version after dropping: ", version)
 	} else {
 		logging.Log.Fatal("Invalid migration direction: ", direction)
 		return errors.New("Invalid migration direction")
