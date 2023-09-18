@@ -137,7 +137,7 @@ parameters:
   value: DEBUG
 - description: The number of replicas to use for the platform-changlog
   name: API_REPLICAS
-  value: '3'
+  value: '1'
 - description: Image
   name: IMAGE
   required: true
