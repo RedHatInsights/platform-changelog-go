@@ -24,7 +24,7 @@ objects:
         initContainers:
           - command: ["/bin/sh", "-c"]
             args:
-              - ./platform-changelog migrate drop
+              - ./platform-changelog migrate up
             image: ${IMAGE}:${IMAGE_TAG}
             inheritEnv: True
         minReadySeconds: 15
@@ -137,7 +137,7 @@ parameters:
   value: DEBUG
 - description: The number of replicas to use for the platform-changlog
   name: API_REPLICAS
-  value: '1'
+  value: '3'
 - description: Image
   name: IMAGE
   required: true
