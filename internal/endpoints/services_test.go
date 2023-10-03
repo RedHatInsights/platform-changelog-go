@@ -76,7 +76,7 @@ var _ = Describe("Handler", Ordered, func() {
 			handler := endpoints.NewHandler(dbConnector)
 
 			// create a request
-			req, err := http.NewRequest("GET", "/services/platform-changelog", nil)
+			req, err := http.NewRequest("GET", "/services/1", nil) // platform-changelog
 			Expect(err).To(BeNil())
 
 			req.Header.Set("Content-Type", "application/json")
@@ -84,7 +84,7 @@ var _ = Describe("Handler", Ordered, func() {
 			rr := httptest.NewRecorder()
 
 			router := chi.NewRouter()
-			router.Get("/services/{service}", handler.GetServiceByName)
+			router.Get("/services/{service_id}", handler.GetServiceByID)
 
 			router.ServeHTTP(rr, req)
 
