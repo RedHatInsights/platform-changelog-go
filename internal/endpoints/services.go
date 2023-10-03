@@ -35,11 +35,11 @@ func (eh *EndpointHandler) GetServicesAll(w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(servicesList)
 }
 
-func (eh *EndpointHandler) GetServiceByName(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetServiceByID(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	serviceName := chi.URLParam(r, "service")
-	service, _, err := eh.conn.GetServiceByName(serviceName)
+	serviceID := chi.URLParam(r, "service_id")
+	service, _, err := eh.conn.GetServiceByID(serviceID)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -64,7 +64,7 @@ func (eh *EndpointHandler) GetServiceByName(w http.ResponseWriter, r *http.Reque
 		Projects:    convertProjectsToProjectsData(service.Projects),
 	}
 
-	l.Log.Debugf("URL Param: %s", serviceName)
+	l.Log.Debugf("URL Param: %s", serviceID)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(serviceData)

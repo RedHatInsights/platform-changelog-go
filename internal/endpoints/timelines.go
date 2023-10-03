@@ -38,7 +38,7 @@ func (eh *EndpointHandler) GetTimelinesAll(w http.ResponseWriter, r *http.Reques
 func (eh *EndpointHandler) GetTimelinesByService(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	serviceName := chi.URLParam(r, "service")
+	serviceID := chi.URLParam(r, "service_id")
 
 	q, err := initQuery(r)
 
@@ -47,7 +47,7 @@ func (eh *EndpointHandler) GetTimelinesByService(w http.ResponseWriter, r *http.
 		return
 	}
 
-	service, _, err := eh.conn.GetServiceByName(serviceName)
+	service, _, err := eh.conn.GetServiceByID(serviceID)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

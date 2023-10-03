@@ -35,7 +35,7 @@ func (eh *EndpointHandler) GetDeploysAll(w http.ResponseWriter, r *http.Request)
 
 func (eh *EndpointHandler) GetDeploysByService(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
-	serviceName := chi.URLParam(r, "service")
+	serviceID := chi.URLParam(r, "service_id")
 
 	q, err := initQuery(r)
 
@@ -44,7 +44,7 @@ func (eh *EndpointHandler) GetDeploysByService(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	service, _, err := eh.conn.GetServiceByName(serviceName)
+	service, _, err := eh.conn.GetServiceByID(serviceID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Couldn't find the service"))

@@ -36,11 +36,11 @@ func (eh *EndpointHandler) GetProjectsAll(w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(projectsList)
 }
 
-func (eh *EndpointHandler) GetProjectByName(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetProjectByID(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	projectName := chi.URLParam(r, "project")
-	project, _, err := eh.conn.GetProjectByName(projectName)
+	projectID := chi.URLParam(r, "project_id")
+	project, _, err := eh.conn.GetProjectByID(projectID)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -59,7 +59,7 @@ func (eh *EndpointHandler) GetProjectByName(w http.ResponseWriter, r *http.Reque
 
 	projectData := convertProjectToProjectsData(project)
 
-	l.Log.Debugf("URL Param: %s", projectName)
+	l.Log.Debugf("URL Param: %s", projectID)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(projectData)
@@ -68,7 +68,7 @@ func (eh *EndpointHandler) GetProjectByName(w http.ResponseWriter, r *http.Reque
 func (eh *EndpointHandler) GetProjectsByService(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	serviceName := chi.URLParam(r, "service")
+	serviceID := chi.URLParam(r, "service_id")
 
 	q, err := initQuery(r)
 
@@ -77,7 +77,7 @@ func (eh *EndpointHandler) GetProjectsByService(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	service, _, err := eh.conn.GetServiceByName(serviceName)
+	service, _, err := eh.conn.GetServiceByID(serviceID)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
