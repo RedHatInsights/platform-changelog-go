@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
@@ -20,6 +21,8 @@ func startAPI(cfg *config.Config) {
 	mr := chi.NewRouter()
 	sub := chi.NewRouter().With(metrics.ResponseMetricsMiddleware)
 
+	r.Use(middleware.StripSlashes)
+	
 	// Mount the root of the api router on /api/v1
 	r.Mount("/api/v1", sub)
 	r.Get("/", handler.LubdubHandler)
@@ -55,7 +58,7 @@ func startAPI(cfg *config.Config) {
 	sub.Get("/deploys/{ref}", handler.GetDeployByRef)
 
 	sub.Get("/openapi.json", handler.OpenAPIHandler(cfg))
-
+	
 	srv := http.Server{
 		Addr:    ":" + cfg.PublicPort,
 		Handler: r,
