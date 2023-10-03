@@ -74,9 +74,19 @@ var (
 		Help: "Elapsed time for sql lookup of all deploys",
 	})
 
+	SqlGetServiceByID = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_service_by_name_seconds",
+		Help: "Elapsed time for sql lookup of services by name",
+	})
+
 	SqlGetServiceByName = pa.NewHistogram(p.HistogramOpts{
 		Name: "platform_changelog_sql_get_service_by_name_seconds",
 		Help: "Elapsed time for sql lookup of services by name",
+	})
+
+	SqlGetProjectByID = pa.NewHistogram(p.HistogramOpts{
+		Name: "platform_changelog_sql_get_project_by_name_seconds",
+		Help: "Elapsed time for sql lookup of projects by name",
 	})
 
 	SqlGetProjectByName = pa.NewHistogram(p.HistogramOpts{
