@@ -73,7 +73,7 @@ func (eh *EndpointHandler) GetTimelinesByService(w http.ResponseWriter, r *http.
 func (eh *EndpointHandler) GetTimelinesByProject(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	projectName := chi.URLParam(r, "project")
+	projectID := chi.URLParam(r, "project_id")
 
 	q, err := initQuery(r)
 
@@ -82,11 +82,11 @@ func (eh *EndpointHandler) GetTimelinesByProject(w http.ResponseWriter, r *http.
 		return
 	}
 
-	project, _, err := eh.conn.GetProjectByName(projectName)
+	project, _, err := eh.conn.GetProjectByID(projectID)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Couldn't find the service"))
+		w.Write([]byte("Couldn't find the project"))
 		return
 	}
 
