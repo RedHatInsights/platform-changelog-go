@@ -35,7 +35,13 @@ func (eh *EndpointHandler) GetDeploysAll(w http.ResponseWriter, r *http.Request)
 
 func (eh *EndpointHandler) GetDeploysByService(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
-	serviceID := chi.URLParam(r, "service_id")
+
+	serviceID, err := getIDFromURL(r, "service_id")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid service ID"))
+		return
+	}
 
 	q, err := initQuery(r)
 
@@ -67,7 +73,12 @@ func (eh *EndpointHandler) GetDeploysByService(w http.ResponseWriter, r *http.Re
 
 func (eh *EndpointHandler) GetDeploysByProject(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
-	projectID := chi.URLParam(r, "project_id")
+	projectID, err := getIDFromURL(r, "project_id")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid service ID"))
+		return
+	}
 
 	q, err := initQuery(r)
 

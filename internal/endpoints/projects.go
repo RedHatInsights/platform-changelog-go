@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
@@ -39,7 +38,13 @@ func (eh *EndpointHandler) GetProjectsAll(w http.ResponseWriter, r *http.Request
 func (eh *EndpointHandler) GetProjectByID(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	projectID := chi.URLParam(r, "project_id")
+	projectID, err := getIDFromURL(r, "project_id")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid project ID"))
+		return
+	}
+
 	project, _, err := eh.conn.GetProjectByID(projectID)
 
 	if err != nil {
@@ -59,7 +64,7 @@ func (eh *EndpointHandler) GetProjectByID(w http.ResponseWriter, r *http.Request
 
 	projectData := convertProjectToProjectsData(project)
 
-	l.Log.Debugf("URL Param: %s", projectID)
+	l.Log.Debugf("URL Param: %d", projectID)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(projectData)
@@ -68,7 +73,12 @@ func (eh *EndpointHandler) GetProjectByID(w http.ResponseWriter, r *http.Request
 func (eh *EndpointHandler) GetProjectsByService(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	serviceID := chi.URLParam(r, "service_id")
+	serviceID, err := getIDFromURL(r, "service_id")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid service ID"))
+		return
+	}
 
 	q, err := initQuery(r)
 

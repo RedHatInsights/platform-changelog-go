@@ -92,7 +92,7 @@ func (conn *DBConnectorImpl) GetServiceNames() ([]string, error) {
 	return names, evaluateError(result.Error)
 }
 
-func (conn *DBConnectorImpl) GetServiceByID(id string) (models.Services, int64, error) {
+func (conn *DBConnectorImpl) GetServiceByID(id int) (models.Services, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServiceByID)
 	defer callDurationTimer.ObserveDuration()
 

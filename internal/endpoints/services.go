@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
@@ -38,7 +37,13 @@ func (eh *EndpointHandler) GetServicesAll(w http.ResponseWriter, r *http.Request
 func (eh *EndpointHandler) GetServiceByID(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	serviceID := chi.URLParam(r, "service_id")
+	serviceID, err := getIDFromURL(r, "service_id")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid service ID"))
+		return
+	}
+
 	service, _, err := eh.conn.GetServiceByID(serviceID)
 
 	if err != nil {
@@ -64,7 +69,7 @@ func (eh *EndpointHandler) GetServiceByID(w http.ResponseWriter, r *http.Request
 		Projects:    convertProjectsToProjectsData(service.Projects),
 	}
 
-	l.Log.Debugf("URL Param: %s", serviceID)
+	l.Log.Debugf("URL Param: %d", serviceID)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(serviceData)
