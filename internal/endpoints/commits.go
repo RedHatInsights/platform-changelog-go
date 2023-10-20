@@ -77,7 +77,7 @@ func (eh *EndpointHandler) GetCommitsByProject(w http.ResponseWriter, r *http.Re
 	projectID, err := getIDFromURL(r, "project_id")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid service ID"))
+		w.Write([]byte("Invalid project ID"))
 		return
 	}
 
