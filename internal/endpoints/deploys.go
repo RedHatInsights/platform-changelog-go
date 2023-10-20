@@ -53,7 +53,7 @@ func (eh *EndpointHandler) GetDeploysByService(w http.ResponseWriter, r *http.Re
 	service, _, err := eh.conn.GetServiceByID(serviceID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Couldn't find the project"))
+		w.Write([]byte("Couldn't find the service"))
 		return
 	}
 
@@ -76,7 +76,7 @@ func (eh *EndpointHandler) GetDeploysByProject(w http.ResponseWriter, r *http.Re
 	projectID, err := getIDFromURL(r, "project_id")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid service ID"))
+		w.Write([]byte("Invalid project ID"))
 		return
 	}
 
@@ -90,7 +90,7 @@ func (eh *EndpointHandler) GetDeploysByProject(w http.ResponseWriter, r *http.Re
 	project, _, err := eh.conn.GetProjectByID(projectID)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Couldn't find the projects"))
+		w.Write([]byte("Couldn't find the project"))
 		return
 	}
 
