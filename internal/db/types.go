@@ -12,6 +12,7 @@ type DBConnector interface {
 	DeleteServiceTableEntry(name string) (models.Services, error)
 	GetServicesAll(offset int, limit int, q structs.Query) ([]structs.ExpandedServicesData, int64, error)
 	GetLatest(service structs.ExpandedServicesData) (structs.ExpandedServicesData, error, error)
+	GetServiceByID(id int) (models.Services, int64, error)
 	GetServiceByName(name string) (models.Services, int64, error)
 	GetServiceByRepo(repo string) (models.Services, error)
 
@@ -19,6 +20,7 @@ type DBConnector interface {
 	UpdateProjectTableEntry(p *models.Projects) error
 	GetProjectsAll(offset int, limit int, q structs.Query) ([]models.Projects, int64, error)
 	GetProjectsByService(service models.Services, offset int, limit int, q structs.Query) ([]models.Projects, int64, error)
+	GetProjectByID(id int) (models.Projects, int64, error)
 	GetProjectByName(name string) (models.Projects, int64, error)
 	GetProjectByRepo(repo string) (models.Projects, error)
 

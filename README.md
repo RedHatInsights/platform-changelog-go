@@ -38,9 +38,9 @@ Refer to the [OpenAPI](https://github.com/RedHatInsights/platform-changelog-go/b
 ### Services
 `/api/v1/services/`
 Gets a list of services with their most recent commit and deployment
-`/api/v1/services/{name}`
+`/api/v1/services/{id}`
 Gets all of a services fields
-`/api/v1/services/{name}/timelines`; `/api/v1/services/{name}/commits`; `/api/v1/services/{name}/deploys`
+`/api/v1/services/{id}/timelines`; `/api/v1/services/{id}/commits`; `/api/v1/services/{id}/deploys`
 Gets all of a service's timelines (commits and deployments) or commits or deployments only
 
 ### Timelines

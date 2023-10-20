@@ -64,12 +64,12 @@ var _ = Describe("Handler", Ordered, func() {
 			}
 		})
 
-		It("should return project by service", func() {
+		It("should return project by id", func() {
 			dbConnector := testDBImpl
 			handler := endpoints.NewHandler(dbConnector)
 
 			// create a request
-			req, err := http.NewRequest("GET", "/services/platform-changelog/projects", nil)
+			req, err := http.NewRequest("GET", "/projects/1", nil)
 			Expect(err).To(BeNil())
 
 			req.Header.Set("Content-Type", "application/json")
@@ -77,7 +77,30 @@ var _ = Describe("Handler", Ordered, func() {
 			rr := httptest.NewRecorder()
 
 			router := chi.NewRouter()
-			router.Get("/services/{service}/projects", handler.GetProjectsByService)
+			router.Get("/projects/{project_id}", handler.GetProjectByID)
+
+			router.ServeHTTP(rr, req)
+
+			Expect(rr.Code).To(Equal(http.StatusOK))
+			body := rr.Body.String()
+
+			Expect(body).To(ContainSubstring("\"name\":\"platform-changelog-go\""))
+		})
+
+		It("should return project by service", func() {
+			dbConnector := testDBImpl
+			handler := endpoints.NewHandler(dbConnector)
+
+			// create a request
+			req, err := http.NewRequest("GET", "/services/1/projects", nil)
+			Expect(err).To(BeNil())
+
+			req.Header.Set("Content-Type", "application/json")
+
+			rr := httptest.NewRecorder()
+
+			router := chi.NewRouter()
+			router.Get("/services/{service_id}/projects", handler.GetProjectsByService)
 
 			router.ServeHTTP(rr, req)
 

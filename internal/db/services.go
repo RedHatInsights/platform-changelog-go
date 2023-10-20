@@ -92,6 +92,15 @@ func (conn *DBConnectorImpl) GetServiceNames() ([]string, error) {
 	return names, evaluateError(result.Error)
 }
 
+func (conn *DBConnectorImpl) GetServiceByID(id int) (models.Services, int64, error) {
+	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServiceByID)
+	defer callDurationTimer.ObserveDuration()
+
+	var service models.Services
+	result := conn.db.Model(models.Services{}).Preload("Projects").Where("services.id = ?", id).First(&service)
+	return service, result.RowsAffected, evaluateError(result.Error)
+}
+
 func (conn *DBConnectorImpl) GetServiceByName(name string) (models.Services, int64, error) {
 	callDurationTimer := prometheus.NewTimer(metrics.SqlGetServiceByName)
 	defer callDurationTimer.ObserveDuration()

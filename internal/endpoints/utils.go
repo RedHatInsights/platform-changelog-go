@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/redhatinsights/platform-changelog-go/internal/structs"
 )
 
@@ -69,4 +70,14 @@ func initQuery(r *http.Request) (structs.Query, error) {
 	}
 
 	return q, err
+}
+
+func getIDFromURL(r *http.Request, param string) (int, error) {
+	paramString := chi.URLParam(r, param)
+	paramInt, err := strconv.Atoi(paramString)
+	if err != nil {
+		return 0, err
+	}
+
+	return paramInt, nil
 }

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
 	"github.com/redhatinsights/platform-changelog-go/internal/metrics"
 	"github.com/redhatinsights/platform-changelog-go/internal/models"
@@ -36,11 +35,17 @@ func (eh *EndpointHandler) GetProjectsAll(w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(projectsList)
 }
 
-func (eh *EndpointHandler) GetProjectByName(w http.ResponseWriter, r *http.Request) {
+func (eh *EndpointHandler) GetProjectByID(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	projectName := chi.URLParam(r, "project")
-	project, _, err := eh.conn.GetProjectByName(projectName)
+	projectID, err := getIDFromURL(r, "project_id")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid project ID"))
+		return
+	}
+
+	project, _, err := eh.conn.GetProjectByID(projectID)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -59,7 +64,7 @@ func (eh *EndpointHandler) GetProjectByName(w http.ResponseWriter, r *http.Reque
 
 	projectData := convertProjectToProjectsData(project)
 
-	l.Log.Debugf("URL Param: %s", projectName)
+	l.Log.Debugf("URL Param: %d", projectID)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(projectData)
@@ -68,7 +73,12 @@ func (eh *EndpointHandler) GetProjectByName(w http.ResponseWriter, r *http.Reque
 func (eh *EndpointHandler) GetProjectsByService(w http.ResponseWriter, r *http.Request) {
 	metrics.IncRequests(r.URL.Path, r.Method, r.UserAgent())
 
-	serviceName := chi.URLParam(r, "service")
+	serviceID, err := getIDFromURL(r, "service_id")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid service ID"))
+		return
+	}
 
 	q, err := initQuery(r)
 
@@ -77,7 +87,7 @@ func (eh *EndpointHandler) GetProjectsByService(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	service, _, err := eh.conn.GetServiceByName(serviceName)
+	service, _, err := eh.conn.GetServiceByID(serviceID)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)

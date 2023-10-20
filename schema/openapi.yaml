@@ -115,13 +115,13 @@ paths:
                 $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
-  '/services/{service}':
+  '/services/{service_id}':
     get:
       summary: Returns an individual service
       description: returns an individual service
       operationId: get.services.service
       parameters:
-        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/service_id'
       responses:
         '200':
           description: OK
@@ -131,13 +131,13 @@ paths:
                 $ref: '#/components/schemas/Service'
         '400':
           $ref: '#/components/responses/BadRequest'
-  '/services/{service}/projects':
+  '/services/{service_id}/projects':
     get:
       summary: Returns all projects for a specific service
       description: Returns an array containing projects for a specific service
       operationId: get.services.service.project
       parameters:
-        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/service_id'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
       responses:
@@ -149,13 +149,13 @@ paths:
                 $ref: '#/components/schemas/ProjectsData'
         '400':
           $ref: '#/components/responses/BadRequest'
-  '/services/{service}/timelines':
+  '/services/{service_id}/timelines':
     get:
       summary: Returns all the commits and deploys for a specific service
       description: Returns an array containing timelines for a specific service
       operationId: get.services.service.timelines
       parameters:
-        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/service_id'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
         - $ref: '#/components/parameters/startDate'
@@ -169,13 +169,13 @@ paths:
                 $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
-  '/services/{service}/commits':
+  '/services/{service_id}/commits':
     get:
       summary: Returns all the commits for a specific service
       description: Returns an array containing commits for a specific service
       operationId: get.services.service.commits
       parameters:
-        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/service_id'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
         - $ref: '#/components/parameters/startDate'
@@ -189,13 +189,13 @@ paths:
                 $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
-  '/services/{service}/deploys':
+  '/services/{service_id}/deploys':
     get:
       summary: Returns all the deploys for a specific service
       description: Returns an array containing deploys for a specific service
       operationId: get.services.service.deploys
       parameters:
-        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/service_id'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
         - $ref: '#/components/parameters/startDate'
@@ -209,13 +209,13 @@ paths:
                 $ref: '#/components/schemas/TimelinesData'
         '400':
           $ref: '#/components/responses/BadRequest'
-  '/projects/{project}':
+  '/projects/{project_id}':
     get:
       summary: Returns an individual project
       description: returns an individual project
       operationId: get.projects.project
       parameters:
-        - $ref: '#/components/parameters/project'
+        - $ref: '#/components/parameters/project_id'
       responses:
         '200':
           description: OK
@@ -225,13 +225,13 @@ paths:
                 $ref: '#/components/schemas/Project'
         '400':
           $ref: '#/components/responses/BadRequest'
-  '/projects/{project}/timelines':
+  '/projects/{project_id}/timelines':
     get:
       summary: Returns all the commits and deploys for a specific project
       description: Returns an array containing timelines for a specific project
       operationId: get.projects.project.timelines
       parameters:
-        - $ref: '#/components/parameters/project'
+        - $ref: '#/components/parameters/project_id'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
         - $ref: '#/components/parameters/startDate'
@@ -245,13 +245,13 @@ paths:
                 $ref: '#/components/schemas/ProjectsData'
         '400':
           $ref: '#/components/responses/BadRequest'
-  '/projects/{project}/commits':
+  '/projects/{project_id}/commits':
     get:
       summary: Returns all the commits for a specific project
       description: Returns an array containing commits for a specific project
       operationId: get.projects.project.commits
       parameters:
-        - $ref: '#/components/parameters/project'
+        - $ref: '#/components/parameters/project_id'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
         - $ref: '#/components/parameters/startDate'
@@ -265,13 +265,13 @@ paths:
                 $ref: '#/components/schemas/ProjectsData'
         '400':
           $ref: '#/components/responses/BadRequest'
-  '/projects/{project}/deploys':
+  '/projects/{project_id}/deploys':
     get:
       summary: Returns all the deploys for a specific project
       description: Returns an array containing deploys for a specific project
       operationId: get.projects.project.deploys
       parameters:
-        - $ref: '#/components/parameters/project'
+        - $ref: '#/components/parameters/project_id'
         - $ref: '#/components/parameters/offsetParam'
         - $ref: '#/components/parameters/limitParam'
         - $ref: '#/components/parameters/startDate'
@@ -591,20 +591,20 @@ components:
         ref:
           type: string
   parameters:
-    service:
+    service_id:
       in: path
-      name: service
+      name: service_id
       required: true
       schema:
         type: string
-      description: The service name
-    project:
+      description: The service id
+    project_id:
       in: path
-      name: project
+      name: project_id
       required: true
       schema:
         type: string
-      description: The project name
+      description: The project id
     ref:
       in: path
       name: ref
