@@ -6,6 +6,7 @@ COPY cmd cmd
 COPY migrations migrations
 COPY schema schema
 COPY tools tools
+COPY internal internal
 
 COPY go.mod go.mod
 COPY go.sum go.sum
