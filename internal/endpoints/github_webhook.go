@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/google/go-github/v50/github"
+	"github.com/google/go-github/v69/github"
 	"github.com/redhatinsights/platform-changelog-go/internal/config"
 	"github.com/redhatinsights/platform-changelog-go/internal/db"
 	l "github.com/redhatinsights/platform-changelog-go/internal/logging"
