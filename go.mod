@@ -19,7 +19,7 @@ require (
 	github.com/redhatinsights/platform-go-middlewares v0.12.0
 	github.com/sirupsen/logrus v1.9.2
 	github.com/spf13/cobra v1.7.0
-	github.com/spf13/viper v1.10.1
+	github.com/spf13/viper v1.20.1
 	github.com/xanzy/go-gitlab v0.68.0
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/postgres v1.3.4
