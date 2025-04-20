@@ -12,7 +12,7 @@ require (
 	github.com/google/go-github/v50 v50.1.0
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/lib/pq v1.10.4
-	github.com/onsi/ginkgo/v2 v2.11.0 // indirect
+	github.com/onsi/ginkgo/v2 v2.23.4 // indirect
 	github.com/prometheus/client_golang v1.16.0
 	github.com/prometheus/common v0.42.0 // indirect
 	github.com/redhatinsights/app-common-go v1.6.0
