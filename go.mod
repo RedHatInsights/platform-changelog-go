@@ -7,7 +7,7 @@ require (
 	github.com/fergusstrange/embedded-postgres v1.24.0 // indirect
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/golang-migrate/migrate v3.5.4+incompatible // indirect
-	github.com/golang-migrate/migrate/v4 v4.16.2
+	github.com/golang-migrate/migrate/v4 v4.18.3
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-github/v50 v50.1.0
 	github.com/google/go-querystring v1.1.0 // indirect
