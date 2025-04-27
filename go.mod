@@ -22,6 +22,6 @@ require (
 	github.com/spf13/viper v1.10.1
 	github.com/xanzy/go-gitlab v0.68.0
 	gopkg.in/yaml.v2 v2.4.0
-	gorm.io/driver/postgres v1.3.4
+	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.23.4
 )
