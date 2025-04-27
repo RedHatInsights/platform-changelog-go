@@ -3,7 +3,7 @@ module github.com/redhatinsights/platform-changelog-go
 go 1.16
 
 require (
-	github.com/aws/aws-sdk-go v1.43.36
+	github.com/aws/aws-sdk-go v1.55.7
 	github.com/fergusstrange/embedded-postgres v1.24.0 // indirect
 	github.com/go-chi/chi/v5 v5.0.7
 	github.com/golang-migrate/migrate v3.5.4+incompatible // indirect
