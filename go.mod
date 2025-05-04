@@ -16,7 +16,7 @@ require (
 	github.com/prometheus/client_golang v1.16.0
 	github.com/prometheus/common v0.42.0 // indirect
 	github.com/redhatinsights/app-common-go v1.6.0
-	github.com/redhatinsights/platform-go-middlewares v0.12.0
+	github.com/redhatinsights/platform-go-middlewares v1.0.0
 	github.com/sirupsen/logrus v1.9.2
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.10.1
